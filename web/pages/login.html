@@ -1,0 +1,106 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#E5972F" />
+  <meta name="description" content="Log in to Lemenbado." />
+
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="../assets/icons/icon-192.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <title>Log in — Lemenbado</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/globals.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+</head>
+<body>
+  <div class="app-shell">
+
+    <!--  NAV  -->
+    <header class="nav">
+      <div class="container nav__inner">
+        <a href="../index.html" class="nav__logo">
+          <svg class="nav__logo-mark" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="14" cy="14" r="13" stroke="#E5972F" stroke-width="1.5" />
+            <path d="M4 14 H24" stroke="#2A3557" stroke-width="1.5" stroke-dasharray="2 2.5" />
+            <circle cx="6" cy="14" r="2.5" fill="#E5972F" />
+            <circle cx="22" cy="14" r="2.5" fill="#0A0F1C" stroke="#E5972F" stroke-width="1.5" />
+          </svg>
+          Lemenbado
+        </a>
+        <div class="nav__actions">
+          <a class="btn btn--ghost btn--sm" href="../index.html">Back to home</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="container container--narrow page">
+
+      <div class="card auth-card">
+        <div class="page-header">
+          <span class="hero__eyebrow">Welcome back</span>
+          <h1>Log in to Lemenbado</h1>
+          <p class="page-header__subtitle">Enter your phone number and password to continue.</p>
+        </div>
+
+        <form class="form" id="login-form" novalidate>
+
+          <div class="field">
+            <label class="field__label" for="phone">Phone number</label>
+            <input class="input" type="tel" id="phone" name="phone" placeholder="e.g. 09xx xxx xxx" required />
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="password">Password</label>
+            <input class="input" type="password" id="password" name="password" required />
+          </div>
+
+          <div class="form__actions">
+            <button class="btn btn--primary btn--full" type="submit">Log in</button>
+          </div>
+        </form>
+
+        <p class="auth-card__foot">New here? <a href="register.html">Create an account</a></p>
+      </div>
+
+    </main>
+
+    <footer class="footer">
+      <div class="container footer__inner">
+        <span class="footer__note">Lemenbado · pilot build</span>
+        <span class="footer__note">Fewer empty legs on the Addis corridors.</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    // Mock auth for now 
+    document.getElementById('login-form').addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const phone = document.getElementById('phone').value;
+      const existing = JSON.parse(localStorage.getItem('lemenbado_user') || 'null');
+
+      const user = existing && existing.phone === phone
+        ? existing
+        : { name: 'Truck Owner', phone, role: 'TRUCK_OWNER' };
+
+      localStorage.setItem('lemenbado_user', JSON.stringify(user));
+      window.location.href = 'dashboard.html';
+    });
+  </script>
+</body>
+</html>

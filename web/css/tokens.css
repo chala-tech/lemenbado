@@ -1,0 +1,111 @@
+/* design tokens */
+
+:root {
+
+  /* color */
+
+  /* Base surfaces — layered dark navy, each step slightly lighter so
+     cards and the nav visibly lift off the background */
+  --color-bg:            #0A0F1C; /* app background — near-black navy */
+  --color-bg-elevated:   #0F1626; /* nav bar / sticky surfaces */
+  --color-surface:       #141C30; /* cards, panels */
+  --color-surface-alt:   #1B2440; /* inputs, secondary surfaces, hover fill */
+
+  /* Text */
+  --color-ink:           #F3F1E6; /* primary text — warm off-white */
+  --color-ink-soft:      #A9B2C8; /* secondary text, body copy on dark */
+  --color-ink-faint:     #5F6A85; /* placeholders, disabled, micro-labels */
+
+  /* Borders / lines */
+  --color-line:          #2A3557; /* dashed route lines, input borders */
+  --color-line-soft:     #1E2740; /* card borders, subtle dividers */
+
+  /* Brand / action — amber, like sodium road lights and running lamps */
+  --color-route:         #E5972F;
+  --color-route-bright:  #F5AC4E; /* hover/active state — brighter, not darker, on dark UI */
+  --color-route-tint:    rgb(229 151 47 / 14%); /* translucent wash for highlighted cards/badges */
+
+  /* Status */
+  --color-signal:        #3FC48A; /* OPEN / accepted / completed — bright on dark */
+  --color-signal-tint:   rgb(63 196 138 / 14%);
+
+  --color-alert:         #F26B5E; /* cancelled / rejected / error */
+  --color-alert-tint:    rgb(242 107 94 / 14%);
+
+  --color-wait:          #E3B646; /* pending / requested / in transit */
+  --color-wait-tint:     rgb(227 182 70 / 14%);
+
+  --color-overlay:       rgb(5 8 16 / 78%); /* modal/drawer backdrop */
+
+
+  /* typography */
+
+  --font-display: 'Space Grotesk', 'Segoe UI', sans-serif;
+  --font-body:    'IBM Plex Sans', 'Segoe UI', sans-serif;
+  --font-data:    'IBM Plex Mono', 'Consolas', monospace;
+
+  --text-xs:    clamp(0.72rem, 0.7rem + 0.1vw, 0.78rem);
+  --text-sm:    clamp(0.82rem, 0.8rem + 0.15vw, 0.88rem);
+  --text-base:  clamp(0.95rem, 0.92rem + 0.2vw, 1rem);
+  --text-md:    clamp(1.05rem, 1rem + 0.3vw, 1.15rem);
+  --text-lg:    clamp(1.3rem, 1.2rem + 0.5vw, 1.5rem);
+  --text-xl:    clamp(1.6rem, 1.4rem + 1vw, 2rem);
+  --text-2xl:   clamp(2.1rem, 1.7rem + 2vw, 3.2rem);
+
+  --leading-tight:  1.15;
+  --leading-normal: 1.5;
+  --leading-loose:  1.7;
+
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+
+  /* spacing */
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+
+  /* radius */
+
+  --radius-sm:   8px;
+  --radius-md:   14px;
+  --radius-lg:   24px;
+  --radius-full: 999px;
+
+
+  /* elevation */
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%);
+  --shadow-md: 0 8px 24px rgb(0 0 0 / 40%);
+  --shadow-lg: 0 20px 48px rgb(0 0 0 / 50%);
+  --glow-route: 0 0 60px rgb(229 151 47 / 25%); /* used behind hero art */
+
+
+  /* motion */
+
+  --transition-fast: 120ms ease;
+  --transition-base: 200ms ease;
+  --transition-slow: 320ms ease;
+
+
+  /* layout */
+
+  --tap-target-min: 44px;
+  --container-max:  1120px; /* wider now that we have a real nav + hero image layout */
+  --content-narrow: 480px;  /* used for text-only columns inside the wide shell */
+  --nav-height:     72px;
+
+  --z-nav:     100;
+  --z-overlay: 200;
+  --z-modal:   300;
+  --z-toast:   400;
+}

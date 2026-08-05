@@ -1,0 +1,137 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#E5972F" />
+  <meta name="description" content="Create your Lemenbado account as a truck owner or cargo owner." />
+
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="../assets/icons/icon-192.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <title>Create your account — Lemenbado</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/globals.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+</head>
+<body>
+  <div class="app-shell">
+
+    <!--  NAV -->
+    <header class="nav">
+      <div class="container nav__inner">
+        <a href="../index.html" class="nav__logo">
+          <svg class="nav__logo-mark" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="14" cy="14" r="13" stroke="#E5972F" stroke-width="1.5" />
+            <path d="M4 14 H24" stroke="#2A3557" stroke-width="1.5" stroke-dasharray="2 2.5" />
+            <circle cx="6" cy="14" r="2.5" fill="#E5972F" />
+            <circle cx="22" cy="14" r="2.5" fill="#0A0F1C" stroke="#E5972F" stroke-width="1.5" />
+          </svg>
+          Lemenbado
+        </a>
+        <div class="nav__actions">
+          <a class="btn btn--ghost btn--sm" href="../index.html">Back to home</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="container container--narrow page">
+
+      <div class="card auth-card">
+        <div class="page-header">
+          <span class="hero__eyebrow">Create account</span>
+          <h1>Join Lemenbado</h1>
+          <p class="page-header__subtitle">Pick how you'll use the platform — you can add the other role later.</p>
+        </div>
+
+        <form class="form" id="register-form" novalidate>
+
+          <div class="field">
+            <label class="field__label" id="role-label">I am a...</label>
+            <div class="role-toggle" role="radiogroup" aria-labelledby="role-label">
+              <input type="radio" id="role-truck" name="role" value="TRUCK_OWNER" checked />
+              <label for="role-truck">Truck owner</label>
+
+              <input type="radio" id="role-cargo" name="role" value="CARGO_OWNER" />
+              <label for="role-cargo">Cargo owner</label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="name">Full name</label>
+            <input class="input" type="text" id="name" name="name" placeholder="e.g. Tesfaye Alemu" required />
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="phone">Phone number</label>
+            <input class="input" type="tel" id="phone" name="phone" placeholder="e.g. 09xx xxx xxx" required />
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="password">Password</label>
+            <input class="input" type="password" id="password" name="password" placeholder="At least 8 characters" minlength="8" required />
+          </div>
+
+          <div class="field" id="confirm-field">
+            <label class="field__label" for="confirm">Confirm password</label>
+            <input class="input" type="password" id="confirm" name="confirm" required />
+            <p class="field__error" id="confirm-error">Passwords don't match.</p>
+          </div>
+
+          <div class="form__actions">
+            <button class="btn btn--primary btn--full" type="submit">Create account</button>
+          </div>
+        </form>
+
+        <p class="auth-card__foot">Already have an account? <a href="login.html">Log in</a></p>
+      </div>
+
+    </main>
+
+    <footer class="footer">
+      <div class="container footer__inner">
+        <span class="footer__note">Lemenbado · pilot build</span>
+        <span class="footer__note">Fewer empty legs on the Addis corridors.</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    // Mock auth for now — no backend yet. 
+
+    const form = document.getElementById('register-form');
+    const password = document.getElementById('password');
+    const confirm = document.getElementById('confirm');
+    const confirmField = document.getElementById('confirm-field');
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const passwordsMatch = password.value === confirm.value;
+      confirmField.classList.toggle('field--invalid', !passwordsMatch);
+      if (!passwordsMatch) return;
+
+      const user = {
+        name: document.getElementById('name').value,
+        phone: document.getElementById('phone').value,
+        role: form.elements['role'].value,
+      };
+
+      localStorage.setItem('lemenbado_user', JSON.stringify(user));
+      window.location.href = 'dashboard.html';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#E5972F" />
+  <meta name="description" content="Cargo matches for your published truck routes — Lemenbado." />
+
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="../assets/icons/icon-192.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <title>Matches — Lemenbado</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/globals.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+</head>
+<body>
+  <div class="app-shell">
+
+    <!--  NAV -->
+    <header class="nav">
+      <div class="container nav__inner">
+        <a href="../index.html" class="nav__logo">
+          <svg class="nav__logo-mark" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="14" cy="14" r="13" stroke="#E5972F" stroke-width="1.5" />
+            <path d="M4 14 H24" stroke="#2A3557" stroke-width="1.5" stroke-dasharray="2 2.5" />
+            <circle cx="6" cy="14" r="2.5" fill="#E5972F" />
+            <circle cx="22" cy="14" r="2.5" fill="#0A0F1C" stroke="#E5972F" stroke-width="1.5" />
+          </svg>
+          Lemenbado
+        </a>
+
+        <nav class="nav__links" aria-label="Primary">
+          <a class="nav__link" href="dashboard.html">Dashboard</a>
+          <a class="nav__link" href="publish-availability.html">Availability</a>
+          <a class="nav__link nav__link--active" href="matches.html" aria-current="page">Matches</a>
+          <a class="nav__link" href="bookings.html">Bookings</a>
+        </nav>
+
+        <div class="nav__actions">
+          <a class="btn btn--ghost btn--sm" href="#" id="logout-link">Log out</a>
+          <a class="nav__avatar" href="profile.html" aria-label="Your profile">TO</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="container page">
+
+      <div class="page-header">
+        <span class="hero__eyebrow">Matches</span>
+        <h1>Find your best match</h1>
+        <p class="page-header__subtitle">
+          Cargo requests that fit a route you've already published — exact matches first, nearby-city matches after.
+        </p>
+      </div>
+
+      <div class="field" style="max-width: 28rem; margin-bottom: var(--space-6);">
+        <label class="field__label" for="availability-select">Show matches for</label>
+        <div class="select-wrap">
+          <select class="select" id="availability-select"></select>
+        </div>
+      </div>
+
+      <div id="match-list" style="display: flex; flex-direction: column; gap: var(--space-4);"></div>
+
+      <div class="card" id="empty-state" style="display: none; text-align: center; color: var(--color-ink-faint);">
+        No cargo requests match this route yet — check back once more cargo owners post on this corridor.
+      </div>
+
+    </main>
+
+    <footer class="footer">
+      <div class="container footer__inner">
+        <span class="footer__note">Lemenbado · pilot build</span>
+        <span class="footer__note">Fewer empty legs on the Addis corridors.</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    // Mock data 
+    const AVAILABILITIES = [
+      { id: 'av_1', origin: 'Addis Ababa', destination: 'Hawassa', capacityKg: 5200, truck: 'Isuzu FRR · AA-12345' },
+      { id: 'av_2', origin: 'Addis Ababa', destination: 'Bahir Dar', capacityKg: 8000, truck: 'Isuzu FRR · AA-12345' },
+      { id: 'av_3', origin: 'Addis Ababa', destination: 'Adama', capacityKg: 3000, truck: 'Sino Howo · OR-98765' },
+    ];
+
+    const MATCHES = {
+      av_1: [
+        {
+          matchType: 'EXACT', origin: 'Addis Ababa', destination: 'Hawassa',
+          weightKg: 3000, cargoType: 'General goods', requiredDate: 'Aug 6',
+          priceEtb: 4500, cargoOwner: 'Bekele Trading PLC',
+        },
+        {
+          matchType: 'NEARBY', origin: 'Addis Ababa', destination: 'Shashemene',
+          weightKg: 1500, cargoType: 'Perishable', requiredDate: 'Aug 6',
+          priceEtb: null, cargoOwner: 'Ropack Foods',
+        },
+      ],
+      av_2: [
+        {
+          matchType: 'EXACT', origin: 'Addis Ababa', destination: 'Bahir Dar',
+          weightKg: 6000, cargoType: 'Construction material', requiredDate: 'Aug 10',
+          priceEtb: 9000, cargoOwner: 'Selam Hardware',
+        },
+      ],
+      av_3: [],
+    };
+
+    const MATCH_BADGE = { EXACT: 'badge--signal', NEARBY: 'badge--wait' };
+    const MATCH_LABEL = { EXACT: 'Exact match', NEARBY: 'Nearby match' };
+
+    const select = document.getElementById('availability-select');
+    const list = document.getElementById('match-list');
+    const emptyState = document.getElementById('empty-state');
+
+    select.innerHTML = AVAILABILITIES.map((a) => `
+      <option value="${a.id}">${a.origin} → ${a.destination} · ${a.capacityKg.toLocaleString()} kg · ${a.truck}</option>
+    `).join('');
+
+    function renderMatches(availabilityId) {
+      const matches = MATCHES[availabilityId] || [];
+      list.innerHTML = matches.map((m) => `
+        <div class="card avail-card">
+          <div class="avail-card__top">
+            <span class="avail-card__route">${m.origin} <span class="avail-card__route-arrow">→</span> ${m.destination}</span>
+            <span class="badge ${MATCH_BADGE[m.matchType]}">${MATCH_LABEL[m.matchType]}</span>
+          </div>
+          <div class="avail-card__meta">
+            <span class="data">${m.weightKg.toLocaleString()} kg</span>
+            <span>${m.cargoType}</span>
+            <span class="data">Needed by ${m.requiredDate}</span>
+            ${m.priceEtb ? `<span class="data">${m.priceEtb.toLocaleString()} ETB</span>` : '<span>Price not specified</span>'}
+            <span>Cargo: ${m.cargoOwner}</span>
+          </div>
+          <div class="avail-card__actions">
+            <button class="btn btn--primary btn--sm" data-request>Request booking</button>
+            <a class="btn btn--ghost btn--sm" href="post-cargo.html">View cargo owner</a>
+          </div>
+        </div>
+      `).join('');
+
+      emptyState.style.display = matches.length === 0 ? 'block' : 'none';
+
+      list.querySelectorAll('[data-request]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          // No backend yet — this is where POST /api/bookings goes.
+          alert('Booking requested (mock) — you\'ll be able to track it on the Bookings page once the API exists.');
+          window.location.href = 'bookings.html';
+        });
+      });
+    }
+
+    select.addEventListener('change', () => renderMatches(select.value));
+    renderMatches(select.value);
+
+    document.getElementById('logout-link').addEventListener('click', (event) => {
+      event.preventDefault();
+      localStorage.removeItem('lemenbado_user');
+      window.location.href = '../index.html';
+    });
+  </script>
+</body>
+</html>

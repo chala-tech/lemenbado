@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#E5972F" />
+  <meta name="description" content="Post a cargo request on Lemenbado — list your load so a truck already on that route can find it." />
+
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="../assets/icons/icon-192.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <title>Post a cargo request — Lemenbado</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/globals.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+</head>
+<body>
+  <div class="app-shell">
+
+    <!-- NAV  -->
+    <header class="nav">
+      <div class="container nav__inner">
+        <a href="../index.html" class="nav__logo">
+          <svg class="nav__logo-mark" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="14" cy="14" r="13" stroke="#E5972F" stroke-width="1.5" />
+            <path d="M4 14 H24" stroke="#2A3557" stroke-width="1.5" stroke-dasharray="2 2.5" />
+            <circle cx="6" cy="14" r="2.5" fill="#E5972F" />
+            <circle cx="22" cy="14" r="2.5" fill="#0A0F1C" stroke="#E5972F" stroke-width="1.5" />
+          </svg>
+          Lemenbado
+        </a>
+
+        <nav class="nav__links" aria-label="Primary">
+          <a class="nav__link" href="dashboard.html">Dashboard</a>
+          <a class="nav__link" href="post-cargo.html" aria-current="page">Post cargo</a>
+          <a class="nav__link" href="matches.html">Matches</a>
+          <a class="nav__link" href="bookings.html">Bookings</a>
+        </nav>
+
+        <div class="nav__actions">
+          <a class="btn btn--ghost btn--sm" href="#" id="logout-link">Log out</a>
+          <a class="nav__avatar" href="profile.html" aria-label="Your profile">CO</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="container page">
+
+      <div class="page-header">
+        <span class="hero__eyebrow">Cargo owner</span>
+        <h1>Post a cargo request</h1>
+        <p class="page-header__subtitle">
+          Describe what needs to move and by when — a truck already driving that route will show up as a match automatically.
+        </p>
+      </div>
+
+      <div class="split split--form">
+
+        <!--  FORM -->
+        <form class="form card" id="cargo-form" novalidate>
+
+          <div class="form__grid form__grid--2">
+            <div class="field" id="origin-field">
+              <label class="field__label" for="origin">Origin city</label>
+              <div class="select-wrap">
+                <select class="select" id="origin" name="origin" required>
+                  <option value="" selected disabled>Select origin</option>
+                  <option>Addis Ababa</option>
+                  <option>Adama</option>
+                  <option>Hawassa</option>
+                  <option>Bahir Dar</option>
+                  <option>Mekelle</option>
+                  <option>Dire Dawa</option>
+                  <option>Jimma</option>
+                  <option>Gondar</option>
+                  <option>Dessie</option>
+                  <option>Debre Birhan</option>
+                  <option>Shashemene</option>
+                  <option>Arba Minch</option>
+                  <option>Nekemte</option>
+                  <option>Woldiya</option>
+                </select>
+              </div>
+              <p class="field__error" id="origin-error">Origin and destination can't be the same city.</p>
+            </div>
+
+            <div class="field">
+              <label class="field__label" for="destination">Destination city</label>
+              <div class="select-wrap">
+                <select class="select" id="destination" name="destination" required>
+                  <option value="" selected disabled>Select destination</option>
+                  <option>Addis Ababa</option>
+                  <option>Adama</option>
+                  <option>Hawassa</option>
+                  <option>Bahir Dar</option>
+                  <option>Mekelle</option>
+                  <option>Dire Dawa</option>
+                  <option>Jimma</option>
+                  <option>Gondar</option>
+                  <option>Dessie</option>
+                  <option>Debre Birhan</option>
+                  <option>Shashemene</option>
+                  <option>Arba Minch</option>
+                  <option>Nekemte</option>
+                  <option>Woldiya</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form__grid form__grid--2">
+            <div class="field">
+              <label class="field__label" for="weight">Weight (kg)</label>
+              <input class="input" type="number" id="weight" name="weight" min="1" step="1" placeholder="e.g. 3000" required />
+            </div>
+
+            <div class="field">
+              <label class="field__label" for="cargo-type">Cargo type</label>
+              <div class="select-wrap">
+                <select class="select" id="cargo-type" name="cargo-type" required>
+                  <option value="" selected disabled>Select type</option>
+                  <option>General goods</option>
+                  <option>Perishable</option>
+                  <option>Construction material</option>
+                  <option>Livestock</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form__grid form__grid--2">
+            <div class="field">
+              <label class="field__label" for="required-date">Required by</label>
+              <input class="input" type="date" id="required-date" name="required-date" required />
+            </div>
+
+            <div class="field">
+              <label class="field__label" for="price">Desired price (ETB) <span class="field__hint">(optional)</span></label>
+              <input class="input" type="number" id="price" name="price" min="0" step="1" placeholder="e.g. 4500" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="notes">Notes <span class="field__hint">(optional)</span></label>
+            <textarea class="textarea" id="notes" name="notes" placeholder="e.g. Needs to stay upright, fragile items"></textarea>
+          </div>
+
+          <div class="form__actions">
+            <button class="btn btn--primary" type="submit">Post cargo request</button>
+            <a class="btn btn--ghost" href="dashboard.html">Cancel</a>
+          </div>
+        </form>
+
+        <!--  LIVE PREVIEW  -->
+        <aside class="panel panel--glow" aria-label="Cargo request preview">
+          <div class="panel__content">
+            <p class="field__label" style="margin-bottom: var(--space-4);">Preview</p>
+
+            <div class="route-line">
+              <span class="route-line__dot route-line__dot--origin"></span>
+              <span class="route-line__track"></span>
+              <span class="route-line__dot route-line__dot--destination"></span>
+            </div>
+            <div class="route-line__labels">
+              <span id="preview-origin">Origin</span>
+              <span id="preview-destination">Destination</span>
+            </div>
+
+            <div style="margin-top: var(--space-6); display: flex; flex-direction: column; gap: var(--space-3);">
+              <div class="avail-card__meta">
+                <span>Weight: <strong class="data" id="preview-weight">— kg</strong></span>
+              </div>
+              <div class="avail-card__meta">
+                <span id="preview-type">Cargo type not set</span>
+              </div>
+              <div class="avail-card__meta">
+                <span id="preview-date">Required date not set</span>
+              </div>
+              <span class="badge badge--wait" id="preview-status">Draft</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!--  ACTIVE CARGO REQUESTS  -->
+      <section aria-labelledby="active-heading" style="margin-top: var(--space-8);">
+        <h2 id="active-heading" class="corridors__heading">Your active cargo requests</h2>
+
+        <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+
+          <div class="card avail-card">
+            <div class="avail-card__top">
+              <span class="avail-card__route">
+                Addis Ababa <span class="avail-card__route-arrow">→</span> Hawassa
+              </span>
+              <span class="badge badge--wait">Matched</span>
+            </div>
+            <div class="avail-card__meta">
+              <span class="data">3,000 kg · General goods</span>
+              <span class="data">Needed by Aug 6</span>
+              <span>4,500 ETB</span>
+            </div>
+            <div class="avail-card__actions">
+              <a class="btn btn--ghost btn--sm" href="matches.html">View match</a>
+              <button class="btn btn--ghost btn--sm" type="button">Cancel</button>
+            </div>
+          </div>
+
+          <div class="card avail-card">
+            <div class="avail-card__top">
+              <span class="avail-card__route">
+                Addis Ababa <span class="avail-card__route-arrow">→</span> Bahir Dar
+              </span>
+              <span class="badge badge--signal">Open</span>
+            </div>
+            <div class="avail-card__meta">
+              <span class="data">1,200 kg · Perishable</span>
+              <span class="data">Needed by Aug 9</span>
+              <span>Price not specified</span>
+            </div>
+            <div class="avail-card__actions">
+              <button class="btn btn--ghost btn--sm" type="button">Edit</button>
+              <button class="btn btn--ghost btn--sm" type="button">Cancel</button>
+            </div>
+          </div>
+
+          <div class="card avail-card">
+            <div class="avail-card__top">
+              <span class="avail-card__route">
+                Addis Ababa <span class="avail-card__route-arrow">→</span> Jimma
+              </span>
+              <span class="badge badge--alert">Expired</span>
+            </div>
+            <div class="avail-card__meta">
+              <span class="data">2,400 kg · General goods</span>
+              <span class="data">Needed by Jul 29</span>
+              <span>3,000 ETB</span>
+            </div>
+            <div class="avail-card__actions">
+              <button class="btn btn--ghost btn--sm" type="button">Repost</button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="footer">
+      <div class="container footer__inner">
+        <span class="footer__note">Lemenbado · pilot build</span>
+        <span class="footer__note">Fewer empty legs on the Addis corridors.</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    const originSelect = document.getElementById('origin');
+    const destinationSelect = document.getElementById('destination');
+    const originField = document.getElementById('origin-field');
+    const originError = document.getElementById('origin-error');
+    const weightInput = document.getElementById('weight');
+    const typeSelect = document.getElementById('cargo-type');
+    const dateInput = document.getElementById('required-date');
+
+    const previewOrigin = document.getElementById('preview-origin');
+    const previewDestination = document.getElementById('preview-destination');
+    const previewWeight = document.getElementById('preview-weight');
+    const previewType = document.getElementById('preview-type');
+    const previewDate = document.getElementById('preview-date');
+
+    function formatDate(value) {
+      if (!value) return null;
+      return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+
+    function updatePreview() {
+      previewOrigin.textContent = originSelect.value || 'Origin';
+      previewDestination.textContent = destinationSelect.value || 'Destination';
+      previewWeight.textContent = weightInput.value ? `${Number(weightInput.value).toLocaleString()} kg` : '— kg';
+      previewType.textContent = typeSelect.value || 'Cargo type not set';
+      const date = formatDate(dateInput.value);
+      previewDate.textContent = date ? `Needed by ${date}` : 'Required date not set';
+    }
+
+    function validateCities() {
+      const sameCity = originSelect.value && originSelect.value === destinationSelect.value;
+      originField.classList.toggle('field--invalid', Boolean(sameCity));
+      originError.style.display = sameCity ? 'block' : 'none';
+      return !sameCity;
+    }
+
+    [originSelect, destinationSelect, weightInput, typeSelect, dateInput].forEach((el) => {
+      el.addEventListener('input', () => {
+        validateCities();
+        updatePreview();
+      });
+      el.addEventListener('change', () => {
+        validateCities();
+        updatePreview();
+      });
+    });
+
+    document.getElementById('cargo-form').addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (!validateCities()) return;
+      // No backend yet — this is where POST /api/cargo will go.
+      console.log('Post cargo request (mock):', {
+        origin: originSelect.value,
+        destination: destinationSelect.value,
+        weightKg: weightInput.value,
+        cargoType: typeSelect.value,
+        requiredDate: dateInput.value,
+        priceEtb: document.getElementById('price').value || null,
+        notes: document.getElementById('notes').value,
+      });
+      alert('Cargo request posted (mock) — wire this up to the API once the backend is ready.');
+    });
+
+    document.getElementById('logout-link').addEventListener('click', (event) => {
+      event.preventDefault();
+      localStorage.removeItem('lemenbado_user');
+      window.location.href = '../index.html';
+    });
+  </script>
+</body>
+</html>

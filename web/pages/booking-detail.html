@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#E5972F" />
+  <meta name="description" content="Booking details and status timeline — Lemenbado." />
+
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="../assets/icons/icon-192.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <title>Booking details — Lemenbado</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/globals.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+</head>
+<body>
+  <div class="app-shell">
+
+    <!-- ================= NAV ================= -->
+    <header class="nav">
+      <div class="container nav__inner">
+        <a href="../index.html" class="nav__logo">
+          <svg class="nav__logo-mark" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="14" cy="14" r="13" stroke="#E5972F" stroke-width="1.5" />
+            <path d="M4 14 H24" stroke="#2A3557" stroke-width="1.5" stroke-dasharray="2 2.5" />
+            <circle cx="6" cy="14" r="2.5" fill="#E5972F" />
+            <circle cx="22" cy="14" r="2.5" fill="#0A0F1C" stroke="#E5972F" stroke-width="1.5" />
+          </svg>
+          Lemenbado
+        </a>
+
+        <nav class="nav__links" aria-label="Primary">
+          <a class="nav__link" href="dashboard.html">Dashboard</a>
+          <a class="nav__link" href="publish-availability.html">Availability</a>
+          <a class="nav__link" href="matches.html">Matches</a>
+          <a class="nav__link nav__link--active" href="bookings.html" aria-current="page">Bookings</a>
+        </nav>
+
+        <div class="nav__actions">
+          <a class="btn btn--ghost btn--sm" href="#" id="logout-link">Log out</a>
+          <a class="nav__avatar" href="profile.html" aria-label="Your profile">TO</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="container page">
+
+      <a class="btn btn--ghost btn--sm" href="bookings.html" style="margin-bottom: var(--space-5);">← All bookings</a>
+
+      <div id="detail-root"><!-- populated by script --></div>
+
+    </main>
+
+    <footer class="footer">
+      <div class="container footer__inner">
+        <span class="footer__note">Lemenbado · pilot build</span>
+        <span class="footer__note">Fewer empty legs on the Addis corridors.</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    // Mock data 
+    const BOOKINGS = {
+      bk_1: {
+        origin: 'Addis Ababa', destination: 'Adama', status: 'IN_TRANSIT',
+        weightKg: 2000, cargoType: 'General goods',
+        counterpart: 'Nib Import Export', phone: '+251 91 234 5678',
+        truck: 'Sino Howo · Plate OR-98765',
+        payment: 'Cash on delivery',
+      },
+      bk_2: {
+        origin: 'Hawassa', destination: 'Addis Ababa', status: 'COMPLETED',
+        weightKg: 4500, cargoType: 'Perishable',
+        counterpart: 'Bekele Trading PLC', phone: '+251 92 345 6789',
+        truck: 'Isuzu FRR · Plate AA-12345',
+        payment: 'Bank transfer',
+      },
+      bk_3: {
+        origin: 'Addis Ababa', destination: 'Hawassa', status: 'REQUESTED',
+        weightKg: 3000, cargoType: 'General goods',
+        counterpart: 'Bekele Trading PLC', phone: '+251 92 345 6789',
+        truck: 'Isuzu FRR · Plate AA-12345',
+        payment: 'Unspecified',
+      },
+      bk_4: {
+        origin: 'Addis Ababa', destination: 'Bahir Dar', status: 'ACCEPTED',
+        weightKg: 1800, cargoType: 'Construction material',
+        counterpart: 'Selam Hardware', phone: '+251 93 456 7890',
+        truck: 'Sino Howo · Plate OR-98765',
+        payment: 'Cash on delivery',
+      },
+      bk_5: {
+        origin: 'Addis Ababa', destination: 'Mekelle', status: 'CANCELLED',
+        weightKg: 6000, cargoType: 'General goods',
+        counterpart: 'Merkato Grains Co.', phone: '+251 94 567 8901',
+        truck: 'Isuzu FRR · Plate AA-12345',
+        payment: 'Unspecified',
+        cancelReason: 'Cargo owner found an alternate truck before pickup.',
+      },
+    };
+
+    const STEPS = ['REQUESTED', 'ACCEPTED', 'IN_TRANSIT', 'DELIVERED', 'COMPLETED'];
+    const STEP_LABELS = {
+      REQUESTED: 'Requested', ACCEPTED: 'Accepted', IN_TRANSIT: 'In transit',
+      DELIVERED: 'Delivered', COMPLETED: 'Completed',
+    };
+    const STATUS_BADGE = {
+      REQUESTED: 'badge--wait', ACCEPTED: 'badge--wait', IN_TRANSIT: 'badge--wait',
+      DELIVERED: 'badge--wait', COMPLETED: 'badge--signal', CANCELLED: 'badge--alert',
+      REJECTED: 'badge--alert',
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    const root = document.getElementById('detail-root');
+    let booking = id ? BOOKINGS[id] : null;
+
+    function stepperHtml(status) {
+      if (status === 'CANCELLED' || status === 'REJECTED') {
+        return `<div class="card" style="border-color: var(--color-alert); background-color: var(--color-alert-tint);">
+          <p style="color: var(--color-alert); font-weight: var(--weight-semibold); margin-bottom: var(--space-2);">
+            This booking was ${status === 'REJECTED' ? 'rejected' : 'cancelled'}.
+          </p>
+          <p style="font-size: var(--text-sm); color: var(--color-ink-soft);">${booking.cancelReason || 'No reason given.'}</p>
+        </div>`;
+      }
+      const current = STEPS.indexOf(status);
+      return `<div class="stepper">${STEPS.map((step, i) => `
+        <div class="stepper__step ${i < current ? 'stepper__step--done' : ''} ${i === current ? 'stepper__step--current' : ''}">
+          <span class="stepper__line"></span>
+          <span class="stepper__dot"></span>
+          <span class="stepper__label">${STEP_LABELS[step]}</span>
+        </div>
+      `).join('')}</div>`;
+    }
+
+    function actionsHtml(status) {
+      const cancelBtn = `<button class="btn btn--ghost btn--sm" data-action="CANCELLED">Cancel booking</button>`;
+      switch (status) {
+        case 'REQUESTED':
+          return `
+            <button class="btn btn--primary" data-action="ACCEPTED">Accept</button>
+            <button class="btn btn--ghost" data-action="REJECTED">Reject</button>`;
+        case 'ACCEPTED':
+          return `
+            <button class="btn btn--primary" data-action="IN_TRANSIT">Mark picked up</button>
+            ${cancelBtn}`;
+        case 'IN_TRANSIT':
+          return `
+            <button class="btn btn--primary" data-action="DELIVERED">Mark delivered</button>
+            ${cancelBtn}`;
+        case 'DELIVERED':
+          return `<button class="btn btn--primary" data-action="COMPLETED">Confirm completed</button>`;
+        case 'COMPLETED':
+          return `<button class="btn btn--ghost" id="review-btn" type="button">Leave a review</button>`;
+        default:
+          return '';
+      }
+    }
+
+    function contactHtml(status) {
+      const revealed = status !== 'REQUESTED';
+      return `
+        <div class="card">
+          <p class="field__label" style="margin-bottom: var(--space-3);">Counterpart</p>
+          <p style="color: var(--color-ink); font-weight: var(--weight-medium);">${booking.counterpart}</p>
+          <p class="data" style="color: var(--color-ink-soft); margin-top: var(--space-2);">
+            ${revealed ? booking.phone : 'Phone number is revealed once the booking is accepted.'}
+          </p>
+        </div>`;
+    }
+
+    function render() {
+      if (!booking) {
+        root.innerHTML = `
+          <div class="card" style="text-align:center;">
+            <h2>Booking not found</h2>
+            <p class="page-header__subtitle" style="margin-inline:auto;">This booking doesn't exist or the link is missing an id.</p>
+            <a class="btn btn--primary" href="bookings.html" style="margin-top: var(--space-4);">Back to bookings</a>
+          </div>`;
+        return;
+      }
+
+      root.innerHTML = `
+        <div class="page-header">
+          <span class="hero__eyebrow">Booking</span>
+          <h1>${booking.origin} → ${booking.destination}</h1>
+          <span class="badge ${STATUS_BADGE[booking.status]}">${STEP_LABELS[booking.status] || booking.status}</span>
+        </div>
+
+        ${stepperHtml(booking.status)}
+
+        <div class="split split--form">
+          <div class="card">
+            <p class="field__label" style="margin-bottom: var(--space-3);">Shipment</p>
+            <div class="avail-card__meta" style="margin-bottom: var(--space-2);">
+              <span class="data">${booking.weightKg.toLocaleString()} kg</span>
+              <span>${booking.cargoType}</span>
+              <span>${booking.truck}</span>
+            </div>
+            <p class="field__hint">Payment: ${booking.payment}</p>
+
+            <div class="form__actions" style="margin-top: var(--space-5);">
+              ${actionsHtml(booking.status)}
+            </div>
+          </div>
+
+          ${contactHtml(booking.status)}
+        </div>
+      `;
+
+      root.querySelectorAll('[data-action]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          booking.status = btn.dataset.action;
+          render();
+        });
+      });
+
+      const reviewBtn = document.getElementById('review-btn');
+      if (reviewBtn) {
+        reviewBtn.addEventListener('click', () => alert('Reviews are coming in a later phase — see Part 3, SHOULD HAVE.'));
+      }
+    }
+
+    render();
+
+    document.getElementById('logout-link').addEventListener('click', (event) => {
+      event.preventDefault();
+      localStorage.removeItem('lemenbado_user');
+      window.location.href = '../index.html';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#E5972F" />
+  <meta name="description" content="Your Lemenbado bookings — requested, accepted, in transit, and completed." />
+
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="../assets/icons/icon-192.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <title>Bookings — Lemenbado</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/globals.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+</head>
+<body>
+  <div class="app-shell">
+
+    <!--  NAV  -->
+    <header class="nav">
+      <div class="container nav__inner">
+        <a href="../index.html" class="nav__logo">
+          <svg class="nav__logo-mark" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="14" cy="14" r="13" stroke="#E5972F" stroke-width="1.5" />
+            <path d="M4 14 H24" stroke="#2A3557" stroke-width="1.5" stroke-dasharray="2 2.5" />
+            <circle cx="6" cy="14" r="2.5" fill="#E5972F" />
+            <circle cx="22" cy="14" r="2.5" fill="#0A0F1C" stroke="#E5972F" stroke-width="1.5" />
+          </svg>
+          Lemenbado
+        </a>
+
+        <nav class="nav__links" aria-label="Primary">
+          <a class="nav__link" href="dashboard.html">Dashboard</a>
+          <a class="nav__link" href="publish-availability.html">Availability</a>
+          <a class="nav__link" href="matches.html">Matches</a>
+          <a class="nav__link nav__link--active" href="bookings.html" aria-current="page">Bookings</a>
+        </nav>
+
+        <div class="nav__actions">
+          <a class="btn btn--ghost btn--sm" href="#" id="logout-link">Log out</a>
+          <a class="nav__avatar" href="profile.html" aria-label="Your profile">TO</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="container page">
+
+      <div class="page-header">
+        <span class="hero__eyebrow">Bookings</span>
+        <h1>Your bookings</h1>
+        <p class="page-header__subtitle">Every request you've sent or received, in one place — tap a booking for the full timeline.</p>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Filter by status" id="tabs">
+        <button class="tab" role="tab" aria-selected="true" data-status="ALL">All</button>
+        <button class="tab" role="tab" aria-selected="false" data-status="REQUESTED">Requested</button>
+        <button class="tab" role="tab" aria-selected="false" data-status="ACCEPTED">Accepted</button>
+        <button class="tab" role="tab" aria-selected="false" data-status="IN_TRANSIT">In transit</button>
+        <button class="tab" role="tab" aria-selected="false" data-status="COMPLETED">Completed</button>
+        <button class="tab" role="tab" aria-selected="false" data-status="CANCELLED">Cancelled</button>
+      </div>
+
+      <div id="booking-list" style="display: flex; flex-direction: column; gap: var(--space-4);"></div>
+
+      <div class="card" id="empty-state" style="display: none; text-align: center; color: var(--color-ink-faint);">
+        No bookings in this status yet.
+      </div>
+
+    </main>
+
+    <footer class="footer">
+      <div class="container footer__inner">
+        <span class="footer__note">Lemenbado · pilot build</span>
+        <span class="footer__note">Fewer empty legs on the Addis corridors.</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    // Mock data 
+
+    const BOOKINGS = [
+      {
+        id: 'bk_1',
+        origin: 'Addis Ababa',
+        destination: 'Adama',
+        status: 'IN_TRANSIT',
+        weightKg: 2000,
+        counterpart: 'Nib Import Export',
+        dateLabel: 'Picked up Aug 5, 14:20',
+      },
+      {
+        id: 'bk_2',
+        origin: 'Hawassa',
+        destination: 'Addis Ababa',
+        status: 'COMPLETED',
+        weightKg: 4500,
+        counterpart: 'Bekele Trading PLC',
+        dateLabel: 'Delivered Jul 30',
+      },
+      {
+        id: 'bk_3',
+        origin: 'Addis Ababa',
+        destination: 'Hawassa',
+        status: 'REQUESTED',
+        weightKg: 3000,
+        counterpart: 'Bekele Trading PLC',
+        dateLabel: 'Needed by Aug 6',
+      },
+      {
+        id: 'bk_4',
+        origin: 'Addis Ababa',
+        destination: 'Bahir Dar',
+        status: 'ACCEPTED',
+        weightKg: 1800,
+        counterpart: 'Selam Hardware',
+        dateLabel: 'Departs Aug 11, 06:00',
+      },
+      {
+        id: 'bk_5',
+        origin: 'Addis Ababa',
+        destination: 'Mekelle',
+        status: 'CANCELLED',
+        weightKg: 6000,
+        counterpart: 'Merkato Grains Co.',
+        dateLabel: 'Cancelled Aug 2',
+      },
+    ];
+
+    const STATUS_BADGE = {
+      REQUESTED: 'badge--wait',
+      ACCEPTED: 'badge--wait',
+      IN_TRANSIT: 'badge--wait',
+      COMPLETED: 'badge--signal',
+      CANCELLED: 'badge--alert',
+    };
+
+    const STATUS_LABEL = {
+      REQUESTED: 'Requested',
+      ACCEPTED: 'Accepted',
+      IN_TRANSIT: 'In transit',
+      COMPLETED: 'Completed',
+      CANCELLED: 'Cancelled',
+    };
+
+    const list = document.getElementById('booking-list');
+    const emptyState = document.getElementById('empty-state');
+
+    function renderBookings(filter) {
+      const items = filter === 'ALL' ? BOOKINGS : BOOKINGS.filter((b) => b.status === filter);
+      list.innerHTML = items.map((b) => `
+        <a class="card avail-card" href="booking-detail.html?id=${b.id}" style="display:flex;">
+          <div class="avail-card__top">
+            <span class="avail-card__route">${b.origin} <span class="avail-card__route-arrow">→</span> ${b.destination}</span>
+            <span class="badge ${STATUS_BADGE[b.status]}">${STATUS_LABEL[b.status]}</span>
+          </div>
+          <div class="avail-card__meta">
+            <span class="data">${b.weightKg.toLocaleString()} kg</span>
+            <span class="data">${b.dateLabel}</span>
+            <span>${b.counterpart}</span>
+          </div>
+        </a>
+      `).join('');
+      emptyState.style.display = items.length === 0 ? 'block' : 'none';
+    }
+
+    document.getElementById('tabs').addEventListener('click', (event) => {
+      const tab = event.target.closest('.tab');
+      if (!tab) return;
+      document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', 'false'));
+      tab.setAttribute('aria-selected', 'true');
+      renderBookings(tab.dataset.status);
+    });
+
+    renderBookings('ALL');
+
+    document.getElementById('logout-link').addEventListener('click', (event) => {
+      event.preventDefault();
+      localStorage.removeItem('lemenbado_user');
+      window.location.href = '../index.html';
+    });
+  </script>
+</body>
+</html>

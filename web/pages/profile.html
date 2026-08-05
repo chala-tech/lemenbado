@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#E5972F" />
+  <meta name="description" content="Your Lemenbado profile and verification status." />
+
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="../assets/icons/icon-192.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <title>Profile — Lemenbado</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/globals.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+</head>
+<body>
+  <div class="app-shell">
+
+    <!--  NAV -->
+    <header class="nav">
+      <div class="container nav__inner">
+        <a href="../index.html" class="nav__logo">
+          <svg class="nav__logo-mark" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="14" cy="14" r="13" stroke="#E5972F" stroke-width="1.5" />
+            <path d="M4 14 H24" stroke="#2A3557" stroke-width="1.5" stroke-dasharray="2 2.5" />
+            <circle cx="6" cy="14" r="2.5" fill="#E5972F" />
+            <circle cx="22" cy="14" r="2.5" fill="#0A0F1C" stroke="#E5972F" stroke-width="1.5" />
+          </svg>
+          Lemenbado
+        </a>
+
+        <nav class="nav__links" aria-label="Primary">
+          <a class="nav__link" href="dashboard.html">Dashboard</a>
+          <a class="nav__link" href="publish-availability.html">Availability</a>
+          <a class="nav__link" href="matches.html">Matches</a>
+          <a class="nav__link" href="bookings.html">Bookings</a>
+        </nav>
+
+        <div class="nav__actions">
+          <a class="btn btn--ghost btn--sm" href="#" id="logout-link">Log out</a>
+          <a class="nav__avatar" href="profile.html" aria-current="page" aria-label="Your profile" id="nav-avatar">--</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="container container--narrow page">
+
+      <div class="page-header">
+        <span class="hero__eyebrow">Profile</span>
+        <h1 id="profile-name">Your profile</h1>
+        <p class="page-header__subtitle" id="profile-role">—</p>
+      </div>
+
+      <!-- PERSONAL INFO -->
+      <form class="form card" id="profile-form" style="margin-bottom: var(--space-5);" novalidate>
+        <div class="field">
+          <label class="field__label" for="name">Full name</label>
+          <input class="input" type="text" id="name" name="name" required />
+        </div>
+        <div class="field">
+          <label class="field__label" for="phone">Phone number</label>
+          <input class="input" type="tel" id="phone" name="phone" required />
+        </div>
+        <div class="form__actions">
+          <button class="btn btn--primary btn--sm" type="submit">Save changes</button>
+        </div>
+      </form>
+
+      <!--  VERIFICATION -->
+      <div class="card" style="margin-bottom: var(--space-5);">
+        <div class="avail-card__top" style="margin-bottom: var(--space-3);">
+          <p class="field__label" style="margin-bottom:0;">Verification</p>
+          <span class="badge badge--wait">Pending verification</span>
+        </div>
+        <p class="field__hint" style="margin-bottom: var(--space-4);">
+          Upload a photo of your license or business registration — an admin will review it manually during the pilot.
+        </p>
+        <div class="field">
+          <label class="field__label" for="document">Document photo</label>
+          <input class="input" type="file" id="document" name="document" accept="image/*,.pdf" />
+        </div>
+      </div>
+
+      <!--  ROLE-SPECIFIC  -->
+      <div class="card" id="role-section" style="margin-bottom: var(--space-5);"></div>
+
+      <!-- RATINGS  -->
+      <div class="card" style="margin-bottom: var(--space-5);">
+        <p class="field__label" style="margin-bottom: var(--space-2);">Ratings</p>
+        <p style="color: var(--color-route); font-family: var(--font-display); font-size: var(--text-lg); font-weight: var(--weight-bold);">
+          4.8 <span style="color: var(--color-ink-faint); font-size: var(--text-sm); font-family: var(--font-body); font-weight: var(--weight-regular);">(12 completed deliveries)</span>
+        </p>
+      </div>
+
+      <button class="btn btn--ghost btn--full" id="logout-btn" type="button">Log out</button>
+
+    </main>
+
+    <footer class="footer">
+      <div class="container footer__inner">
+        <span class="footer__note">Lemenbado · pilot build</span>
+        <span class="footer__note">Fewer empty legs on the Addis corridors.</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    // Reads the mock session from localStorage (see login.html /
+    // register.html). 
+    const user = JSON.parse(localStorage.getItem('lemenbado_user') || 'null');
+
+    if (!user) {
+      window.location.href = 'login.html';
+    } else {
+      document.getElementById('profile-name').textContent = user.name || 'Your profile';
+      document.getElementById('profile-role').textContent =
+        user.role === 'CARGO_OWNER' ? 'Cargo owner' : 'Truck owner';
+      document.getElementById('name').value = user.name || '';
+      document.getElementById('phone').value = user.phone || '';
+
+      const initials = (user.name || 'U').split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase();
+      document.getElementById('nav-avatar').textContent = initials;
+
+      const roleSection = document.getElementById('role-section');
+      if (user.role === 'CARGO_OWNER') {
+        roleSection.innerHTML = `
+          <p class="field__label" style="margin-bottom: var(--space-3);">Your business</p>
+          <div class="avail-card__meta">
+            <span>Bekele Trading PLC</span>
+            <span>Business account</span>
+          </div>
+        `;
+      } else {
+        roleSection.innerHTML = `
+          <div class="avail-card__top" style="margin-bottom: var(--space-3);">
+            <p class="field__label" style="margin-bottom:0;">Your trucks</p>
+            <a class="field__link" href="publish-availability.html#trucks">+ Add a truck</a>
+          </div>
+          <div class="avail-card__meta" style="margin-bottom: var(--space-2);">
+            <span>Isuzu FRR · AA-12345</span><span>Max 8,000 kg</span>
+          </div>
+          <div class="avail-card__meta">
+            <span>Sino Howo · OR-98765</span><span>Max 15,000 kg</span>
+          </div>
+        `;
+      }
+
+      function logout() {
+        localStorage.removeItem('lemenbado_user');
+        window.location.href = '../index.html';
+      }
+      document.getElementById('logout-link').addEventListener('click', (e) => { e.preventDefault(); logout(); });
+      document.getElementById('logout-btn').addEventListener('click', logout);
+
+      document.getElementById('profile-form').addEventListener('submit', (event) => {
+        event.preventDefault();
+        // No backend yet — this is where PATCH /api/users/me will go.
+        user.name = document.getElementById('name').value;
+        user.phone = document.getElementById('phone').value;
+        localStorage.setItem('lemenbado_user', JSON.stringify(user));
+        alert('Profile updated (mock) — wire this up to the API once the backend is ready.');
+      });
+    }
+  </script>
+</body>
+</html>

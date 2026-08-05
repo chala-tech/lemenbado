@@ -1,0 +1,224 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#E5972F" />
+  <meta name="description" content="Your Lemenbado dashboard — active availabilities, new matches, and booking status at a glance." />
+
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="../assets/icons/icon-192.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <title>Dashboard — Lemenbado</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/globals.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+</head>
+<body>
+  <div class="app-shell">
+
+    <!--  NAV  -->
+    <header class="nav">
+      <div class="container nav__inner">
+        <a href="../index.html" class="nav__logo">
+          <svg class="nav__logo-mark" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="14" cy="14" r="13" stroke="#E5972F" stroke-width="1.5" />
+            <path d="M4 14 H24" stroke="#2A3557" stroke-width="1.5" stroke-dasharray="2 2.5" />
+            <circle cx="6" cy="14" r="2.5" fill="#E5972F" />
+            <circle cx="22" cy="14" r="2.5" fill="#0A0F1C" stroke="#E5972F" stroke-width="1.5" />
+          </svg>
+          Lemenbado
+        </a>
+
+        <nav class="nav__links" aria-label="Primary">
+          <a class="nav__link nav__link--active" href="dashboard.html" aria-current="page">Dashboard</a>
+          <a class="nav__link" href="publish-availability.html">Availability</a>
+          <a class="nav__link" href="matches.html">Matches</a>
+          <a class="nav__link" href="bookings.html">Bookings</a>
+        </nav>
+
+        <div class="nav__actions">
+          <a class="btn btn--ghost btn--sm" href="#" id="logout-link">Log out</a>
+          <a class="nav__avatar" href="profile.html" id="nav-avatar" aria-label="Your profile">--</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="container page">
+
+      <div class="page-header">
+        <span class="hero__eyebrow" id="role-label">Truck owner</span>
+        <h1 id="welcome-heading">Welcome back</h1>
+        <p class="page-header__subtitle">
+          Here's what's moving on your routes right now.
+        </p>
+      </div>
+
+      <!-- STATS  -->
+      <div class="stat-grid">
+        <div class="card">
+          <div class="stat-card__value data">3</div>
+          <div class="stat-card__label">Active availabilities</div>
+        </div>
+        <div class="card">
+          <div class="stat-card__value data">2</div>
+          <div class="stat-card__label">New matches</div>
+        </div>
+        <div class="card">
+          <div class="stat-card__value data">1</div>
+          <div class="stat-card__label">Pending bookings</div>
+        </div>
+        <div class="card">
+          <div class="stat-card__value data">12</div>
+          <div class="stat-card__label">Completed deliveries</div>
+        </div>
+      </div>
+
+      <!--  QUICK ACTIONS  -->
+      <div class="hero__actions" style="margin-bottom: var(--space-8);">
+        <a class="btn btn--primary" href="publish-availability.html">Publish availability</a>
+        <a class="btn btn--ghost" href="post-cargo.html">Post a cargo request</a>
+      </div>
+
+      <!--  NEW MATCHES  -->
+      <section aria-labelledby="matches-heading" style="margin-bottom: var(--space-8);">
+        <div class="section-head">
+          <h2 id="matches-heading" class="corridors__heading" style="margin-bottom:0;">New matches for you</h2>
+          <a class="section-head__link" href="matches.html">See all matches</a>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+          <div class="card avail-card">
+            <div class="avail-card__top">
+              <span class="avail-card__route">
+                Addis Ababa <span class="avail-card__route-arrow">→</span> Hawassa
+              </span>
+              <span class="badge badge--signal">Exact match</span>
+            </div>
+            <div class="avail-card__meta">
+              <span class="data">3,000 kg · general goods</span>
+              <span class="data">Needed by Aug 6</span>
+              <span>Cargo: Bekele Trading PLC</span>
+            </div>
+            <div class="avail-card__actions">
+              <a class="btn btn--primary btn--sm" href="matches.html">Request booking</a>
+              <a class="btn btn--ghost btn--sm" href="matches.html">View details</a>
+            </div>
+          </div>
+
+          <div class="card avail-card">
+            <div class="avail-card__top">
+              <span class="avail-card__route">
+                Addis Ababa <span class="avail-card__route-arrow">→</span> Bahir Dar
+              </span>
+              <span class="badge badge--wait">Nearby match</span>
+            </div>
+            <div class="avail-card__meta">
+              <span class="data">1,800 kg · construction material</span>
+              <span class="data">Needed by Aug 11</span>
+              <span>Cargo: Selam Hardware</span>
+            </div>
+            <div class="avail-card__actions">
+              <a class="btn btn--primary btn--sm" href="matches.html">Request booking</a>
+              <a class="btn btn--ghost btn--sm" href="matches.html">View details</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!--  RECENT BOOKINGS  -->
+      <section aria-labelledby="bookings-heading">
+        <div class="section-head">
+          <h2 id="bookings-heading" class="corridors__heading" style="margin-bottom:0;">Recent bookings</h2>
+          <a class="section-head__link" href="bookings.html">See all bookings</a>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+          <div class="card avail-card">
+            <div class="avail-card__top">
+              <span class="avail-card__route">
+                Addis Ababa <span class="avail-card__route-arrow">→</span> Adama
+              </span>
+              <span class="badge badge--wait">In transit</span>
+            </div>
+            <div class="avail-card__meta">
+              <span class="data">2,000 kg</span>
+              <span class="data">Picked up Aug 5, 14:20</span>
+              <span>Cargo: Nib Import Export</span>
+            </div>
+            <div class="avail-card__actions">
+              <a class="btn btn--ghost btn--sm" href="booking-detail.html?id=bk_1">View booking</a>
+            </div>
+          </div>
+
+          <div class="card avail-card">
+            <div class="avail-card__top">
+              <span class="avail-card__route">
+                Hawassa <span class="avail-card__route-arrow">→</span> Addis Ababa
+              </span>
+              <span class="badge badge--signal">Completed</span>
+            </div>
+            <div class="avail-card__meta">
+              <span class="data">4,500 kg</span>
+              <span class="data">Delivered Jul 30</span>
+              <span>Cargo: Bekele Trading PLC</span>
+            </div>
+            <div class="avail-card__actions">
+              <a class="btn btn--ghost btn--sm" href="booking-detail.html?id=bk_2">View booking</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="footer">
+      <div class="container footer__inner">
+        <span class="footer__note">Lemenbado · pilot build</span>
+        <span class="footer__note">Fewer empty legs on the Addis corridors.</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    // Reads the mock session written by login.html / register.html.
+  
+
+    const user = JSON.parse(localStorage.getItem('lemenbado_user') || 'null');
+
+    if (!user) {
+      window.location.href = 'login.html';
+    } else {
+      const firstName = user.name ? user.name.split(' ')[0] : 'there';
+      document.getElementById('welcome-heading').textContent = `Welcome back, ${firstName}`;
+      document.getElementById('role-label').textContent =
+        user.role === 'CARGO_OWNER' ? 'Cargo owner' : 'Truck owner';
+
+      const initials = (user.name || 'U')
+        .split(' ')
+        .map((part) => part[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase();
+      document.getElementById('nav-avatar').textContent = initials;
+
+      document.getElementById('logout-link').addEventListener('click', (event) => {
+        event.preventDefault();
+        localStorage.removeItem('lemenbado_user');
+        window.location.href = '../index.html';
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#E5972F" />
+  <meta name="description" content="Lemenbado — match your empty truck leg with cargo that's already going the same way." />
+
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <title>Lemenbado — Return-Load Freight Matching</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/globals.css" />
+  <link rel="stylesheet" href="css/components.css" />
+</head>
+<body>
+  <div class="app-shell">
+
+    <!-- nav -->
+    <header class="nav">
+      <div class="container nav__inner">
+        <a href="index.html" class="nav__logo">
+          <svg class="nav__logo-mark" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="14" cy="14" r="13" stroke="#E5972F" stroke-width="1.5" />
+            <path d="M4 14 H24" stroke="#2A3557" stroke-width="1.5" stroke-dasharray="2 2.5" />
+            <circle cx="6" cy="14" r="2.5" fill="#E5972F" />
+            <circle cx="22" cy="14" r="2.5" fill="#0A0F1C" stroke="#E5972F" stroke-width="1.5" />
+          </svg>
+          Lemenbado
+        </a>
+
+        <nav class="nav__links" aria-label="Primary">
+          <a class="nav__link" href="#how-it-works">How it works</a>
+        </nav>
+
+        <div class="nav__actions">
+          <a class="btn btn--ghost btn--sm" href="pages/login.html">Log in</a>
+          <a class="btn btn--primary btn--sm" href="pages/register.html">Get started</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="container page">
+
+      <!-- hero -->
+      <section class="hero">
+        <span class="hero__eyebrow fade-up">Now matching on 3 Addis corridors</span>
+        <h1 class="hero__title fade-up fade-up--delay-1">Stop driving back <em>empty</em>.</h1>
+        <p class="hero__subtitle fade-up fade-up--delay-2">
+          Lemenbado matches your truck's route to cargo that's already headed the same way.
+        </p>
+        <div class="hero__actions fade-up fade-up--delay-3">
+          <a class="btn btn--primary" href="pages/register.html">Post a load</a>
+          <a class="btn btn--ghost" href="pages/publish-availability.html">List your truck</a>
+        </div>
+      </section>
+
+      <!-- animated route visual -->
+      <section class="hero-visual panel panel--glow" aria-label="A route with a truck's capacity moving on it">
+        <div class="route-line route-line--lg">
+          <span class="route-line__dot route-line__dot--origin"></span>
+          <span class="route-line__track">
+            <span class="route-mover"></span>
+          </span>
+          <span class="route-line__dot route-line__dot--destination"></span>
+        </div>
+        <div class="route-line__labels" style="max-width: 34rem; margin-inline: auto;">
+          <span>Addis Ababa</span>
+          <span>Hawassa</span>
+        </div>
+      </section>
+
+      <!-- how it works -->
+      <section id="how-it-works">
+        <h2 style="text-align: center;">How it works</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="step__num">1</div>
+            <h3 class="step__title">List your route or your load</h3>
+            <p class="step__text">Truck owners publish a route with spare space. Cargo owners post what needs to move.</p>
+          </div>
+          <div class="step">
+            <div class="step__num">2</div>
+            <h3 class="step__title">Get matched</h3>
+            <p class="step__text">We match trucks and cargo heading the same way, at the same time.</p>
+          </div>
+          <div class="step">
+            <div class="step__num">3</div>
+            <h3 class="step__title">Book it and go</h3>
+            <p class="step__text">Accept the match, get the contact details, and move.</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- footer -->
+    <footer class="footer">
+      <div class="container footer__inner">
+        <span class="footer__note">Lemenbado</span>
+        <span class="footer__note">Fewer empty legs on the Addis corridors.</span>
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>

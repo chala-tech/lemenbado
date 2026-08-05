@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#E5972F" />
+  <meta name="description" content="Publish a truck leg on Lemenbado — list your route and spare capacity so matching cargo can find you." />
+
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="../assets/icons/icon-192.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <title>Publish availability — Lemenbado</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/globals.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+</head>
+<body>
+  <div class="app-shell">
+
+    <!-- NAV -->
+    <header class="nav">
+      <div class="container nav__inner">
+        <a href="../index.html" class="nav__logo">
+          <svg class="nav__logo-mark" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="14" cy="14" r="13" stroke="#E5972F" stroke-width="1.5" />
+            <path d="M4 14 H24" stroke="#2A3557" stroke-width="1.5" stroke-dasharray="2 2.5" />
+            <circle cx="6" cy="14" r="2.5" fill="#E5972F" />
+            <circle cx="22" cy="14" r="2.5" fill="#0A0F1C" stroke="#E5972F" stroke-width="1.5" />
+          </svg>
+          Lemenbado
+        </a>
+
+        <nav class="nav__links" aria-label="Primary">
+          <a class="nav__link" href="dashboard.html">Dashboard</a>
+          <a class="nav__link nav__link--active" href="publish-availability.html" aria-current="page">Availability</a>
+          <a class="nav__link" href="matches.html">Matches</a>
+          <a class="nav__link" href="bookings.html">Bookings</a>
+        </nav>
+
+        <div class="nav__actions">
+          <a class="btn btn--ghost btn--sm" href="#" id="logout-link">Log out</a>
+          <a class="nav__avatar" href="profile.html" aria-label="Your profile">TO</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="container page">
+
+      <div class="page-header">
+        <span class="hero__eyebrow">Truck owner</span>
+        <h1>Publish available capacity</h1>
+        <p class="page-header__subtitle">
+          List a route you're already driving and the empty space you can offer.
+          Matching cargo requests on this corridor will show up automatically.
+        </p>
+      </div>
+
+      <div class="split split--form">
+
+        <!--  FORM  -->
+        <form class="form card" id="availability-form" novalidate>
+
+          <div class="field">
+            <label class="field__label" for="truck">Truck</label>
+            <div class="select-wrap">
+              <select class="select" id="truck" name="truck" required>
+                <option value="" selected disabled>Select a truck</option>
+                <option value="truck-1" data-capacity="8000">Isuzu FRR — Plate AA-12345 (max 8,000 kg)</option>
+                <option value="truck-2" data-capacity="15000">Sino Howo — Plate OR-98765 (max 15,000 kg)</option>
+              </select>
+            </div>
+            <a class="field__link" href="dashboard.html#trucks">+ Add a new truck</a>
+          </div>
+
+          <div class="form__grid form__grid--2">
+            <div class="field" id="origin-field">
+              <label class="field__label" for="origin">Origin city</label>
+              <div class="select-wrap">
+                <select class="select" id="origin" name="origin" required>
+                  <option value="" selected disabled>Select origin</option>
+                  <option>Addis Ababa</option>
+                  <option>Adama</option>
+                  <option>Hawassa</option>
+                  <option>Bahir Dar</option>
+                  <option>Mekelle</option>
+                  <option>Dire Dawa</option>
+                  <option>Jimma</option>
+                  <option>Gondar</option>
+                  <option>Dessie</option>
+                  <option>Debre Birhan</option>
+                  <option>Shashemene</option>
+                  <option>Arba Minch</option>
+                  <option>Nekemte</option>
+                  <option>Woldiya</option>
+                </select>
+              </div>
+              <p class="field__error" id="origin-error">Origin and destination can't be the same city.</p>
+            </div>
+
+            <div class="field" id="destination-field">
+              <label class="field__label" for="destination">Destination city</label>
+              <div class="select-wrap">
+                <select class="select" id="destination" name="destination" required>
+                  <option value="" selected disabled>Select destination</option>
+                  <option>Addis Ababa</option>
+                  <option>Adama</option>
+                  <option>Hawassa</option>
+                  <option>Bahir Dar</option>
+                  <option>Mekelle</option>
+                  <option>Dire Dawa</option>
+                  <option>Jimma</option>
+                  <option>Gondar</option>
+                  <option>Dessie</option>
+                  <option>Debre Birhan</option>
+                  <option>Shashemene</option>
+                  <option>Arba Minch</option>
+                  <option>Nekemte</option>
+                  <option>Woldiya</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="capacity">Available capacity (kg)</label>
+            <input class="input" type="number" id="capacity" name="capacity" min="1" step="1" placeholder="e.g. 4500" required />
+            <p class="field__hint" id="capacity-hint">Select a truck to see its max capacity.</p>
+          </div>
+
+          <div class="form__grid form__grid--2">
+            <div class="field">
+              <label class="field__label" for="departure-start">Departure window — from</label>
+              <input class="input" type="datetime-local" id="departure-start" name="departure-start" required />
+            </div>
+            <div class="field">
+              <label class="field__label" for="departure-end">Departure window — to</label>
+              <input class="input" type="datetime-local" id="departure-end" name="departure-end" required />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="notes">Notes <span class="field__hint">(optional)</span></label>
+            <textarea class="textarea" id="notes" name="notes" placeholder="e.g. Can detour up to 20km, prefer general goods only"></textarea>
+          </div>
+
+          <div class="form__actions">
+            <button class="btn btn--primary" type="submit">Publish availability</button>
+            <a class="btn btn--ghost" href="dashboard.html">Cancel</a>
+          </div>
+        </form>
+
+        <!-- LIVE PREVIEW -->
+        <aside class="panel panel--glow" aria-label="Route preview">
+          <div class="panel__content">
+            <p class="field__label" style="margin-bottom: var(--space-4);">Preview</p>
+
+            <div class="route-line">
+              <span class="route-line__dot route-line__dot--origin"></span>
+              <span class="route-line__track"></span>
+              <span class="route-line__dot route-line__dot--destination"></span>
+            </div>
+            <div class="route-line__labels">
+              <span id="preview-origin">Origin</span>
+              <span id="preview-destination">Destination</span>
+            </div>
+
+            <div style="margin-top: var(--space-6); display: flex; flex-direction: column; gap: var(--space-3);">
+              <div class="avail-card__meta">
+                <span>Capacity: <strong class="data" id="preview-capacity">— kg</strong></span>
+              </div>
+              <div class="avail-card__meta">
+                <span id="preview-window">Departure window not set</span>
+              </div>
+              <span class="badge badge--wait" id="preview-status">Draft</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!--  ACTIVE AVAILABILITIES -->
+      <section aria-labelledby="active-heading" style="margin-top: var(--space-8);">
+        <h2 id="active-heading" class="corridors__heading">Your active availabilities</h2>
+
+        <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+
+          <div class="card avail-card">
+            <div class="avail-card__top">
+              <span class="avail-card__route">
+                Addis Ababa <span class="avail-card__route-arrow">→</span> Hawassa
+              </span>
+              <span class="badge badge--signal">Open</span>
+            </div>
+            <div class="avail-card__meta">
+              <span class="data">5,200 kg available</span>
+              <span class="data">Aug 6, 08:00 – 20:00</span>
+              <span>Isuzu FRR · AA-12345</span>
+            </div>
+            <div class="avail-card__actions">
+              <button class="btn btn--ghost btn--sm" type="button">Edit</button>
+              <button class="btn btn--ghost btn--sm" type="button">Cancel</button>
+            </div>
+          </div>
+
+          <div class="card avail-card">
+            <div class="avail-card__top">
+              <span class="avail-card__route">
+                Addis Ababa <span class="avail-card__route-arrow">→</span> Adama
+              </span>
+              <span class="badge badge--wait">Booked</span>
+            </div>
+            <div class="avail-card__meta">
+              <span class="data">2,000 kg available</span>
+              <span class="data">Aug 5, 14:00 – 18:00</span>
+              <span>Sino Howo · OR-98765</span>
+            </div>
+            <div class="avail-card__actions">
+              <button class="btn btn--ghost btn--sm" type="button">View booking</button>
+            </div>
+          </div>
+
+          <div class="card avail-card">
+            <div class="avail-card__top">
+              <span class="avail-card__route">
+                Addis Ababa <span class="avail-card__route-arrow">→</span> Bahir Dar
+              </span>
+              <span class="badge badge--alert">Expired</span>
+            </div>
+            <div class="avail-card__meta">
+              <span class="data">8,000 kg available</span>
+              <span class="data">Jul 28, 06:00 – 22:00</span>
+              <span>Isuzu FRR · AA-12345</span>
+            </div>
+            <div class="avail-card__actions">
+              <button class="btn btn--ghost btn--sm" type="button">Republish</button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="footer">
+      <div class="container footer__inner">
+        <span class="footer__note">Lemenbado · pilot build</span>
+        <span class="footer__note">Fewer empty legs on the Addis corridors.</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    // Local, page-scoped interactivity for now. Once js/app.js is built,
+    // the truck-capacity lookup and formatting helpers below should move
+    // there so every page can share them.
+
+    const truckSelect = document.getElementById('truck');
+    const capacityInput = document.getElementById('capacity');
+    const capacityHint = document.getElementById('capacity-hint');
+    const originSelect = document.getElementById('origin');
+    const destinationSelect = document.getElementById('destination');
+    const originField = document.getElementById('origin-field');
+    const originError = document.getElementById('origin-error');
+    const startInput = document.getElementById('departure-start');
+    const endInput = document.getElementById('departure-end');
+
+    const previewOrigin = document.getElementById('preview-origin');
+    const previewDestination = document.getElementById('preview-destination');
+    const previewCapacity = document.getElementById('preview-capacity');
+    const previewWindow = document.getElementById('preview-window');
+
+    function formatDateTime(value) {
+      if (!value) return null;
+      const date = new Date(value);
+      return date.toLocaleString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    }
+
+    function updatePreview() {
+      previewOrigin.textContent = originSelect.value || 'Origin';
+      previewDestination.textContent = destinationSelect.value || 'Destination';
+      previewCapacity.textContent = capacityInput.value ? `${Number(capacityInput.value).toLocaleString()} kg` : '— kg';
+
+      const start = formatDateTime(startInput.value);
+      const end = formatDateTime(endInput.value);
+      previewWindow.textContent = start && end ? `${start} – ${end}` : 'Departure window not set';
+    }
+
+    truckSelect.addEventListener('change', () => {
+      const selected = truckSelect.selectedOptions[0];
+      const max = selected ? selected.dataset.capacity : null;
+      capacityHint.textContent = max
+        ? `Max for this truck: ${Number(max).toLocaleString()} kg`
+        : 'Select a truck to see its max capacity.';
+      capacityInput.max = max || '';
+    });
+
+    function validateCities() {
+      const sameCity = originSelect.value && originSelect.value === destinationSelect.value;
+      originField.classList.toggle('field--invalid', Boolean(sameCity));
+      originError.style.display = sameCity ? 'block' : 'none';
+      return !sameCity;
+    }
+
+    [originSelect, destinationSelect, capacityInput, startInput, endInput].forEach((el) => {
+      el.addEventListener('input', () => {
+        validateCities();
+        updatePreview();
+      });
+    });
+
+    document.getElementById('logout-link').addEventListener('click', (event) => {
+      event.preventDefault();
+      localStorage.removeItem('lemenbado_user');
+      window.location.href = '../index.html';
+    });
+
+    document.getElementById('availability-form').addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (!validateCities()) return;
+      // No backend yet — this is where a POST to /api/truck-availability
+      // will go once the Express API exists.
+      console.log('Publish availability (mock):', {
+        truck: truckSelect.value,
+        origin: originSelect.value,
+        destination: destinationSelect.value,
+        capacityKg: capacityInput.value,
+        departureStart: startInput.value,
+        departureEnd: endInput.value,
+        notes: document.getElementById('notes').value,
+      });
+      alert('Availability published (mock) — wire this up to the API once the backend is ready.');
+    });
+  </script>
+</body>
+</html>

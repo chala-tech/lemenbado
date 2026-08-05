@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#E5972F" />
+  <meta name="description" content="Lemenbado admin — verify users, moderate listings, resolve disputes." />
+
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="../assets/icons/icon-192.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <title>Admin — Lemenbado</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/globals.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+</head>
+<body>
+  <div class="app-shell">
+
+    <!--  NAV -->
+    <header class="nav">
+      <div class="container nav__inner">
+        <a href="../index.html" class="nav__logo">
+          <svg class="nav__logo-mark" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="14" cy="14" r="13" stroke="#E5972F" stroke-width="1.5" />
+            <path d="M4 14 H24" stroke="#2A3557" stroke-width="1.5" stroke-dasharray="2 2.5" />
+            <circle cx="6" cy="14" r="2.5" fill="#E5972F" />
+            <circle cx="22" cy="14" r="2.5" fill="#0A0F1C" stroke="#E5972F" stroke-width="1.5" />
+          </svg>
+          Lemenbado <span class="badge badge--alert" style="margin-left: var(--space-2);">Admin</span>
+        </a>
+        <div class="nav__actions">
+          <a class="btn btn--ghost btn--sm" href="dashboard.html">Exit admin</a>
+          <a class="btn btn--ghost btn--sm" href="#" id="logout-link">Log out</a>
+        </div>
+      </div>
+    </header>
+
+    <!--  GUARD MESSAGE  -->
+    <main class="container container--narrow page" id="guard-view" style="display: none;">
+      <div class="card" style="text-align: center;">
+        <h2>Admin access only</h2>
+        <p class="page-header__subtitle" style="margin-inline: auto;">
+          This area is restricted to admin accounts. This page checks the role stored client-side, which is fine for
+          this demo — the real check has to happen on the server, per Part 11 of the blueprint, since anyone can edit
+          localStorage in dev tools.
+        </p>
+        <a class="btn btn--primary" href="dashboard.html" style="margin-top: var(--space-4);">Back to dashboard</a>
+      </div>
+    </main>
+
+    <!--  ADMIN CONTENT  -->
+    <main class="container page" id="admin-view" style="display: none;">
+
+      <div class="page-header">
+        <span class="hero__eyebrow">Admin</span>
+        <h1>Verification, listings & disputes</h1>
+        <p class="page-header__subtitle">Manual review for the pilot cohort — automate once this becomes the bottleneck (Part 10).</p>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Admin sections" id="tabs">
+        <button class="tab" role="tab" aria-selected="true" data-panel="users">Users</button>
+        <button class="tab" role="tab" aria-selected="false" data-panel="listings">Listings</button>
+        <button class="tab" role="tab" aria-selected="false" data-panel="disputes">Disputes</button>
+      </div>
+
+      <!-- USERS -->
+      <section id="panel-users" style="display: flex; flex-direction: column; gap: var(--space-4);"></section>
+
+      <!-- LISTINGS -->
+      <section id="panel-listings" style="display: none; flex-direction: column; gap: var(--space-4);"></section>
+
+      <!-- DISPUTES -->
+      <section id="panel-disputes" style="display: none; flex-direction: column; gap: var(--space-4);"></section>
+
+    </main>
+
+    <footer class="footer">
+      <div class="container footer__inner">
+        <span class="footer__note">Lemenbado · pilot build</span>
+        <span class="footer__note">Fewer empty legs on the Addis corridors.</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+   
+
+    const user = JSON.parse(localStorage.getItem('lemenbado_user') || 'null');
+
+    if (!user || user.role !== 'ADMIN') {
+      document.getElementById('guard-view').style.display = 'block';
+    } else {
+      document.getElementById('admin-view').style.display = 'block';
+      initAdmin();
+    }
+
+    function initAdmin() {
+      // ---- Mock data — stands in for GET /api/admin/* -----------------
+      const USERS = [
+        { id: 'u_1', name: 'Tesfaye Alemu', role: 'Truck owner', phone: '+251 91 111 2222', status: 'PENDING' },
+        { id: 'u_2', name: 'Bekele Trading PLC', role: 'Cargo owner', phone: '+251 92 222 3333', status: 'PENDING' },
+        { id: 'u_3', name: 'Selam Hardware', role: 'Cargo owner', phone: '+251 93 333 4444', status: 'VERIFIED' },
+      ];
+
+      const LISTINGS = [
+        { id: 'l_1', type: 'Truck availability', route: 'Addis Ababa → Hawassa', owner: 'Tesfaye Alemu', status: 'ACTIVE' },
+        { id: 'l_2', type: 'Cargo request', route: 'Addis Ababa → Bahir Dar', owner: 'Selam Hardware', status: 'ACTIVE' },
+        { id: 'l_3', type: 'Truck availability', route: 'Addis Ababa → Adama', owner: 'Tesfaye Alemu', status: 'SUSPENDED' },
+      ];
+
+      const DISPUTES = [
+        { id: 'd_1', route: 'Addis Ababa → Hawassa', parties: 'Tesfaye Alemu ↔ Bekele Trading PLC', summary: 'Cargo weight didn\'t match what was posted.', status: 'OPEN' },
+      ];
+
+      const USER_BADGE = { PENDING: 'badge--wait', VERIFIED: 'badge--signal', REJECTED: 'badge--alert' };
+      const LISTING_BADGE = { ACTIVE: 'badge--signal', SUSPENDED: 'badge--alert' };
+      const DISPUTE_BADGE = { OPEN: 'badge--wait', RESOLVED: 'badge--signal' };
+
+      function renderUsers() {
+        document.getElementById('panel-users').innerHTML = USERS.map((u) => `
+          <div class="card avail-card">
+            <div class="avail-card__top">
+              <span class="avail-card__route">${u.name}</span>
+              <span class="badge ${USER_BADGE[u.status]}" id="user-badge-${u.id}">${u.status}</span>
+            </div>
+            <div class="avail-card__meta">
+              <span>${u.role}</span>
+              <span class="data">${u.phone}</span>
+            </div>
+            <div class="avail-card__actions">
+              <button class="btn btn--ghost btn--sm" data-verify="${u.id}" ${u.status === 'VERIFIED' ? 'disabled' : ''}>Verify</button>
+              <button class="btn btn--ghost btn--sm" data-reject="${u.id}" ${u.status === 'REJECTED' ? 'disabled' : ''}>Reject</button>
+            </div>
+          </div>
+        `).join('');
+
+        document.querySelectorAll('[data-verify]').forEach((btn) => btn.addEventListener('click', () => {
+          const u = USERS.find((x) => x.id === btn.dataset.verify);
+          u.status = 'VERIFIED';
+          renderUsers();
+        }));
+        document.querySelectorAll('[data-reject]').forEach((btn) => btn.addEventListener('click', () => {
+          const u = USERS.find((x) => x.id === btn.dataset.reject);
+          u.status = 'REJECTED';
+          renderUsers();
+        }));
+      }
+
+      function renderListings() {
+        document.getElementById('panel-listings').innerHTML = LISTINGS.map((l) => `
+          <div class="card avail-card">
+            <div class="avail-card__top">
+              <span class="avail-card__route">${l.route}</span>
+              <span class="badge ${LISTING_BADGE[l.status]}">${l.status === 'ACTIVE' ? 'Active' : 'Suspended'}</span>
+            </div>
+            <div class="avail-card__meta">
+              <span>${l.type}</span>
+              <span>${l.owner}</span>
+            </div>
+            <div class="avail-card__actions">
+              <button class="btn btn--ghost btn--sm" data-toggle="${l.id}">
+                ${l.status === 'ACTIVE' ? 'Suspend' : 'Reinstate'}
+              </button>
+            </div>
+          </div>
+        `).join('');
+
+        document.querySelectorAll('[data-toggle]').forEach((btn) => btn.addEventListener('click', () => {
+          const l = LISTINGS.find((x) => x.id === btn.dataset.toggle);
+          l.status = l.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+          renderListings();
+        }));
+      }
+
+      function renderDisputes() {
+        document.getElementById('panel-disputes').innerHTML = DISPUTES.map((d) => `
+          <div class="card avail-card">
+            <div class="avail-card__top">
+              <span class="avail-card__route">${d.route}</span>
+              <span class="badge ${DISPUTE_BADGE[d.status]}">${d.status === 'OPEN' ? 'Open' : 'Resolved'}</span>
+            </div>
+            <div class="avail-card__meta"><span>${d.parties}</span></div>
+            <p class="field__hint" style="margin-top: var(--space-2);">${d.summary}</p>
+            <div class="avail-card__actions">
+              <button class="btn btn--ghost btn--sm" data-resolve="${d.id}" ${d.status === 'RESOLVED' ? 'disabled' : ''}>Mark resolved</button>
+            </div>
+          </div>
+        `).join('') || '<p class="field__hint">No disputes on file.</p>';
+
+        document.querySelectorAll('[data-resolve]').forEach((btn) => btn.addEventListener('click', () => {
+          const d = DISPUTES.find((x) => x.id === btn.dataset.resolve);
+          d.status = 'RESOLVED';
+          renderDisputes();
+        }));
+      }
+
+      renderUsers();
+      renderListings();
+      renderDisputes();
+
+      document.getElementById('tabs').addEventListener('click', (event) => {
+        const tab = event.target.closest('.tab');
+        if (!tab) return;
+        document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', 'false'));
+        tab.setAttribute('aria-selected', 'true');
+        ['users', 'listings', 'disputes'].forEach((name) => {
+          document.getElementById(`panel-${name}`).style.display = name === tab.dataset.panel ? 'flex' : 'none';
+        });
+      });
+    }
+
+    document.getElementById('logout-link').addEventListener('click', (event) => {
+      event.preventDefault();
+      localStorage.removeItem('lemenbado_user');
+      window.location.href = '../index.html';
+    });
+  </script>
+</body>
+</html>
