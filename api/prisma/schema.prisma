@@ -1,0 +1,279 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  TRUCK_OWNER
+  DRIVER
+  CARGO_OWNER
+  ADMIN
+}
+
+enum AvailabilityStatus {
+  OPEN
+  BOOKED
+  CANCELLED
+  EXPIRED
+}
+
+enum CargoStatus {
+  OPEN
+  MATCHED
+  BOOKED
+  CANCELLED
+  EXPIRED
+}
+
+enum BookingStatus {
+  REQUESTED
+  ACCEPTED
+  REJECTED
+  IN_TRANSIT
+  DELIVERED
+  COMPLETED
+  CANCELLED
+  DISPUTED
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+// core identity — role decides what a user can do, no separate TruckOwner table
+model User {
+  id           String   @id @default(uuid())
+  phone        String   @unique
+  passwordHash String
+  name         String
+  role         Role
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  trucks            Truck[]
+  businessMemberships BusinessMember[]
+  documents         Document[]
+  notifications     Notification[]
+  reviewsGiven      Review[]         @relation("ReviewsGiven")
+  reviewsReceived   Review[]         @relation("ReviewsReceived")
+  bookingsRequested Booking[]        @relation("BookingsRequested")
+}
+
+// a cargo-owning company; a user joins one via BusinessMember
+model Business {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  members       BusinessMember[]
+  cargoRequests CargoRequest[]
+}
+
+model BusinessMember {
+  id         String   @id @default(uuid())
+  businessId String
+  userId     String
+  role       String // "owner" | "staff"
+
+  business Business @relation(fields: [businessId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+
+  @@unique([businessId, userId])
+}
+
+// static reference table — seeded once, no live geocoding needed (Part 8)
+model City {
+  id     Int    @id @default(autoincrement())
+  name   String @unique
+  nameAm String?
+  lat    Float
+  lng    Float
+  region String?
+
+  truckOriginLegs      TruckAvailability[] @relation("TruckOrigin")
+  truckDestinationLegs TruckAvailability[] @relation("TruckDestination")
+  cargoOriginLegs      CargoRequest[]      @relation("CargoOrigin")
+  cargoDestinationLegs CargoRequest[]      @relation("CargoDestination")
+}
+
+model TruckType {
+  id     String  @id @default(uuid())
+  name   String  @unique
+  trucks Truck[]
+}
+
+model Truck {
+  id          String   @id @default(uuid())
+  ownerId     String
+  truckTypeId String
+  plateNumber String   @unique
+  maxCapacityKg Decimal
+  createdAt   DateTime @default(now())
+
+  owner        User                @relation(fields: [ownerId], references: [id])
+  truckType    TruckType           @relation(fields: [truckTypeId], references: [id])
+  availability TruckAvailability[]
+}
+
+// the heart of the platform — a published leg (Part 6)
+model TruckAvailability {
+  id                    String              @id @default(uuid())
+  truckId               String
+  originCityId          Int
+  destinationCityId     Int
+  availableCapacityKg   Decimal
+  departureWindowStart  DateTime
+  departureWindowEnd    DateTime
+  status                AvailabilityStatus  @default(OPEN)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  truck       Truck    @relation(fields: [truckId], references: [id], onDelete: Restrict)
+  originCity  City     @relation("TruckOrigin", fields: [originCityId], references: [id])
+  destCity    City     @relation("TruckDestination", fields: [destinationCityId], references: [id])
+  matches     Match[]
+  bookings    Booking[]
+
+  @@index([originCityId, destinationCityId, status, departureWindowStart])
+}
+
+model CargoType {
+  id            String         @id @default(uuid())
+  name          String         @unique
+  cargoRequests CargoRequest[]
+}
+
+model CargoRequest {
+  id                String       @id @default(uuid())
+  businessId        String
+  originCityId      Int
+  destinationCityId Int
+  weightKg          Decimal
+  cargoTypeId       String
+  requiredDate      DateTime
+  desiredPriceEtb   Decimal?
+  status            CargoStatus  @default(OPEN)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  business    Business  @relation(fields: [businessId], references: [id])
+  originCity  City      @relation("CargoOrigin", fields: [originCityId], references: [id])
+  destCity    City      @relation("CargoDestination", fields: [destinationCityId], references: [id])
+  cargoType   CargoType @relation(fields: [cargoTypeId], references: [id])
+  matches     Match[]
+  bookings    Booking[]
+
+  @@index([originCityId, destinationCityId, status, requiredDate])
+}
+
+// system-generated candidate pairing — Stage 1/2 matching engine (Part 7)
+model Match {
+  id                  String   @id @default(uuid())
+  truckAvailabilityId String
+  cargoRequestId      String
+  score               Float
+  createdAt           DateTime @default(now())
+
+  truckAvailability TruckAvailability @relation(fields: [truckAvailabilityId], references: [id])
+  cargoRequest      CargoRequest      @relation(fields: [cargoRequestId], references: [id])
+
+  @@unique([truckAvailabilityId, cargoRequestId])
+}
+
+// a confirmed transaction — state machine lives in `status` (Part 9)
+model Booking {
+  id                  String        @id @default(uuid())
+  truckAvailabilityId String
+  cargoRequestId      String
+  requestedByUserId   String
+  status              BookingStatus @default(REQUESTED)
+  acceptedAt          DateTime?
+  rejectedAt          DateTime?
+  completedAt         DateTime?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  truckAvailability TruckAvailability @relation(fields: [truckAvailabilityId], references: [id], onDelete: Restrict)
+  cargoRequest      CargoRequest      @relation(fields: [cargoRequestId], references: [id], onDelete: Restrict)
+  requestedBy       User              @relation("BookingsRequested", fields: [requestedByUserId], references: [id])
+  reviews           Review[]
+  disputes          Dispute[]
+
+  @@index([status])
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  bookingId  String
+  reviewerId String
+  revieweeId String
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  booking  Booking @relation(fields: [bookingId], references: [id])
+  reviewer User    @relation("ReviewsGiven", fields: [reviewerId], references: [id])
+  reviewee User    @relation("ReviewsReceived", fields: [revieweeId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  payload   Json
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Document {
+  id         String              @id @default(uuid())
+  userId     String
+  type       String // "license" | "registration" | etc.
+  fileUrl    String
+  status     VerificationStatus  @default(PENDING)
+  createdAt  DateTime            @default(now())
+
+  user         User          @relation(fields: [userId], references: [id])
+  verification Verification?
+}
+
+model Verification {
+  id           String             @id @default(uuid())
+  documentId   String             @unique
+  verifiedById String?
+  outcome      VerificationStatus
+  decidedAt    DateTime           @default(now())
+
+  document Document @relation(fields: [documentId], references: [id])
+}
+
+model Dispute {
+  id        String   @id @default(uuid())
+  bookingId String
+  raisedBy  String
+  summary   String
+  status    String   @default("OPEN") // "OPEN" | "RESOLVED"
+  createdAt DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+}
+
+// append-only — every status change / admin action gets one of these (Part 11)
+model AuditLog {
+  id         String   @id @default(uuid())
+  entityType String
+  entityId   String
+  action     String
+  actorId    String?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+}
