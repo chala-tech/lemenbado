@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,7 +26,7 @@
 <body>
   <div class="app-shell">
 
-    <!--  NAV  -->
+    <!-- nav -->
     <header class="nav">
       <div class="container nav__inner">
         <a href="../index.html" class="nav__logo">
@@ -89,7 +88,8 @@
   </div>
 
   <script>
-    // Mock data 
+    // mock data — stands in for GET /api/bookings until the Express
+    // API exists; same shape duplicated in booking-detail.html for now
 
     const BOOKINGS = [
       {
@@ -188,7 +188,7 @@
 
     document.getElementById('logout-link').addEventListener('click', (event) => {
       event.preventDefault();
-      localStorage.removeItem('lemenbado_user');
+      localStorage.removeItem('lemenbado_session');
       window.location.href = '../index.html';
     });
   </script>

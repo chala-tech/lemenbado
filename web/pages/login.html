@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,7 +26,7 @@
 <body>
   <div class="app-shell">
 
-    <!--  NAV  -->
+    <!-- nav (logged-out) -->
     <header class="nav">
       <div class="container nav__inner">
         <a href="../index.html" class="nav__logo">
@@ -87,18 +85,23 @@
   </div>
 
   <script>
-    // Mock auth for now 
+    // mock auth, no real password check — if a session already exists
+    // for this phone, reuse it; otherwise create a placeholder user
+
     document.getElementById('login-form').addEventListener('submit', (event) => {
       event.preventDefault();
 
       const phone = document.getElementById('phone').value;
-      const existing = JSON.parse(localStorage.getItem('lemenbado_user') || 'null');
+      const existing = JSON.parse(localStorage.getItem('lemenbado_session') || 'null');
 
-      const user = existing && existing.phone === phone
-        ? existing
-        : { name: 'Truck Owner', phone, role: 'TRUCK_OWNER' };
+      const user = existing && existing.user.phone === phone
+        ? existing.user
+        : { id: 'usr_' + Date.now(), name: 'Truck Owner', phone, role: 'TRUCK_OWNER' };
 
-      localStorage.setItem('lemenbado_user', JSON.stringify(user));
+      // mock token — real /api/auth/login returns a signed JWT here
+      const session = { token: 'mock-jwt-' + user.id, user };
+
+      localStorage.setItem('lemenbado_session', JSON.stringify(session));
       window.location.href = 'dashboard.html';
     });
   </script>

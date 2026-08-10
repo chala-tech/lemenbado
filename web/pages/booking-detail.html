@@ -26,7 +26,7 @@
 <body>
   <div class="app-shell">
 
-    <!-- ================= NAV ================= -->
+    <!-- nav -->
     <header class="nav">
       <div class="container nav__inner">
         <a href="../index.html" class="nav__logo">
@@ -71,7 +71,10 @@
   </div>
 
   <script>
-    // Mock data 
+    // mock data — same shape/duplication note as bookings.html;
+    // transitions below are in-memory only, no persistence, purely to
+    // show the state machine from Part 9 of the blueprint
+
     const BOOKINGS = {
       bk_1: {
         origin: 'Addis Ababa', destination: 'Adama', status: 'IN_TRANSIT',
@@ -238,7 +241,7 @@
 
     document.getElementById('logout-link').addEventListener('click', (event) => {
       event.preventDefault();
-      localStorage.removeItem('lemenbado_user');
+      localStorage.removeItem('lemenbado_session');
       window.location.href = '../index.html';
     });
   </script>

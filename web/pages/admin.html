@@ -26,7 +26,7 @@
 <body>
   <div class="app-shell">
 
-    <!--  NAV -->
+    <!-- nav (admin — deliberately not the marketplace nav) -->
     <header class="nav">
       <div class="container nav__inner">
         <a href="../index.html" class="nav__logo">
@@ -45,7 +45,7 @@
       </div>
     </header>
 
-    <!--  GUARD MESSAGE  -->
+    <!-- guard message (shown if not an admin) -->
     <main class="container container--narrow page" id="guard-view" style="display: none;">
       <div class="card" style="text-align: center;">
         <h2>Admin access only</h2>
@@ -58,7 +58,7 @@
       </div>
     </main>
 
-    <!--  ADMIN CONTENT  -->
+    <!-- admin content -->
     <main class="container page" id="admin-view" style="display: none;">
 
       <div class="page-header">
@@ -73,13 +73,8 @@
         <button class="tab" role="tab" aria-selected="false" data-panel="disputes">Disputes</button>
       </div>
 
-      <!-- USERS -->
       <section id="panel-users" style="display: flex; flex-direction: column; gap: var(--space-4);"></section>
-
-      <!-- LISTINGS -->
       <section id="panel-listings" style="display: none; flex-direction: column; gap: var(--space-4);"></section>
-
-      <!-- DISPUTES -->
       <section id="panel-disputes" style="display: none; flex-direction: column; gap: var(--space-4);"></section>
 
     </main>
@@ -94,9 +89,10 @@
   </div>
 
   <script>
-   
+  
 
-    const user = JSON.parse(localStorage.getItem('lemenbado_user') || 'null');
+    const session = JSON.parse(localStorage.getItem('lemenbado_session') || 'null');
+    const user = session ? session.user : null;
 
     if (!user || user.role !== 'ADMIN') {
       document.getElementById('guard-view').style.display = 'block';
@@ -106,7 +102,7 @@
     }
 
     function initAdmin() {
-      // ---- Mock data — stands in for GET /api/admin/* -----------------
+      // mock data — stands in for GET /api/admin/*
       const USERS = [
         { id: 'u_1', name: 'Tesfaye Alemu', role: 'Truck owner', phone: '+251 91 111 2222', status: 'PENDING' },
         { id: 'u_2', name: 'Bekele Trading PLC', role: 'Cargo owner', phone: '+251 92 222 3333', status: 'PENDING' },
@@ -222,7 +218,7 @@
 
     document.getElementById('logout-link').addEventListener('click', (event) => {
       event.preventDefault();
-      localStorage.removeItem('lemenbado_user');
+      localStorage.removeItem('lemenbado_session');
       window.location.href = '../index.html';
     });
   </script>

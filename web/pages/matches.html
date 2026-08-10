@@ -26,7 +26,7 @@
 <body>
   <div class="app-shell">
 
-    <!--  NAV -->
+    <!-- nav -->
     <header class="nav">
       <div class="container nav__inner">
         <a href="../index.html" class="nav__logo">
@@ -88,7 +88,10 @@
   </div>
 
   <script>
-    // Mock data 
+    // mock data — stands in for GET /api/trucks (own availabilities)
+    // and GET /api/matches?truckAvailabilityId=... until the Express
+    // API + Stage 1/2 matching engine (Part 7) exist
+
     const AVAILABILITIES = [
       { id: 'av_1', origin: 'Addis Ababa', destination: 'Hawassa', capacityKg: 5200, truck: 'Isuzu FRR · AA-12345' },
       { id: 'av_2', origin: 'Addis Ababa', destination: 'Bahir Dar', capacityKg: 8000, truck: 'Isuzu FRR · AA-12345' },
@@ -155,7 +158,7 @@
 
       list.querySelectorAll('[data-request]').forEach((btn) => {
         btn.addEventListener('click', () => {
-          // No backend yet — this is where POST /api/bookings goes.
+          // no backend yet — this is where POST /api/bookings goes
           alert('Booking requested (mock) — you\'ll be able to track it on the Bookings page once the API exists.');
           window.location.href = 'bookings.html';
         });
@@ -167,7 +170,7 @@
 
     document.getElementById('logout-link').addEventListener('click', (event) => {
       event.preventDefault();
-      localStorage.removeItem('lemenbado_user');
+      localStorage.removeItem('lemenbado_session');
       window.location.href = '../index.html';
     });
   </script>

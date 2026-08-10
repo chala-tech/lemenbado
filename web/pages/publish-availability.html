@@ -26,7 +26,7 @@
 <body>
   <div class="app-shell">
 
-    <!-- NAV -->
+    <!-- nav -->
     <header class="nav">
       <div class="container nav__inner">
         <a href="../index.html" class="nav__logo">
@@ -66,7 +66,7 @@
 
       <div class="split split--form">
 
-        <!--  FORM  -->
+        <!-- form -->
         <form class="form card" id="availability-form" novalidate>
 
           <div class="field">
@@ -87,20 +87,20 @@
               <div class="select-wrap">
                 <select class="select" id="origin" name="origin" required>
                   <option value="" selected disabled>Select origin</option>
-                  <option>Addis Ababa</option>
-                  <option>Adama</option>
-                  <option>Hawassa</option>
-                  <option>Bahir Dar</option>
-                  <option>Mekelle</option>
-                  <option>Dire Dawa</option>
-                  <option>Jimma</option>
-                  <option>Gondar</option>
-                  <option>Dessie</option>
-                  <option>Debre Birhan</option>
-                  <option>Shashemene</option>
-                  <option>Arba Minch</option>
-                  <option>Nekemte</option>
-                  <option>Woldiya</option>
+                  <option value="1">Addis Ababa</option>
+                  <option value="2">Adama</option>
+                  <option value="3">Hawassa</option>
+                  <option value="4">Bahir Dar</option>
+                  <option value="5">Mekelle</option>
+                  <option value="6">Dire Dawa</option>
+                  <option value="7">Jimma</option>
+                  <option value="8">Gondar</option>
+                  <option value="9">Dessie</option>
+                  <option value="10">Debre Birhan</option>
+                  <option value="11">Shashemene</option>
+                  <option value="12">Arba Minch</option>
+                  <option value="13">Nekemte</option>
+                  <option value="14">Woldiya</option>
                 </select>
               </div>
               <p class="field__error" id="origin-error">Origin and destination can't be the same city.</p>
@@ -111,20 +111,20 @@
               <div class="select-wrap">
                 <select class="select" id="destination" name="destination" required>
                   <option value="" selected disabled>Select destination</option>
-                  <option>Addis Ababa</option>
-                  <option>Adama</option>
-                  <option>Hawassa</option>
-                  <option>Bahir Dar</option>
-                  <option>Mekelle</option>
-                  <option>Dire Dawa</option>
-                  <option>Jimma</option>
-                  <option>Gondar</option>
-                  <option>Dessie</option>
-                  <option>Debre Birhan</option>
-                  <option>Shashemene</option>
-                  <option>Arba Minch</option>
-                  <option>Nekemte</option>
-                  <option>Woldiya</option>
+                  <option value="1">Addis Ababa</option>
+                  <option value="2">Adama</option>
+                  <option value="3">Hawassa</option>
+                  <option value="4">Bahir Dar</option>
+                  <option value="5">Mekelle</option>
+                  <option value="6">Dire Dawa</option>
+                  <option value="7">Jimma</option>
+                  <option value="8">Gondar</option>
+                  <option value="9">Dessie</option>
+                  <option value="10">Debre Birhan</option>
+                  <option value="11">Shashemene</option>
+                  <option value="12">Arba Minch</option>
+                  <option value="13">Nekemte</option>
+                  <option value="14">Woldiya</option>
                 </select>
               </div>
             </div>
@@ -158,7 +158,7 @@
           </div>
         </form>
 
-        <!-- LIVE PREVIEW -->
+        <!-- live preview -->
         <aside class="panel panel--glow" aria-label="Route preview">
           <div class="panel__content">
             <p class="field__label" style="margin-bottom: var(--space-4);">Preview</p>
@@ -186,7 +186,7 @@
         </aside>
       </div>
 
-      <!--  ACTIVE AVAILABILITIES -->
+      <!-- active availabilities -->
       <section aria-labelledby="active-heading" style="margin-top: var(--space-8);">
         <h2 id="active-heading" class="corridors__heading">Your active availabilities</h2>
 
@@ -259,9 +259,9 @@
   </div>
 
   <script>
-    // Local, page-scoped interactivity for now. Once js/app.js is built,
-    // the truck-capacity lookup and formatting helpers below should move
-    // there so every page can share them.
+    // local, page-scoped interactivity for now — once js/app.js is
+    // built, the truck-capacity lookup and formatting helpers below
+    // should move there so every page can share them
 
     const truckSelect = document.getElementById('truck');
     const capacityInput = document.getElementById('capacity');
@@ -290,8 +290,8 @@
     }
 
     function updatePreview() {
-      previewOrigin.textContent = originSelect.value || 'Origin';
-      previewDestination.textContent = destinationSelect.value || 'Destination';
+      previewOrigin.textContent = originSelect.selectedOptions[0]?.text || 'Origin';
+      previewDestination.textContent = destinationSelect.selectedOptions[0]?.text || 'Destination';
       previewCapacity.textContent = capacityInput.value ? `${Number(capacityInput.value).toLocaleString()} kg` : '— kg';
 
       const start = formatDateTime(startInput.value);
@@ -324,19 +324,18 @@
 
     document.getElementById('logout-link').addEventListener('click', (event) => {
       event.preventDefault();
-      localStorage.removeItem('lemenbado_user');
+      localStorage.removeItem('lemenbado_session');
       window.location.href = '../index.html';
     });
 
     document.getElementById('availability-form').addEventListener('submit', (event) => {
       event.preventDefault();
       if (!validateCities()) return;
-      // No backend yet — this is where a POST to /api/truck-availability
-      // will go once the Express API exists.
+      // no backend yet — this is where a POST to /api/truck-availability goes
       console.log('Publish availability (mock):', {
         truck: truckSelect.value,
-        origin: originSelect.value,
-        destination: destinationSelect.value,
+        originCityId: originSelect.value,
+        destinationCityId: destinationSelect.value,
         capacityKg: capacityInput.value,
         departureStart: startInput.value,
         departureEnd: endInput.value,

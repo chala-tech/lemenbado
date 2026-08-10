@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,7 +26,7 @@
 <body>
   <div class="app-shell">
 
-    <!--  NAV  -->
+    <!-- nav -->
     <header class="nav">
       <div class="container nav__inner">
         <a href="../index.html" class="nav__logo">
@@ -64,7 +63,7 @@
         </p>
       </div>
 
-      <!-- STATS  -->
+      <!-- stats -->
       <div class="stat-grid">
         <div class="card">
           <div class="stat-card__value data">3</div>
@@ -84,13 +83,13 @@
         </div>
       </div>
 
-      <!--  QUICK ACTIONS  -->
+      <!-- quick actions -->
       <div class="hero__actions" style="margin-bottom: var(--space-8);">
         <a class="btn btn--primary" href="publish-availability.html">Publish availability</a>
         <a class="btn btn--ghost" href="post-cargo.html">Post a cargo request</a>
       </div>
 
-      <!--  NEW MATCHES  -->
+      <!-- new matches -->
       <section aria-labelledby="matches-heading" style="margin-bottom: var(--space-8);">
         <div class="section-head">
           <h2 id="matches-heading" class="corridors__heading" style="margin-bottom:0;">New matches for you</h2>
@@ -136,7 +135,7 @@
         </div>
       </section>
 
-      <!--  RECENT BOOKINGS  -->
+      <!-- recent bookings -->
       <section aria-labelledby="bookings-heading">
         <div class="section-head">
           <h2 id="bookings-heading" class="corridors__heading" style="margin-bottom:0;">Recent bookings</h2>
@@ -192,10 +191,11 @@
   </div>
 
   <script>
-    // Reads the mock session written by login.html / register.html.
-  
+    // reads the mock session from login.html / register.html —
+    // guard + greeting logic, repeated per page until js/app.js exists
 
-    const user = JSON.parse(localStorage.getItem('lemenbado_user') || 'null');
+    const session = JSON.parse(localStorage.getItem('lemenbado_session') || 'null');
+    const user = session ? session.user : null;
 
     if (!user) {
       window.location.href = 'login.html';
@@ -215,7 +215,7 @@
 
       document.getElementById('logout-link').addEventListener('click', (event) => {
         event.preventDefault();
-        localStorage.removeItem('lemenbado_user');
+        localStorage.removeItem('lemenbado_session');
         window.location.href = '../index.html';
       });
     }
