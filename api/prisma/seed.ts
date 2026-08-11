@@ -36,7 +36,7 @@ async function main() {
   for (const name of truckTypes) {
     await prisma.truckType.upsert({ where: { name }, update: {}, create: { name } });
   }
-
+   
   for (const name of cargoTypes) {
     await prisma.cargoType.upsert({ where: { name }, update: {}, create: { name } });
   }
