@@ -8,6 +8,7 @@ import { trucksRouter } from './modules/trucks/trucks.routes';
 import { truckTypesRouter } from './modules/trucks/truck-types.routes';
 import { availabilityRouter } from './modules/availability/availability.routes';
 import { errorHandler } from './middleware/errorHandler';
+import { cargoRouter } from './modules/cargo/cargo.routes';
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use('/api/cities', citiesRouter);
 app.use('/api/trucks', trucksRouter);
 app.use('/api/truck-types', truckTypesRouter);
 app.use('/api/truck-availability', availabilityRouter);
+app.use('/api/cargo', cargoRouter);
 app.use(errorHandler);
 
 app.listen(env.port, () => {
