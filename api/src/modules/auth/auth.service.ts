@@ -13,9 +13,10 @@ interface RegisterInput {
   role: 'TRUCK_OWNER' | 'CARGO_OWNER';
 }
 
-function signToken(userId: string, role: string) {
+
+function signToken(userId: string, role: string, name: string) {
   const options: jwt.SignOptions = { expiresIn: env.jwtExpiresIn as jwt.SignOptions['expiresIn'] };
-  return jwt.sign({ userId, role }, env.jwtSecret, options);
+  return jwt.sign({ userId, role, name }, env.jwtSecret, options);
 }
 
 function toPublicUser(user: { id: string; name: string; phone: string; role: string }) {
@@ -32,7 +33,7 @@ export async function register(input: RegisterInput) {
     data: { phone: input.phone, passwordHash, name: input.name, role: input.role },
   });
 
-  return { token: signToken(user.id, user.role), user: toPublicUser(user) };
+  return { token: signToken(user.id, user.role, user.name), user: toPublicUser(user) };
 }
 
 export async function login(phone: string, password: string) {
@@ -42,7 +43,7 @@ export async function login(phone: string, password: string) {
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) throw new HttpError(401, 'Invalid phone number or password');
 
-  return { token: signToken(user.id, user.role), user: toPublicUser(user) };
+  return { token: signToken(user.id, user.role, user.name), user: toPublicUser(user) };
 }
 
 export async function getUserById(id: string) {

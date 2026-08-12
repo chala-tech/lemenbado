@@ -6,6 +6,7 @@ import { HttpError } from './errorHandler';
 export interface AuthPayload {
   userId: string;
   role: string;
+  name: string;
 }
 
 declare global {

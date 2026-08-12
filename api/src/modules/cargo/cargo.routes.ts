@@ -15,7 +15,7 @@ cargoRouter.post('/', async (req, res, next) => {
 
     const request = await cargoService.createCargoRequest({
       userId: req.auth!.userId,
-      userName: (req.auth as any).name ?? 'Cargo Owner',
+      userName: req.auth!.name,
       ...parsed.data,
     });
     res.status(201).json(request);
