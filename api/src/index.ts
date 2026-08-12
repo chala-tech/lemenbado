@@ -10,6 +10,7 @@ import { availabilityRouter } from './modules/availability/availability.routes';
 import { errorHandler } from './middleware/errorHandler';
 import { cargoRouter } from './modules/cargo/cargo.routes';
 import { matchingRouter } from './modules/matching/matching.routes';
+import { bookingsRouter } from './modules/bookings/bookings.routes';
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use('/api/truck-types', truckTypesRouter);
 app.use('/api/truck-availability', availabilityRouter);
 app.use('/api/cargo', cargoRouter);
 app.use('/api/matches', matchingRouter);
+app.use('/api/bookings', bookingsRouter);
 app.use(errorHandler);
 
 app.listen(env.port, () => {
