@@ -11,6 +11,8 @@ import { errorHandler } from './middleware/errorHandler';
 import { cargoRouter } from './modules/cargo/cargo.routes';
 import { matchingRouter } from './modules/matching/matching.routes';
 import { bookingsRouter } from './modules/bookings/bookings.routes';
+import { adminRouter } from './modules/admin/admin.routes';
+import { documentsRouter } from './modules/documents/documents.routes';
 
 const app = express();
 
@@ -28,8 +30,9 @@ app.use('/api/truck-availability', availabilityRouter);
 app.use('/api/cargo', cargoRouter);
 app.use('/api/matches', matchingRouter);
 app.use('/api/bookings', bookingsRouter);
+app.use('/api/admin', adminRouter);
+app.use('/api/documents', documentsRouter);
 app.use(errorHandler);
-
 app.listen(env.port, () => {
   console.log(`Lemenbado API listening on http://localhost:${env.port}`);
 });
