@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import * as matchingService from './matching.service';
-import { requireAuth } from '../../middleware/auth';
-import { HttpError } from '../../middleware/errorHandler';
+import * as matchingService from './matching.service.js';
+import { requireAuth } from '../../middleware/auth.js';
+import { HttpError } from '../../middleware/errorHandler.js';
 
 export const matchingRouter = Router();
 

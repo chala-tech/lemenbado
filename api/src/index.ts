@@ -1,19 +1,19 @@
 
 import express from 'express';
 import cors from 'cors';
-import { env } from './lib/env';
-import { authRouter } from './modules/auth/auth.routes';
-import { citiesRouter } from './modules/cities/cities.routes';
-import { trucksRouter } from './modules/trucks/trucks.routes';
-import { truckTypesRouter } from './modules/trucks/truck-types.routes';
-import { availabilityRouter } from './modules/availability/availability.routes';
-import { errorHandler } from './middleware/errorHandler';
-import { cargoRouter } from './modules/cargo/cargo.routes';
-import { matchingRouter } from './modules/matching/matching.routes';
-import { bookingsRouter } from './modules/bookings/bookings.routes';
-import { adminRouter } from './modules/admin/admin.routes';
-import { reviewsRouter } from './modules/reviews/reviews.routes';
-import { documentsRouter } from './modules/documents/documents.routes';
+import { env } from './lib/env.js';
+import { authRouter } from './modules/auth/auth.routes.js';
+import { citiesRouter } from './modules/cities/cities.routes.js';
+import { trucksRouter } from './modules/trucks/trucks.routes.js';
+import { truckTypesRouter } from './modules/trucks/truck-types.routes.js';
+import { availabilityRouter } from './modules/availability/availability.routes.js';
+import { errorHandler } from './middleware/errorHandler.js';
+import { cargoRouter } from './modules/cargo/cargo.routes.js';
+import { matchingRouter } from './modules/matching/matching.routes.js';
+import { bookingsRouter } from './modules/bookings/bookings.routes.js';
+import { adminRouter } from './modules/admin/admin.routes.js';
+import { reviewsRouter } from './modules/reviews/reviews.routes.js';
+import { documentsRouter } from './modules/documents/documents.routes.js';
 
 const app = express();
 

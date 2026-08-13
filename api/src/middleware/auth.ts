@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
-import { env } from '../lib/env';
-import { HttpError } from './errorHandler';
+import { supabase } from '../lib/supabase.js';
+import { HttpError } from './errorHandler.js';
 
 export interface AuthPayload {
   userId: string;
@@ -17,22 +16,30 @@ declare global {
   }
 }
 
-// checks the Authorization header, rejects anything without a valid JWT
-export function requireAuth(req: Request, _res: Response, next: NextFunction) {
+export async function requireAuth(req: Request, _res: Response, next: NextFunction) {
   const header = req.headers.authorization;
   const token = header?.startsWith('Bearer ') ? header.slice(7) : null;
 
   if (!token) return next(new HttpError(401, 'Missing bearer token'));
 
   try {
-    req.auth = jwt.verify(token, env.jwtSecret) as AuthPayload;
-    next();
+    const { data, error } = await supabase.auth.getUser(token);
+    if (error || !data.user) {
+      return next(new HttpError(401, 'Invalid or expired token'));
+    }
+
+    req.auth = {
+      userId: data.user.id,
+      role: (data.user.app_metadata?.role as string) || 'USER',
+      name: (data.user.user_metadata?.name as string) || data.user.email?.split('@')[0] || 'User',
+    };
+
+    return next();
   } catch {
-    next(new HttpError(401, 'Invalid or expired token'));
+    return next(new HttpError(401, 'Invalid or expired token'));
   }
 }
 
-// use after requireAuth — rejects if the user's role isn't in the allowed list
 export function requireRole(...roles: string[]) {
   return (req: Request, _res: Response, next: NextFunction) => {
     if (!req.auth || !roles.includes(req.auth.role)) {

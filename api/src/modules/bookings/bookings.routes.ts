@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { createBookingSchema, updateStatusSchema } from './bookings.schema';
-import * as bookingsService from './bookings.service';
-import { requireAuth } from '../../middleware/auth';
-import { HttpError } from '../../middleware/errorHandler';
+import { createBookingSchema, updateStatusSchema } from './bookings.schema.js';
+import * as bookingsService from './bookings.service.js';
+import { requireAuth } from '../../middleware/auth.js';
+import { HttpError } from '../../middleware/errorHandler.js';
 
 export const bookingsRouter = Router();
 

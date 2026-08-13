@@ -1,5 +1,5 @@
-import { prisma } from '../../lib/prisma';
-import { HttpError } from '../../middleware/errorHandler';
+import { prisma } from '../../lib/prisma.js';
+import { HttpError } from '../../middleware/errorHandler.js';
 
 interface SubmitDocumentInput {
   userId: string;

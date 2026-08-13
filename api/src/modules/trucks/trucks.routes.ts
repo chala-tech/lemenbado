@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { createTruckSchema } from './trucks.schema';
-import * as trucksService from './trucks.service';
-import { requireAuth, requireRole } from '../../middleware/auth';
-import { HttpError } from '../../middleware/errorHandler';
+import { createTruckSchema } from './trucks.schema.js';
+import * as trucksService from './trucks.service.js';
+import { requireAuth, requireRole } from '../../middleware/auth.js';
+import { HttpError } from '../../middleware/errorHandler.js';
 
 export const trucksRouter = Router();
 

@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import * as documentsService from '../admin/documents.service';
-import { requireAuth } from '../../middleware/auth';
-import { HttpError } from '../../middleware/errorHandler';
+import * as documentsService from '../admin/documents.service.js';
+import { requireAuth } from '../../middleware/auth.js';
+import { HttpError } from '../../middleware/errorHandler.js';
 
 export const documentsRouter = Router();
 

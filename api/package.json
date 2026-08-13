@@ -7,15 +7,18 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "test:db": "node test-db-connection.js"
   },
   "dependencies": {
     "@prisma/client": "^5.19.0",
+    "@supabase/supabase-js": "^2.112.3",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
+    "pg": "^8.23.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

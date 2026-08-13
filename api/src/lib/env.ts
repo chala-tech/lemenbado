@@ -10,7 +10,8 @@ function required(name: string): string {
 export const env = {
   port: Number(process.env.PORT || 4000),
   databaseUrl: required('DATABASE_URL'),
-  jwtSecret: required('JWT_SECRET'),
-  jwtExpiresIn: process.env.JWT_EXPIRES_IN || '15m',
   frontendOrigin: required('FRONTEND_ORIGIN'),
+  supabaseUrl: required('SUPABASE_URL'),
+  supabaseAnonKey: required('SUPABASE_ANON_KEY'),
+  supabaseServiceRoleKey: required('SUPABASE_SERVICE_ROLE_KEY'),
 };

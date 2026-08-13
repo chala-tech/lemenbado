@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import * as adminService from './admin.service';
-import * as documentsService from './documents.service';
-import { requireAuth, requireRole } from '../../middleware/auth';
-import { HttpError } from '../../middleware/errorHandler';
+import * as adminService from './admin.service.js';
+import * as documentsService from './documents.service.js';
+import { requireAuth, requireRole } from '../../middleware/auth.js';
+import { HttpError } from '../../middleware/errorHandler.js';
 
 export const adminRouter = Router();
 

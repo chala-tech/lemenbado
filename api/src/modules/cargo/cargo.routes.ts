@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { createCargoRequestSchema } from './cargo.schema';
-import * as cargoService from './cargo.service';
-import { requireAuth, requireRole } from '../../middleware/auth';
-import { HttpError } from '../../middleware/errorHandler';
+import { createCargoRequestSchema } from './cargo.schema.js';
+import * as cargoService from './cargo.service.js';
+import { requireAuth, requireRole } from '../../middleware/auth.js';
+import { HttpError } from '../../middleware/errorHandler.js';
 
 export const cargoRouter = Router();
 

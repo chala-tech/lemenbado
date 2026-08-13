@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { createAvailabilitySchema } from './availability.schema';
-import * as availabilityService from './availability.service';
-import { requireAuth, requireRole } from '../../middleware/auth';
-import { HttpError } from '../../middleware/errorHandler';
+import { createAvailabilitySchema } from './availability.schema.js';
+import * as availabilityService from './availability.service.js';
+import { requireAuth, requireRole } from '../../middleware/auth.js';
+import { HttpError } from '../../middleware/errorHandler.js';
 
 export const availabilityRouter = Router();
 

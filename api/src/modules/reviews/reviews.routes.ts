@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import * as reviewsService from './reviews.service';
-import { requireAuth } from '../../middleware/auth';
-import { HttpError } from '../../middleware/errorHandler';
+import * as reviewsService from './reviews.service.js';
+import { requireAuth } from '../../middleware/auth.js';
+import { HttpError } from '../../middleware/errorHandler.js';
 
 export const reviewsRouter = Router();
 

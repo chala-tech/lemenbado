@@ -1,5 +1,5 @@
-import { prisma } from '../../lib/prisma';
-import { HttpError } from '../../middleware/errorHandler';
+import { prisma } from '../../lib/prisma.js';
+import { HttpError } from '../../middleware/errorHandler.js';
 
 // no "create your business" flow yet — auto-provision one the first
 // time a cargo owner posts a request, so this isn't blocked on that
