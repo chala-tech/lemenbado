@@ -26,7 +26,6 @@
 <body>
   <div class="app-shell">
 
-    <!-- nav (logged-out) -->
     <header class="nav">
       <div class="container nav__inner">
         <a href="../index.html" class="nav__logo">
@@ -50,14 +49,14 @@
         <div class="page-header">
           <span class="hero__eyebrow">Welcome back</span>
           <h1>Log in to Lemenbado</h1>
-          <p class="page-header__subtitle">Enter your phone number and password to continue.</p>
+          <p class="page-header__subtitle">Enter your email and password to continue.</p>
         </div>
 
         <form class="form" id="login-form" novalidate>
 
           <div class="field">
-            <label class="field__label" for="phone">Phone number</label>
-            <input class="input" type="tel" id="phone" name="phone" placeholder="e.g. 09xx xxx xxx" required />
+            <label class="field__label" for="email">Email</label>
+            <input class="input" type="email" id="email" name="email" placeholder="you@example.com" required />
           </div>
 
           <div class="field">
@@ -66,7 +65,7 @@
           </div>
 
           <div class="form__actions">
-            <button class="btn btn--primary btn--full" type="submit">Log in</button>
+            <button class="btn btn--primary btn--full" type="submit" id="submit-btn">Log in</button>
           </div>
         </form>
 
@@ -84,25 +83,32 @@
 
   </div>
 
+  <script src="../js/app.js"></script>
   <script>
-    // mock auth, no real password check — if a session already exists
-    // for this phone, reuse it; otherwise create a placeholder user
+    const form = document.getElementById('login-form');
+    const submitBtn = document.getElementById('submit-btn');
 
-    document.getElementById('login-form').addEventListener('submit', (event) => {
+    form.addEventListener('submit', async (event) => {
       event.preventDefault();
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Logging in…';
 
-      const phone = document.getElementById('phone').value;
-      const existing = JSON.parse(localStorage.getItem('lemenbado_session') || 'null');
+      try {
+        const result = await apiFetch('/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+          }),
+        });
 
-      const user = existing && existing.user.phone === phone
-        ? existing.user
-        : { id: 'usr_' + Date.now(), name: 'Truck Owner', phone, role: 'TRUCK_OWNER' };
-
-      // mock token — real /api/auth/login returns a signed JWT here
-      const session = { token: 'mock-jwt-' + user.id, user };
-
-      localStorage.setItem('lemenbado_session', JSON.stringify(session));
-      window.location.href = 'dashboard.html';
+        Session.set({ token: result.token, user: result.user });
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        showFormError(form, err.message || 'Login failed. Check your email and password.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Log in';
+      }
     });
   </script>
 </body>
