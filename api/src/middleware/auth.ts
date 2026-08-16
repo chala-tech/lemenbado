@@ -28,10 +28,21 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
       return next(new HttpError(401, 'Invalid or expired token'));
     }
 
+
+    const { data: profile, error: profileError } = await supabase
+      .from('users')
+      .select('role, name')
+      .eq('id', data.user.id)
+      .single();
+
+    if (profileError || !profile) {
+      return next(new HttpError(401, 'User profile not found'));
+    }
+
     req.auth = {
       userId: data.user.id,
-      role: (data.user.app_metadata?.role as string) || 'USER',
-      name: (data.user.user_metadata?.name as string) || data.user.email?.split('@')[0] || 'User',
+      role: profile.role,
+      name: profile.name || data.user.email?.split('@')[0] || 'User',
     };
 
     return next();

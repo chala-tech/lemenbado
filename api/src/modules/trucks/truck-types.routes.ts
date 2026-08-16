@@ -1,12 +1,13 @@
 import { Router } from 'express';
-import { prisma } from '../../lib/prisma.js';
+import { supabase } from '../../lib/supabase.js';
 
 export const truckTypesRouter = Router();
 
 truckTypesRouter.get('/', async (_req, res, next) => {
   try {
-    const truckTypes = await prisma.truckType.findMany({ orderBy: { name: 'asc' } });
-    res.json(truckTypes);
+    const { data, error } = await supabase.from('truck_types').select('*').order('name', { ascending: true });
+    if (error) throw error;
+    res.json(data);
   } catch (err) {
     next(err);
   }

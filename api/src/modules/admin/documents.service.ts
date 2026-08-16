@@ -1,4 +1,4 @@
-import { prisma } from '../../lib/prisma.js';
+import { supabase } from '../../lib/supabase.js';
 import { HttpError } from '../../middleware/errorHandler.js';
 
 interface SubmitDocumentInput {
@@ -8,26 +8,39 @@ interface SubmitDocumentInput {
 }
 
 export async function submitDocument(input: SubmitDocumentInput) {
-  return prisma.document.create({
-    data: { userId: input.userId, type: input.type, fileUrl: input.fileUrl, status: 'PENDING' },
-  });
+  const { data, error } = await supabase
+    .from('documents')
+    .insert({ user_id: input.userId, type: input.type, file_url: input.fileUrl, status: 'PENDING' })
+    .select()
+    .single();
+
+  if (error) throw new HttpError(500, error.message);
+  return data;
 }
 
 export async function listPendingDocuments() {
-  return prisma.document.findMany({
-    where: { status: 'PENDING' },
-    include: { user: { select: { id: true, name: true, phone: true, role: true } } },
-    orderBy: { createdAt: 'asc' },
-  });
+  const { data, error } = await supabase
+    .from('documents')
+    .select('*, user:users(id, name, email, role)')
+    .eq('status', 'PENDING')
+    .order('created_at', { ascending: true });
+
+  if (error) throw new HttpError(500, error.message);
+  return data;
 }
 
 export async function decideDocument(documentId: string, adminId: string, outcome: 'VERIFIED' | 'REJECTED') {
-  const document = await prisma.document.findUnique({ where: { id: documentId } });
-  if (!document) throw new HttpError(404, 'Document not found');
+  const { data: document, error } = await supabase.from('documents').select('*').eq('id', documentId).single();
+  if (error || !document) throw new HttpError(404, 'Document not found');
 
-  await prisma.document.update({ where: { id: documentId }, data: { status: outcome } });
+  await supabase.from('documents').update({ status: outcome }).eq('id', documentId);
 
-  return prisma.verification.create({
-    data: { documentId, verifiedById: adminId, outcome },
-  });
+  const { data, error: verifyError } = await supabase
+    .from('verifications')
+    .insert({ document_id: documentId, verified_by_id: adminId, outcome })
+    .select()
+    .single();
+
+  if (verifyError) throw new HttpError(500, verifyError.message);
+  return data;
 }

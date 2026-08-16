@@ -1,6 +1,5 @@
-import { prisma } from '../../lib/prisma.js';
+import { supabase } from '../../lib/supabase.js';
 import { HttpError } from '../../middleware/errorHandler.js';
-
 
 const ALLOWED_TRANSITIONS: Record<string, string[]> = {
   REQUESTED: ['ACCEPTED', 'REJECTED', 'CANCELLED'],
@@ -19,9 +18,9 @@ interface CreateBookingInput {
 }
 
 export async function createBooking(input: CreateBookingInput) {
-  const [availability, cargoRequest] = await Promise.all([
-    prisma.truckAvailability.findUnique({ where: { id: input.truckAvailabilityId } }),
-    prisma.cargoRequest.findUnique({ where: { id: input.cargoRequestId } }),
+  const [{ data: availability }, { data: cargoRequest }] = await Promise.all([
+    supabase.from('truck_availability').select('*').eq('id', input.truckAvailabilityId).single(),
+    supabase.from('cargo_requests').select('*').eq('id', input.cargoRequestId).single(),
   ]);
 
   if (!availability) throw new HttpError(404, 'Truck availability not found');
@@ -29,53 +28,74 @@ export async function createBooking(input: CreateBookingInput) {
   if (availability.status !== 'OPEN') throw new HttpError(400, 'This truck availability is no longer open');
   if (cargoRequest.status !== 'OPEN') throw new HttpError(400, 'This cargo request is no longer open');
 
-  return prisma.booking.create({
-    data: {
-      truckAvailabilityId: input.truckAvailabilityId,
-      cargoRequestId: input.cargoRequestId,
-      requestedByUserId: input.requestedByUserId,
+  const { data, error } = await supabase
+    .from('bookings')
+    .insert({
+      truck_availability_id: input.truckAvailabilityId,
+      cargo_request_id: input.cargoRequestId,
+      requested_by_user_id: input.requestedByUserId,
       status: 'REQUESTED',
-    },
-    include: { truckAvailability: true, cargoRequest: true },
-  });
+    })
+    .select('*, truck_availability(*), cargo_request:cargo_requests(*)')
+    .single();
+
+  if (error) throw new HttpError(500, error.message);
+  return data;
 }
 
 export async function listMyBookings(userId: string) {
-  // a booking is "mine" if I own the truck, or I'm in the business that owns the cargo
-  const [ownedTruckIds, businessIds] = await Promise.all([
-    prisma.truck.findMany({ where: { ownerId: userId }, select: { id: true } }),
-    prisma.businessMember.findMany({ where: { userId }, select: { businessId: true } }),
+  const [{ data: trucks }, { data: memberships }] = await Promise.all([
+    supabase.from('trucks').select('id').eq('owner_id', userId),
+    supabase.from('business_members').select('business_id').eq('user_id', userId),
   ]);
 
-  return prisma.booking.findMany({
-    where: {
-      OR: [
-        { truckAvailability: { truckId: { in: ownedTruckIds.map((t) => t.id) } } },
-        { cargoRequest: { businessId: { in: businessIds.map((b) => b.businessId) } } },
-      ],
-    },
-    include: {
-      truckAvailability: { include: { originCity: true, destCity: true, truck: true } },
-      cargoRequest: { include: { originCity: true, destCity: true, cargoType: true } },
-    },
-    orderBy: { createdAt: 'desc' },
-  });
+  const truckIds = (trucks || []).map((t) => t.id);
+  const businessIds = (memberships || []).map((m) => m.business_id);
+
+  const [byTruck, byBusiness] = await Promise.all([
+    truckIds.length
+      ? supabase
+          .from('bookings')
+          .select(`
+            *,
+            truck_availability:truck_availability!inner(*, origin_city:cities!fk_availability_origin(*), dest_city:cities!fk_availability_destination(*), truck:trucks!inner(*)),
+            cargo_request:cargo_requests(*, origin_city:cities!fk_cargo_origin(*), dest_city:cities!fk_cargo_destination(*), cargo_type:cargo_types(*))
+          `)
+          .in('truck_availability.truck_id', truckIds)
+      : Promise.resolve({ data: [] as any[] }),
+    businessIds.length
+      ? supabase
+          .from('bookings')
+          .select(`
+            *,
+            truck_availability:truck_availability(*, origin_city:cities!fk_availability_origin(*), dest_city:cities!fk_availability_destination(*), truck:trucks(*)),
+            cargo_request:cargo_requests!inner(*, origin_city:cities!fk_cargo_origin(*), dest_city:cities!fk_cargo_destination(*), cargo_type:cargo_types(*))
+          `)
+          .in('cargo_request.business_id', businessIds)
+      : Promise.resolve({ data: [] as any[] }),
+  ]);
+
+  const merged = [...(byTruck.data || []), ...(byBusiness.data || [])];
+  const unique = Array.from(new Map(merged.map((b) => [b.id, b])).values());
+  return unique.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 }
 
 async function assertParticipant(bookingId: string, userId: string) {
-  const booking = await prisma.booking.findUnique({
-    where: { id: bookingId },
-    include: {
-      truckAvailability: { include: { truck: true } },
-      cargoRequest: true,
-    },
-  });
-  if (!booking) throw new HttpError(404, 'Booking not found');
+  const { data: booking, error } = await supabase
+    .from('bookings')
+    .select('*, truck_availability(*, truck:trucks(*)), cargo_request:cargo_requests(*)')
+    .eq('id', bookingId)
+    .single();
 
-  const ownsTruck = booking.truckAvailability.truck.ownerId === userId;
-  const inCargoBusiness = await prisma.businessMember.findFirst({
-    where: { userId, businessId: booking.cargoRequest.businessId },
-  });
+  if (error || !booking) throw new HttpError(404, 'Booking not found');
+
+  const ownsTruck = booking.truck_availability.truck.owner_id === userId;
+  const { data: inCargoBusiness } = await supabase
+    .from('business_members')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('business_id', booking.cargo_request.business_id)
+    .maybeSingle();
 
   if (!ownsTruck && !inCargoBusiness) throw new HttpError(403, 'Not a participant in this booking');
   return booking;
@@ -90,26 +110,25 @@ export async function updateBookingStatus(bookingId: string, userId: string, new
   }
 
   const timestamps: Record<string, object> = {
-    ACCEPTED: { acceptedAt: new Date() },
-    REJECTED: { rejectedAt: new Date() },
-    COMPLETED: { completedAt: new Date() },
+    ACCEPTED: { accepted_at: new Date().toISOString() },
+    REJECTED: { rejected_at: new Date().toISOString() },
+    COMPLETED: { completed_at: new Date().toISOString() },
   };
 
-  const updated = await prisma.booking.update({
-    where: { id: bookingId },
-    data: { status: newStatus as any, ...(timestamps[newStatus] || {}) },
-  });
+  const { data: updated, error } = await supabase
+    .from('bookings')
+    .update({ status: newStatus, ...(timestamps[newStatus] || {}) })
+    .eq('id', bookingId)
+    .select()
+    .single();
 
-  // once accepted, the underlying listings are no longer open to other matches
+  if (error) throw new HttpError(500, error.message);
+
   if (newStatus === 'ACCEPTED') {
-    await prisma.truckAvailability.update({
-      where: { id: booking.truckAvailabilityId },
-      data: { status: 'BOOKED' },
-    });
-    await prisma.cargoRequest.update({
-      where: { id: booking.cargoRequestId },
-      data: { status: 'BOOKED' },
-    });
+    await Promise.all([
+      supabase.from('truck_availability').update({ status: 'BOOKED' }).eq('id', booking.truck_availability_id),
+      supabase.from('cargo_requests').update({ status: 'BOOKED' }).eq('id', booking.cargo_request_id),
+    ]);
   }
 
   return updated;

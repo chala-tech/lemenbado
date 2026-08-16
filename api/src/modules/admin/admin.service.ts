@@ -1,35 +1,49 @@
-import { prisma } from '../../lib/prisma.js';
+import { supabase } from '../../lib/supabase.js';
 import { HttpError } from '../../middleware/errorHandler.js';
 
 export async function listUsers() {
-  return prisma.user.findMany({
-    select: { id: true, name: true, phone: true, role: true, createdAt: true },
-    orderBy: { createdAt: 'desc' },
-  });
+  const { data, error } = await supabase
+    .from('users')
+    .select('id, name, email, role, created_at')
+    .order('created_at', { ascending: false });
+
+  if (error) throw new HttpError(500, error.message);
+  return data;
 }
 
 export async function suspendListing(type: 'truck-availability' | 'cargo-request', id: string) {
-  if (type === 'truck-availability') {
-    const existing = await prisma.truckAvailability.findUnique({ where: { id } });
-    if (!existing) throw new HttpError(404, 'Availability not found');
-    return prisma.truckAvailability.update({ where: { id }, data: { status: 'CANCELLED' } });
-  }
+  const table = type === 'truck-availability' ? 'truck_availability' : 'cargo_requests';
 
-  const existing = await prisma.cargoRequest.findUnique({ where: { id } });
-  if (!existing) throw new HttpError(404, 'Cargo request not found');
-  return prisma.cargoRequest.update({ where: { id }, data: { status: 'CANCELLED' } });
+  const { data: existing } = await supabase.from(table).select('id').eq('id', id).maybeSingle();
+  if (!existing) throw new HttpError(404, `${type === 'truck-availability' ? 'Availability' : 'Cargo request'} not found`);
+
+  const { data, error } = await supabase.from(table).update({ status: 'CANCELLED' }).eq('id', id).select().single();
+  if (error) throw new HttpError(500, error.message);
+  return data;
 }
 
 export async function listAllListings() {
-  const [availabilities, cargoRequests] = await Promise.all([
-    prisma.truckAvailability.findMany({
-      include: { originCity: true, destCity: true, truck: { include: { owner: true } } },
-      orderBy: { createdAt: 'desc' },
-    }),
-    prisma.cargoRequest.findMany({
-      include: { originCity: true, destCity: true, business: true },
-      orderBy: { createdAt: 'desc' },
-    }),
+  const [{ data: availabilities, error: avError }, { data: cargoRequests, error: cgError }] = await Promise.all([
+    supabase
+      .from('truck_availability')
+      .select(`
+        *,
+        origin_city:cities!fk_availability_origin(*),
+        dest_city:cities!fk_availability_destination(*),
+        truck:trucks(*, owner:users(*))
+      `)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('cargo_requests')
+      .select(`
+        *,
+        origin_city:cities!fk_cargo_origin(*),
+        dest_city:cities!fk_cargo_destination(*),
+        business:businesses(*)
+      `)
+      .order('created_at', { ascending: false }),
   ]);
+
+  if (avError || cgError) throw new HttpError(500, (avError || cgError)!.message);
   return { availabilities, cargoRequests };
 }
