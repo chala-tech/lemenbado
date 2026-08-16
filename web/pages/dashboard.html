@@ -26,7 +26,6 @@
 <body>
   <div class="app-shell">
 
-    <!-- nav -->
     <header class="nav">
       <div class="container nav__inner">
         <a href="../index.html" class="nav__logo">
@@ -56,126 +55,51 @@
     <main class="container page">
 
       <div class="page-header">
-        <span class="hero__eyebrow" id="role-label">Truck owner</span>
+        <span class="hero__eyebrow" id="role-label">—</span>
         <h1 id="welcome-heading">Welcome back</h1>
-        <p class="page-header__subtitle">
-          Here's what's moving on your routes right now.
-        </p>
+        <p class="page-header__subtitle">Here's what's moving on your routes right now.</p>
       </div>
 
-      <!-- stats -->
-      <div class="stat-grid">
+      <div class="stat-grid" id="stat-grid">
         <div class="card">
-          <div class="stat-card__value data">3</div>
-          <div class="stat-card__label">Active availabilities</div>
+          <div class="stat-card__value data" id="stat-active">—</div>
+          <div class="stat-card__label" id="stat-active-label">Active</div>
         </div>
         <div class="card">
-          <div class="stat-card__value data">2</div>
+          <div class="stat-card__value data" id="stat-matches">—</div>
           <div class="stat-card__label">New matches</div>
         </div>
         <div class="card">
-          <div class="stat-card__value data">1</div>
+          <div class="stat-card__value data" id="stat-pending">—</div>
           <div class="stat-card__label">Pending bookings</div>
         </div>
         <div class="card">
-          <div class="stat-card__value data">12</div>
+          <div class="stat-card__value data" id="stat-completed">—</div>
           <div class="stat-card__label">Completed deliveries</div>
         </div>
       </div>
 
-      <!-- quick actions -->
-      <div class="hero__actions" style="margin-bottom: var(--space-8);">
-        <a class="btn btn--primary" href="publish-availability.html">Publish availability</a>
-        <a class="btn btn--ghost" href="post-cargo.html">Post a cargo request</a>
-      </div>
+      <div class="hero__actions" style="margin-bottom: var(--space-8);" id="quick-actions"></div>
 
-      <!-- new matches -->
       <section aria-labelledby="matches-heading" style="margin-bottom: var(--space-8);">
         <div class="section-head">
           <h2 id="matches-heading" class="corridors__heading" style="margin-bottom:0;">New matches for you</h2>
           <a class="section-head__link" href="matches.html">See all matches</a>
         </div>
-
-        <div style="display: flex; flex-direction: column; gap: var(--space-4);">
-          <div class="card avail-card">
-            <div class="avail-card__top">
-              <span class="avail-card__route">
-                Addis Ababa <span class="avail-card__route-arrow">→</span> Hawassa
-              </span>
-              <span class="badge badge--signal">Exact match</span>
-            </div>
-            <div class="avail-card__meta">
-              <span class="data">3,000 kg · general goods</span>
-              <span class="data">Needed by Aug 6</span>
-              <span>Cargo: Bekele Trading PLC</span>
-            </div>
-            <div class="avail-card__actions">
-              <a class="btn btn--primary btn--sm" href="matches.html">Request booking</a>
-              <a class="btn btn--ghost btn--sm" href="matches.html">View details</a>
-            </div>
-          </div>
-
-          <div class="card avail-card">
-            <div class="avail-card__top">
-              <span class="avail-card__route">
-                Addis Ababa <span class="avail-card__route-arrow">→</span> Bahir Dar
-              </span>
-              <span class="badge badge--wait">Nearby match</span>
-            </div>
-            <div class="avail-card__meta">
-              <span class="data">1,800 kg · construction material</span>
-              <span class="data">Needed by Aug 11</span>
-              <span>Cargo: Selam Hardware</span>
-            </div>
-            <div class="avail-card__actions">
-              <a class="btn btn--primary btn--sm" href="matches.html">Request booking</a>
-              <a class="btn btn--ghost btn--sm" href="matches.html">View details</a>
-            </div>
-          </div>
+        <div id="matches-list" style="display: flex; flex-direction: column; gap: var(--space-4);"></div>
+        <div class="card" id="matches-empty" style="display:none; text-align:center; color: var(--color-ink-faint);">
+          No matches yet — publish availability or post cargo to start matching.
         </div>
       </section>
 
-      <!-- recent bookings -->
       <section aria-labelledby="bookings-heading">
         <div class="section-head">
           <h2 id="bookings-heading" class="corridors__heading" style="margin-bottom:0;">Recent bookings</h2>
           <a class="section-head__link" href="bookings.html">See all bookings</a>
         </div>
-
-        <div style="display: flex; flex-direction: column; gap: var(--space-4);">
-          <div class="card avail-card">
-            <div class="avail-card__top">
-              <span class="avail-card__route">
-                Addis Ababa <span class="avail-card__route-arrow">→</span> Adama
-              </span>
-              <span class="badge badge--wait">In transit</span>
-            </div>
-            <div class="avail-card__meta">
-              <span class="data">2,000 kg</span>
-              <span class="data">Picked up Aug 5, 14:20</span>
-              <span>Cargo: Nib Import Export</span>
-            </div>
-            <div class="avail-card__actions">
-              <a class="btn btn--ghost btn--sm" href="booking-detail.html?id=bk_1">View booking</a>
-            </div>
-          </div>
-
-          <div class="card avail-card">
-            <div class="avail-card__top">
-              <span class="avail-card__route">
-                Hawassa <span class="avail-card__route-arrow">→</span> Addis Ababa
-              </span>
-              <span class="badge badge--signal">Completed</span>
-            </div>
-            <div class="avail-card__meta">
-              <span class="data">4,500 kg</span>
-              <span class="data">Delivered Jul 30</span>
-              <span>Cargo: Bekele Trading PLC</span>
-            </div>
-            <div class="avail-card__actions">
-              <a class="btn btn--ghost btn--sm" href="booking-detail.html?id=bk_2">View booking</a>
-            </div>
-          </div>
+        <div id="bookings-list" style="display: flex; flex-direction: column; gap: var(--space-4);"></div>
+        <div class="card" id="bookings-empty" style="display:none; text-align:center; color: var(--color-ink-faint);">
+          No bookings yet.
         </div>
       </section>
 
@@ -190,35 +114,192 @@
 
   </div>
 
+  <script src="../js/app.js"></script>
   <script>
-    // reads the mock session from login.html / register.html —
-    // guard + greeting logic, repeated per page until js/app.js exists
+    const STATUS_BADGE = {
+      REQUESTED: 'badge--wait', ACCEPTED: 'badge--wait', IN_TRANSIT: 'badge--wait',
+      DELIVERED: 'badge--wait', COMPLETED: 'badge--signal', CANCELLED: 'badge--alert',
+      REJECTED: 'badge--alert', OPEN: 'badge--signal', BOOKED: 'badge--wait',
+      EXPIRED: 'badge--alert', MATCHED: 'badge--wait',
+    };
+    const STATUS_LABEL = {
+      REQUESTED: 'Requested', ACCEPTED: 'Accepted', IN_TRANSIT: 'In transit',
+      DELIVERED: 'Delivered', COMPLETED: 'Completed', CANCELLED: 'Cancelled', REJECTED: 'Rejected',
+    };
 
-    const session = JSON.parse(localStorage.getItem('lemenbado_session') || 'null');
-    const user = session ? session.user : null;
+    function cityName(city) {
+      return city ? city.name : '—';
+    }
 
-    if (!user) {
-      window.location.href = 'login.html';
-    } else {
-      const firstName = user.name ? user.name.split(' ')[0] : 'there';
-      document.getElementById('welcome-heading').textContent = `Welcome back, ${firstName}`;
-      document.getElementById('role-label').textContent =
-        user.role === 'CARGO_OWNER' ? 'Cargo owner' : 'Truck owner';
+    function fmtDate(value) {
+      if (!value) return '—';
+      return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
 
-      const initials = (user.name || 'U')
-        .split(' ')
-        .map((part) => part[0])
-        .join('')
-        .slice(0, 2)
-        .toUpperCase();
-      document.getElementById('nav-avatar').textContent = initials;
+    async function init() {
+      const user = requireSession();
+      if (!user) return;
 
-      document.getElementById('logout-link').addEventListener('click', (event) => {
-        event.preventDefault();
-        localStorage.removeItem('lemenbado_session');
-        window.location.href = '../index.html';
+      document.getElementById('role-label').textContent = user.role === 'CARGO_OWNER' ? 'Cargo owner' : 'Truck owner';
+      document.getElementById('welcome-heading').textContent = `Welcome back, ${(user.name || 'there').split(' ')[0]}`;
+      document.getElementById('nav-avatar').textContent = (user.name || 'U').split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+
+      const actions = document.getElementById('quick-actions');
+      if (user.role === 'TRUCK_OWNER') {
+        actions.innerHTML = `<a class="btn btn--primary" href="publish-availability.html">Publish availability</a>`;
+      } else {
+        actions.innerHTML = `<a class="btn btn--primary" href="post-cargo.html">Post a cargo request</a>`;
+      }
+
+      try {
+        if (user.role === 'TRUCK_OWNER') {
+          await loadTruckOwnerData();
+        } else {
+          await loadCargoOwnerData();
+        }
+        await loadBookings();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadTruckOwnerData() {
+      document.getElementById('stat-active-label').textContent = 'Active availabilities';
+      const availabilities = await apiFetch('/truck-availability');
+      const active = availabilities.filter(a => a.status === 'OPEN');
+      document.getElementById('stat-active').textContent = active.length;
+
+      const sample = active.slice(0, 5);
+      const matchGroups = await Promise.all(
+        sample.map(a => apiFetch(`/matches?truckAvailabilityId=${a.id}`).then(matches => ({ availability: a, matches })).catch(() => ({ availability: a, matches: [] })))
+      );
+
+      let totalMatches = 0;
+      const cards = [];
+      matchGroups.forEach(({ availability, matches }) => {
+        totalMatches += matches.length;
+        matches.slice(0, 3).forEach((cargo) => {
+          cards.push(`
+            <div class="card avail-card">
+              <div class="avail-card__top">
+                <span class="avail-card__route">${cityName(cargo.origin_city)} <span class="avail-card__route-arrow">→</span> ${cityName(cargo.dest_city)}</span>
+                <span class="badge badge--signal">Exact match</span>
+              </div>
+              <div class="avail-card__meta">
+                <span class="data">${Number(cargo.weight_kg).toLocaleString()} kg${cargo.cargo_type ? ' · ' + cargo.cargo_type.name : ''}</span>
+                <span class="data">Needed by ${fmtDate(cargo.required_date)}</span>
+              </div>
+              <div class="avail-card__actions">
+                <button class="btn btn--primary btn--sm" data-book data-truck="${availability.id}" data-cargo="${cargo.id}">Request booking</button>
+              </div>
+            </div>
+          `);
+        });
+      });
+
+      document.getElementById('stat-matches').textContent = totalMatches;
+      document.getElementById('matches-list').innerHTML = cards.join('');
+      document.getElementById('matches-empty').style.display = cards.length === 0 ? 'block' : 'none';
+      wireBookingButtons();
+    }
+
+    async function loadCargoOwnerData() {
+      document.getElementById('stat-active-label').textContent = 'Active cargo requests';
+      const requests = await apiFetch('/cargo');
+      const active = requests.filter(c => c.status === 'OPEN');
+      document.getElementById('stat-active').textContent = active.length;
+
+      const sample = active.slice(0, 5);
+      const matchGroups = await Promise.all(
+        sample.map(c => apiFetch(`/matches?cargoRequestId=${c.id}`).then(matches => ({ cargo: c, matches })).catch(() => ({ cargo: c, matches: [] })))
+      );
+
+      let totalMatches = 0;
+      const cards = [];
+      matchGroups.forEach(({ cargo, matches }) => {
+        totalMatches += matches.length;
+        matches.slice(0, 3).forEach((availability) => {
+          cards.push(`
+            <div class="card avail-card">
+              <div class="avail-card__top">
+                <span class="avail-card__route">${cityName(availability.origin_city)} <span class="avail-card__route-arrow">→</span> ${cityName(availability.dest_city)}</span>
+                <span class="badge badge--signal">Exact match</span>
+              </div>
+              <div class="avail-card__meta">
+                <span class="data">${Number(availability.available_capacity_kg).toLocaleString()} kg free</span>
+                <span>${availability.truck ? availability.truck.plate_number : ''}</span>
+              </div>
+              <div class="avail-card__actions">
+                <button class="btn btn--primary btn--sm" data-book data-truck="${availability.id}" data-cargo="${cargo.id}">Request booking</button>
+              </div>
+            </div>
+          `);
+        });
+      });
+
+      document.getElementById('stat-matches').textContent = totalMatches;
+      document.getElementById('matches-list').innerHTML = cards.join('');
+      document.getElementById('matches-empty').style.display = cards.length === 0 ? 'block' : 'none';
+      wireBookingButtons();
+    }
+
+    function wireBookingButtons() {
+      document.querySelectorAll('[data-book]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          btn.disabled = true;
+          btn.textContent = 'Requesting…';
+          try {
+            await apiFetch('/bookings', {
+              method: 'POST',
+              body: JSON.stringify({
+                truckAvailabilityId: btn.dataset.truck,
+                cargoRequestId: btn.dataset.cargo,
+              }),
+            });
+            window.location.href = 'bookings.html';
+          } catch (err) {
+            alert(err.message || 'Could not request this booking.');
+            btn.disabled = false;
+            btn.textContent = 'Request booking';
+          }
+        });
       });
     }
+
+    async function loadBookings() {
+      const bookings = await apiFetch('/bookings');
+
+      const pending = bookings.filter(b => ['REQUESTED', 'ACCEPTED', 'IN_TRANSIT', 'DELIVERED'].includes(b.status));
+      const completed = bookings.filter(b => b.status === 'COMPLETED');
+      document.getElementById('stat-pending').textContent = pending.length;
+      document.getElementById('stat-completed').textContent = completed.length;
+
+      const recent = bookings.slice(0, 3);
+      document.getElementById('bookings-list').innerHTML = recent.map((b) => {
+        const origin = cityName(b.truck_availability?.origin_city);
+        const dest = cityName(b.truck_availability?.dest_city);
+        const weight = b.cargo_request ? Number(b.cargo_request.weight_kg).toLocaleString() + ' kg' : '';
+        return `
+          <div class="card avail-card">
+            <div class="avail-card__top">
+              <span class="avail-card__route">${origin} <span class="avail-card__route-arrow">→</span> ${dest}</span>
+              <span class="badge ${STATUS_BADGE[b.status] || 'badge--wait'}">${STATUS_LABEL[b.status] || b.status}</span>
+            </div>
+            <div class="avail-card__meta">
+              <span class="data">${weight}</span>
+              <span class="data">${fmtDate(b.created_at)}</span>
+            </div>
+            <div class="avail-card__actions">
+              <a class="btn btn--ghost btn--sm" href="booking-detail.html?id=${b.id}">View booking</a>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('bookings-empty').style.display = recent.length === 0 ? 'block' : 'none';
+    }
+
+    init();
   </script>
 </body>
 </html>
