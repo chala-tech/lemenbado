@@ -26,7 +26,6 @@
 <body>
   <div class="app-shell">
 
-    <!-- nav -->
     <header class="nav">
       <div class="container nav__inner">
         <a href="../index.html" class="nav__logo">
@@ -48,7 +47,7 @@
 
         <div class="nav__actions">
           <a class="btn btn--ghost btn--sm" href="#" id="logout-link">Log out</a>
-          <a class="nav__avatar" href="profile.html" aria-label="Your profile">TO</a>
+          <a class="nav__avatar" href="profile.html" id="nav-avatar" aria-label="Your profile">--</a>
         </div>
       </div>
     </header>
@@ -64,9 +63,43 @@
         </p>
       </div>
 
-      <div class="split split--form">
+      <div class="card" id="no-truck-notice" style="display:none; margin-bottom: var(--space-6);">
+        <p class="field__label" style="margin-bottom: var(--space-2);">You need a truck first</p>
+        <p class="field__hint" style="margin-bottom: var(--space-4);">Add your truck's plate number, type, and max capacity before publishing a route.</p>
+        <button class="btn btn--primary btn--sm" type="button" id="show-truck-form">+ Add a truck</button>
+      </div>
 
-        <!-- form -->
+      <form class="form card" id="truck-form" style="display:none; margin-bottom: var(--space-6);" novalidate>
+        <p class="field__label" style="margin-bottom: 0;">Add a truck</p>
+
+        <div class="form__grid form__grid--2">
+          <div class="field">
+            <label class="field__label" for="truck-type">Truck type</label>
+            <div class="select-wrap">
+              <select class="select" id="truck-type" name="truck-type" required>
+                <option value="" selected disabled>Select type</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field__label" for="plate-number">Plate number</label>
+            <input class="input" type="text" id="plate-number" name="plate-number" placeholder="e.g. AA-12345" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="max-capacity">Max capacity (kg)</label>
+          <input class="input" type="number" id="max-capacity" name="max-capacity" min="1" step="1" placeholder="e.g. 8000" required />
+        </div>
+
+        <div class="form__actions">
+          <button class="btn btn--primary btn--sm" type="submit">Add truck</button>
+          <button class="btn btn--ghost btn--sm" type="button" id="cancel-truck-form">Cancel</button>
+        </div>
+      </form>
+
+      <div class="split split--form" id="availability-section" style="display:none;">
+
         <form class="form card" id="availability-form" novalidate>
 
           <div class="field">
@@ -74,11 +107,9 @@
             <div class="select-wrap">
               <select class="select" id="truck" name="truck" required>
                 <option value="" selected disabled>Select a truck</option>
-                <option value="truck-1" data-capacity="8000">Isuzu FRR — Plate AA-12345 (max 8,000 kg)</option>
-                <option value="truck-2" data-capacity="15000">Sino Howo — Plate OR-98765 (max 15,000 kg)</option>
               </select>
             </div>
-            <a class="field__link" href="dashboard.html#trucks">+ Add a new truck</a>
+            <a class="field__link" href="#" id="add-another-truck">+ Add another truck</a>
           </div>
 
           <div class="form__grid form__grid--2">
@@ -87,44 +118,16 @@
               <div class="select-wrap">
                 <select class="select" id="origin" name="origin" required>
                   <option value="" selected disabled>Select origin</option>
-                  <option value="1">Addis Ababa</option>
-                  <option value="2">Adama</option>
-                  <option value="3">Hawassa</option>
-                  <option value="4">Bahir Dar</option>
-                  <option value="5">Mekelle</option>
-                  <option value="6">Dire Dawa</option>
-                  <option value="7">Jimma</option>
-                  <option value="8">Gondar</option>
-                  <option value="9">Dessie</option>
-                  <option value="10">Debre Birhan</option>
-                  <option value="11">Shashemene</option>
-                  <option value="12">Arba Minch</option>
-                  <option value="13">Nekemte</option>
-                  <option value="14">Woldiya</option>
                 </select>
               </div>
               <p class="field__error" id="origin-error">Origin and destination can't be the same city.</p>
             </div>
 
-            <div class="field" id="destination-field">
+            <div class="field">
               <label class="field__label" for="destination">Destination city</label>
               <div class="select-wrap">
                 <select class="select" id="destination" name="destination" required>
                   <option value="" selected disabled>Select destination</option>
-                  <option value="1">Addis Ababa</option>
-                  <option value="2">Adama</option>
-                  <option value="3">Hawassa</option>
-                  <option value="4">Bahir Dar</option>
-                  <option value="5">Mekelle</option>
-                  <option value="6">Dire Dawa</option>
-                  <option value="7">Jimma</option>
-                  <option value="8">Gondar</option>
-                  <option value="9">Dessie</option>
-                  <option value="10">Debre Birhan</option>
-                  <option value="11">Shashemene</option>
-                  <option value="12">Arba Minch</option>
-                  <option value="13">Nekemte</option>
-                  <option value="14">Woldiya</option>
                 </select>
               </div>
             </div>
@@ -147,18 +150,12 @@
             </div>
           </div>
 
-          <div class="field">
-            <label class="field__label" for="notes">Notes <span class="field__hint">(optional)</span></label>
-            <textarea class="textarea" id="notes" name="notes" placeholder="e.g. Can detour up to 20km, prefer general goods only"></textarea>
-          </div>
-
           <div class="form__actions">
-            <button class="btn btn--primary" type="submit">Publish availability</button>
+            <button class="btn btn--primary" type="submit" id="submit-btn">Publish availability</button>
             <a class="btn btn--ghost" href="dashboard.html">Cancel</a>
           </div>
         </form>
 
-        <!-- live preview -->
         <aside class="panel panel--glow" aria-label="Route preview">
           <div class="panel__content">
             <p class="field__label" style="margin-bottom: var(--space-4);">Preview</p>
@@ -186,64 +183,11 @@
         </aside>
       </div>
 
-      <!-- active availabilities -->
       <section aria-labelledby="active-heading" style="margin-top: var(--space-8);">
         <h2 id="active-heading" class="corridors__heading">Your active availabilities</h2>
-
-        <div style="display: flex; flex-direction: column; gap: var(--space-4);">
-
-          <div class="card avail-card">
-            <div class="avail-card__top">
-              <span class="avail-card__route">
-                Addis Ababa <span class="avail-card__route-arrow">→</span> Hawassa
-              </span>
-              <span class="badge badge--signal">Open</span>
-            </div>
-            <div class="avail-card__meta">
-              <span class="data">5,200 kg available</span>
-              <span class="data">Aug 6, 08:00 – 20:00</span>
-              <span>Isuzu FRR · AA-12345</span>
-            </div>
-            <div class="avail-card__actions">
-              <button class="btn btn--ghost btn--sm" type="button">Edit</button>
-              <button class="btn btn--ghost btn--sm" type="button">Cancel</button>
-            </div>
-          </div>
-
-          <div class="card avail-card">
-            <div class="avail-card__top">
-              <span class="avail-card__route">
-                Addis Ababa <span class="avail-card__route-arrow">→</span> Adama
-              </span>
-              <span class="badge badge--wait">Booked</span>
-            </div>
-            <div class="avail-card__meta">
-              <span class="data">2,000 kg available</span>
-              <span class="data">Aug 5, 14:00 – 18:00</span>
-              <span>Sino Howo · OR-98765</span>
-            </div>
-            <div class="avail-card__actions">
-              <button class="btn btn--ghost btn--sm" type="button">View booking</button>
-            </div>
-          </div>
-
-          <div class="card avail-card">
-            <div class="avail-card__top">
-              <span class="avail-card__route">
-                Addis Ababa <span class="avail-card__route-arrow">→</span> Bahir Dar
-              </span>
-              <span class="badge badge--alert">Expired</span>
-            </div>
-            <div class="avail-card__meta">
-              <span class="data">8,000 kg available</span>
-              <span class="data">Jul 28, 06:00 – 22:00</span>
-              <span>Isuzu FRR · AA-12345</span>
-            </div>
-            <div class="avail-card__actions">
-              <button class="btn btn--ghost btn--sm" type="button">Republish</button>
-            </div>
-          </div>
-
+        <div id="active-list" style="display: flex; flex-direction: column; gap: var(--space-4);"></div>
+        <div class="card" id="active-empty" style="display:none; text-align:center; color: var(--color-ink-faint);">
+          No availabilities published yet.
         </div>
       </section>
 
@@ -258,91 +202,222 @@
 
   </div>
 
+  <script src="../js/app.js"></script>
   <script>
-    // local, page-scoped interactivity for now — once js/app.js is
-    // built, the truck-capacity lookup and formatting helpers below
-    // should move there so every page can share them
+    const STATUS_BADGE = { OPEN: 'badge--signal', BOOKED: 'badge--wait', CANCELLED: 'badge--alert', EXPIRED: 'badge--alert' };
+    const STATUS_LABEL = { OPEN: 'Open', BOOKED: 'Booked', CANCELLED: 'Cancelled', EXPIRED: 'Expired' };
 
-    const truckSelect = document.getElementById('truck');
-    const capacityInput = document.getElementById('capacity');
-    const capacityHint = document.getElementById('capacity-hint');
-    const originSelect = document.getElementById('origin');
-    const destinationSelect = document.getElementById('destination');
-    const originField = document.getElementById('origin-field');
-    const originError = document.getElementById('origin-error');
-    const startInput = document.getElementById('departure-start');
-    const endInput = document.getElementById('departure-end');
+    let myTrucks = [];
 
-    const previewOrigin = document.getElementById('preview-origin');
-    const previewDestination = document.getElementById('preview-destination');
-    const previewCapacity = document.getElementById('preview-capacity');
-    const previewWindow = document.getElementById('preview-window');
-
-    function formatDateTime(value) {
+    function fmtDateTime(value) {
       if (!value) return null;
-      const date = new Date(value);
-      return date.toLocaleString(undefined, {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
+      return new Date(value).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function toIso(localValue) {
+      return new Date(localValue).toISOString();
+    }
+
+    async function init() {
+      const user = requireSession();
+      if (!user) return;
+
+      if (user.role !== 'TRUCK_OWNER') {
+        document.querySelector('main').innerHTML = `
+          <div class="card" style="text-align:center;">
+            <h2>Truck owners only</h2>
+            <p class="page-header__subtitle" style="margin-inline:auto;">This page is for publishing truck availability — you're signed in as a cargo owner.</p>
+            <a class="btn btn--primary" href="dashboard.html" style="margin-top: var(--space-4);">Back to dashboard</a>
+          </div>`;
+        return;
+      }
+
+      document.getElementById('nav-avatar').textContent = (user.name || 'U').split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+
+      const [cities, truckTypes] = await Promise.all([RefData.getCities(), RefData.getTruckTypes()]);
+      populateSelect(document.getElementById('origin'), cities);
+      populateSelect(document.getElementById('destination'), cities);
+      populateSelect(document.getElementById('truck-type'), truckTypes);
+
+      await loadTrucks();
+      await loadAvailabilities();
+      wireForms();
+    }
+
+    async function loadTrucks() {
+      myTrucks = await apiFetch('/trucks');
+      const truckSelect = document.getElementById('truck');
+      truckSelect.innerHTML = '<option value="" selected disabled>Select a truck</option>';
+      myTrucks.forEach((t) => {
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.dataset.capacity = t.max_capacity_kg;
+        opt.textContent = `${t.truck_type ? t.truck_type.name : 'Truck'} — Plate ${t.plate_number} (max ${Number(t.max_capacity_kg).toLocaleString()} kg)`;
+        truckSelect.appendChild(opt);
+      });
+
+      const hasTrucks = myTrucks.length > 0;
+      document.getElementById('no-truck-notice').style.display = hasTrucks ? 'none' : 'block';
+      document.getElementById('availability-section').style.display = hasTrucks ? 'grid' : 'none';
+    }
+
+    function wireForms() {
+      const truckForm = document.getElementById('truck-form');
+      const showBtns = [document.getElementById('show-truck-form'), document.getElementById('add-another-truck')];
+      showBtns.forEach((btn) => btn && btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        truckForm.style.display = 'flex';
+        truckForm.scrollIntoView({ behavior: 'smooth' });
+      }));
+
+      document.getElementById('cancel-truck-form').addEventListener('click', () => {
+        truckForm.style.display = 'none';
+      });
+
+      truckForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const submitBtn = truckForm.querySelector('button[type=submit]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Adding…';
+
+        try {
+          await apiFetch('/trucks', {
+            method: 'POST',
+            body: JSON.stringify({
+              truckTypeId: document.getElementById('truck-type').value,
+              plateNumber: document.getElementById('plate-number').value,
+              maxCapacityKg: Number(document.getElementById('max-capacity').value),
+            }),
+          });
+          truckForm.reset();
+          truckForm.style.display = 'none';
+          await loadTrucks();
+        } catch (err) {
+          showFormError(truckForm, err.message || 'Could not add truck.');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Add truck';
+        }
+      });
+
+      const truckSelect = document.getElementById('truck');
+      const capacityInput = document.getElementById('capacity');
+      const capacityHint = document.getElementById('capacity-hint');
+      const originSelect = document.getElementById('origin');
+      const destinationSelect = document.getElementById('destination');
+      const originField = document.getElementById('origin-field');
+      const originError = document.getElementById('origin-error');
+      const startInput = document.getElementById('departure-start');
+      const endInput = document.getElementById('departure-end');
+
+      const previewOrigin = document.getElementById('preview-origin');
+      const previewDestination = document.getElementById('preview-destination');
+      const previewCapacity = document.getElementById('preview-capacity');
+      const previewWindow = document.getElementById('preview-window');
+
+      function updatePreview() {
+        previewOrigin.textContent = originSelect.selectedOptions[0]?.text || 'Origin';
+        previewDestination.textContent = destinationSelect.selectedOptions[0]?.text || 'Destination';
+        previewCapacity.textContent = capacityInput.value ? `${Number(capacityInput.value).toLocaleString()} kg` : '— kg';
+        const start = fmtDateTime(startInput.value);
+        const end = fmtDateTime(endInput.value);
+        previewWindow.textContent = start && end ? `${start} – ${end}` : 'Departure window not set';
+      }
+
+      truckSelect.addEventListener('change', () => {
+        const selected = truckSelect.selectedOptions[0];
+        const max = selected ? selected.dataset.capacity : null;
+        capacityHint.textContent = max ? `Max for this truck: ${Number(max).toLocaleString()} kg` : 'Select a truck to see its max capacity.';
+        capacityInput.max = max || '';
+      });
+
+      function validateCities() {
+        const sameCity = originSelect.value && originSelect.value === destinationSelect.value;
+        originField.classList.toggle('field--invalid', Boolean(sameCity));
+        originError.style.display = sameCity ? 'block' : 'none';
+        return !sameCity;
+      }
+
+      [originSelect, destinationSelect, capacityInput, startInput, endInput].forEach((el) => {
+        el.addEventListener('input', () => { validateCities(); updatePreview(); });
+        el.addEventListener('change', () => { validateCities(); updatePreview(); });
+      });
+
+      const availForm = document.getElementById('availability-form');
+      const submitBtn = document.getElementById('submit-btn');
+
+      availForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!validateCities()) return;
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Publishing…';
+
+        try {
+          await apiFetch('/truck-availability', {
+            method: 'POST',
+            body: JSON.stringify({
+              truckId: truckSelect.value,
+              originCityId: Number(originSelect.value),
+              destinationCityId: Number(destinationSelect.value),
+              availableCapacityKg: Number(capacityInput.value),
+              departureWindowStart: toIso(startInput.value),
+              departureWindowEnd: toIso(endInput.value),
+            }),
+          });
+
+          availForm.reset();
+          updatePreview();
+          await loadAvailabilities();
+        } catch (err) {
+          showFormError(availForm, err.message || 'Could not publish availability.');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Publish availability';
+        }
       });
     }
 
-    function updatePreview() {
-      previewOrigin.textContent = originSelect.selectedOptions[0]?.text || 'Origin';
-      previewDestination.textContent = destinationSelect.selectedOptions[0]?.text || 'Destination';
-      previewCapacity.textContent = capacityInput.value ? `${Number(capacityInput.value).toLocaleString()} kg` : '— kg';
+    async function loadAvailabilities() {
+      const list = await apiFetch('/truck-availability');
+      const container = document.getElementById('active-list');
 
-      const start = formatDateTime(startInput.value);
-      const end = formatDateTime(endInput.value);
-      previewWindow.textContent = start && end ? `${start} – ${end}` : 'Departure window not set';
+      container.innerHTML = list.map((a) => `
+        <div class="card avail-card">
+          <div class="avail-card__top">
+            <span class="avail-card__route">
+              ${a.origin_city ? a.origin_city.name : '—'} <span class="avail-card__route-arrow">→</span> ${a.dest_city ? a.dest_city.name : '—'}
+            </span>
+            <span class="badge ${STATUS_BADGE[a.status] || 'badge--wait'}">${STATUS_LABEL[a.status] || a.status}</span>
+          </div>
+          <div class="avail-card__meta">
+            <span class="data">${Number(a.available_capacity_kg).toLocaleString()} kg available</span>
+            <span class="data">${fmtDateTime(a.departure_window_start)} – ${fmtDateTime(a.departure_window_end)}</span>
+            <span>${a.truck ? a.truck.plate_number : ''}</span>
+          </div>
+          <div class="avail-card__actions">
+            ${a.status === 'OPEN' ? `<button class="btn btn--ghost btn--sm" data-cancel="${a.id}" type="button">Cancel</button>` : ''}
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('active-empty').style.display = list.length === 0 ? 'block' : 'none';
+
+      container.querySelectorAll('[data-cancel]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          btn.disabled = true;
+          try {
+            await apiFetch(`/truck-availability/${btn.dataset.cancel}/cancel`, { method: 'PATCH' });
+            await loadAvailabilities();
+          } catch (err) {
+            alert(err.message || 'Could not cancel this availability.');
+            btn.disabled = false;
+          }
+        });
+      });
     }
 
-    truckSelect.addEventListener('change', () => {
-      const selected = truckSelect.selectedOptions[0];
-      const max = selected ? selected.dataset.capacity : null;
-      capacityHint.textContent = max
-        ? `Max for this truck: ${Number(max).toLocaleString()} kg`
-        : 'Select a truck to see its max capacity.';
-      capacityInput.max = max || '';
-    });
-
-    function validateCities() {
-      const sameCity = originSelect.value && originSelect.value === destinationSelect.value;
-      originField.classList.toggle('field--invalid', Boolean(sameCity));
-      originError.style.display = sameCity ? 'block' : 'none';
-      return !sameCity;
-    }
-
-    [originSelect, destinationSelect, capacityInput, startInput, endInput].forEach((el) => {
-      el.addEventListener('input', () => {
-        validateCities();
-        updatePreview();
-      });
-    });
-
-    document.getElementById('logout-link').addEventListener('click', (event) => {
-      event.preventDefault();
-      localStorage.removeItem('lemenbado_session');
-      window.location.href = '../index.html';
-    });
-
-    document.getElementById('availability-form').addEventListener('submit', (event) => {
-      event.preventDefault();
-      if (!validateCities()) return;
-      // no backend yet — this is where a POST to /api/truck-availability goes
-      console.log('Publish availability (mock):', {
-        truck: truckSelect.value,
-        originCityId: originSelect.value,
-        destinationCityId: destinationSelect.value,
-        capacityKg: capacityInput.value,
-        departureStart: startInput.value,
-        departureEnd: endInput.value,
-        notes: document.getElementById('notes').value,
-      });
-      alert('Availability published (mock) — wire this up to the API once the backend is ready.');
-    });
+    init();
   </script>
 </body>
 </html>
