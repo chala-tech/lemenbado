@@ -13,6 +13,7 @@ import { matchingRouter } from './modules/matching/matching.routes.js';
 import { bookingsRouter } from './modules/bookings/bookings.routes.js';
 import { adminRouter } from './modules/admin/admin.routes.js';
 import { reviewsRouter } from './modules/reviews/reviews.routes.js';
+import { cargoTypesRouter } from './modules/cargo/cargo-types.routes.js';
 import { documentsRouter } from './modules/documents/documents.routes.js';
 
 const app = express();
