@@ -71,10 +71,10 @@ function wireLogout() {
 }
 
 
-
 const RefData = {
   cities: null,
   truckTypes: null,
+  cargoTypes: null,
 
   async getCities() {
     if (!this.cities) this.cities = await apiFetch('/cities');
@@ -85,7 +85,13 @@ const RefData = {
     if (!this.truckTypes) this.truckTypes = await apiFetch('/truck-types');
     return this.truckTypes;
   },
+
+  async getCargoTypes() {
+    if (!this.cargoTypes) this.cargoTypes = await apiFetch('/cargo-types');
+    return this.cargoTypes;
+  },
 };
+
 
 
 function populateSelect(selectEl, items, { valueKey = 'id', labelKey = 'name' } = {}) {

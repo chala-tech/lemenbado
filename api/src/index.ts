@@ -30,6 +30,7 @@ app.use('/api/trucks', trucksRouter);
 app.use('/api/truck-types', truckTypesRouter);
 app.use('/api/truck-availability', availabilityRouter);
 app.use('/api/cargo', cargoRouter);
+app.use('/api/cargo-types', cargoTypesRouter);
 app.use('/api/matches', matchingRouter);
 app.use('/api/bookings', bookingsRouter);
 app.use('/api/admin', adminRouter);
