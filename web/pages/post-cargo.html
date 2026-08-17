@@ -26,7 +26,6 @@
 <body>
   <div class="app-shell">
 
-    <!-- nav -->
     <header class="nav">
       <div class="container nav__inner">
         <a href="../index.html" class="nav__logo">
@@ -48,7 +47,7 @@
 
         <div class="nav__actions">
           <a class="btn btn--ghost btn--sm" href="#" id="logout-link">Log out</a>
-          <a class="nav__avatar" href="profile.html" aria-label="Your profile">CO</a>
+          <a class="nav__avatar" href="profile.html" id="nav-avatar" aria-label="Your profile">--</a>
         </div>
       </div>
     </header>
@@ -65,7 +64,6 @@
 
       <div class="split split--form">
 
-        <!-- form -->
         <form class="form card" id="cargo-form" novalidate>
 
           <div class="form__grid form__grid--2">
@@ -74,20 +72,6 @@
               <div class="select-wrap">
                 <select class="select" id="origin" name="origin" required>
                   <option value="" selected disabled>Select origin</option>
-                  <option value="1">Addis Ababa</option>
-                  <option value="2">Adama</option>
-                  <option value="3">Hawassa</option>
-                  <option value="4">Bahir Dar</option>
-                  <option value="5">Mekelle</option>
-                  <option value="6">Dire Dawa</option>
-                  <option value="7">Jimma</option>
-                  <option value="8">Gondar</option>
-                  <option value="9">Dessie</option>
-                  <option value="10">Debre Birhan</option>
-                  <option value="11">Shashemene</option>
-                  <option value="12">Arba Minch</option>
-                  <option value="13">Nekemte</option>
-                  <option value="14">Woldiya</option>
                 </select>
               </div>
               <p class="field__error" id="origin-error">Origin and destination can't be the same city.</p>
@@ -98,20 +82,6 @@
               <div class="select-wrap">
                 <select class="select" id="destination" name="destination" required>
                   <option value="" selected disabled>Select destination</option>
-                  <option value="1">Addis Ababa</option>
-                  <option value="2">Adama</option>
-                  <option value="3">Hawassa</option>
-                  <option value="4">Bahir Dar</option>
-                  <option value="5">Mekelle</option>
-                  <option value="6">Dire Dawa</option>
-                  <option value="7">Jimma</option>
-                  <option value="8">Gondar</option>
-                  <option value="9">Dessie</option>
-                  <option value="10">Debre Birhan</option>
-                  <option value="11">Shashemene</option>
-                  <option value="12">Arba Minch</option>
-                  <option value="13">Nekemte</option>
-                  <option value="14">Woldiya</option>
                 </select>
               </div>
             </div>
@@ -128,10 +98,6 @@
               <div class="select-wrap">
                 <select class="select" id="cargo-type" name="cargo-type" required>
                   <option value="" selected disabled>Select type</option>
-                  <option>General goods</option>
-                  <option>Perishable</option>
-                  <option>Construction material</option>
-                  <option>Livestock</option>
                 </select>
               </div>
             </div>
@@ -149,18 +115,12 @@
             </div>
           </div>
 
-          <div class="field">
-            <label class="field__label" for="notes">Notes <span class="field__hint">(optional)</span></label>
-            <textarea class="textarea" id="notes" name="notes" placeholder="e.g. Needs to stay upright, fragile items"></textarea>
-          </div>
-
           <div class="form__actions">
-            <button class="btn btn--primary" type="submit">Post cargo request</button>
+            <button class="btn btn--primary" type="submit" id="submit-btn">Post cargo request</button>
             <a class="btn btn--ghost" href="dashboard.html">Cancel</a>
           </div>
         </form>
 
-        <!-- live preview -->
         <aside class="panel panel--glow" aria-label="Cargo request preview">
           <div class="panel__content">
             <p class="field__label" style="margin-bottom: var(--space-4);">Preview</p>
@@ -191,65 +151,11 @@
         </aside>
       </div>
 
-      <!-- active cargo requests -->
       <section aria-labelledby="active-heading" style="margin-top: var(--space-8);">
         <h2 id="active-heading" class="corridors__heading">Your active cargo requests</h2>
-
-        <div style="display: flex; flex-direction: column; gap: var(--space-4);">
-
-          <div class="card avail-card">
-            <div class="avail-card__top">
-              <span class="avail-card__route">
-                Addis Ababa <span class="avail-card__route-arrow">→</span> Hawassa
-              </span>
-              <span class="badge badge--wait">Matched</span>
-            </div>
-            <div class="avail-card__meta">
-              <span class="data">3,000 kg · General goods</span>
-              <span class="data">Needed by Aug 6</span>
-              <span>4,500 ETB</span>
-            </div>
-            <div class="avail-card__actions">
-              <a class="btn btn--ghost btn--sm" href="matches.html">View match</a>
-              <button class="btn btn--ghost btn--sm" type="button">Cancel</button>
-            </div>
-          </div>
-
-          <div class="card avail-card">
-            <div class="avail-card__top">
-              <span class="avail-card__route">
-                Addis Ababa <span class="avail-card__route-arrow">→</span> Bahir Dar
-              </span>
-              <span class="badge badge--signal">Open</span>
-            </div>
-            <div class="avail-card__meta">
-              <span class="data">1,200 kg · Perishable</span>
-              <span class="data">Needed by Aug 9</span>
-              <span>Price not specified</span>
-            </div>
-            <div class="avail-card__actions">
-              <button class="btn btn--ghost btn--sm" type="button">Edit</button>
-              <button class="btn btn--ghost btn--sm" type="button">Cancel</button>
-            </div>
-          </div>
-
-          <div class="card avail-card">
-            <div class="avail-card__top">
-              <span class="avail-card__route">
-                Addis Ababa <span class="avail-card__route-arrow">→</span> Jimma
-              </span>
-              <span class="badge badge--alert">Expired</span>
-            </div>
-            <div class="avail-card__meta">
-              <span class="data">2,400 kg · General goods</span>
-              <span class="data">Needed by Jul 29</span>
-              <span>3,000 ETB</span>
-            </div>
-            <div class="avail-card__actions">
-              <button class="btn btn--ghost btn--sm" type="button">Repost</button>
-            </div>
-          </div>
-
+        <div id="active-list" style="display: flex; flex-direction: column; gap: var(--space-4);"></div>
+        <div class="card" id="active-empty" style="display:none; text-align:center; color: var(--color-ink-faint);">
+          No cargo requests posted yet.
         </div>
       </section>
 
@@ -264,74 +170,157 @@
 
   </div>
 
+  <script src="../js/app.js"></script>
   <script>
-    const originSelect = document.getElementById('origin');
-    const destinationSelect = document.getElementById('destination');
-    const originField = document.getElementById('origin-field');
-    const originError = document.getElementById('origin-error');
-    const weightInput = document.getElementById('weight');
-    const typeSelect = document.getElementById('cargo-type');
-    const dateInput = document.getElementById('required-date');
+    const STATUS_BADGE = { OPEN: 'badge--signal', MATCHED: 'badge--wait', BOOKED: 'badge--wait', CANCELLED: 'badge--alert', EXPIRED: 'badge--alert' };
+    const STATUS_LABEL = { OPEN: 'Open', MATCHED: 'Matched', BOOKED: 'Booked', CANCELLED: 'Cancelled', EXPIRED: 'Expired' };
 
-    const previewOrigin = document.getElementById('preview-origin');
-    const previewDestination = document.getElementById('preview-destination');
-    const previewWeight = document.getElementById('preview-weight');
-    const previewType = document.getElementById('preview-type');
-    const previewDate = document.getElementById('preview-date');
-
-    function formatDate(value) {
+    function fmtDate(value) {
       if (!value) return null;
       return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
     }
 
-    function updatePreview() {
-      previewOrigin.textContent = originSelect.selectedOptions[0]?.text || 'Origin';
-      previewDestination.textContent = destinationSelect.selectedOptions[0]?.text || 'Destination';
-      previewWeight.textContent = weightInput.value ? `${Number(weightInput.value).toLocaleString()} kg` : '— kg';
-      previewType.textContent = typeSelect.value || 'Cargo type not set';
-      const date = formatDate(dateInput.value);
-      previewDate.textContent = date ? `Needed by ${date}` : 'Required date not set';
+   
+    function dateToIso(dateValue) {
+      return new Date(`${dateValue}T00:00:00`).toISOString();
     }
 
-    function validateCities() {
-      const sameCity = originSelect.value && originSelect.value === destinationSelect.value;
-      originField.classList.toggle('field--invalid', Boolean(sameCity));
-      originError.style.display = sameCity ? 'block' : 'none';
-      return !sameCity;
+    async function init() {
+      const user = requireSession();
+      if (!user) return;
+
+      if (user.role !== 'CARGO_OWNER') {
+        document.querySelector('main').innerHTML = `
+          <div class="card" style="text-align:center;">
+            <h2>Cargo owners only</h2>
+            <p class="page-header__subtitle" style="margin-inline:auto;">This page is for posting cargo requests — you're signed in as a truck owner.</p>
+            <a class="btn btn--primary" href="dashboard.html" style="margin-top: var(--space-4);">Back to dashboard</a>
+          </div>`;
+        return;
+      }
+
+      document.getElementById('nav-avatar').textContent = (user.name || 'U').split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+
+      const [cities, cargoTypes] = await Promise.all([RefData.getCities(), RefData.getCargoTypes()]);
+      populateSelect(document.getElementById('origin'), cities);
+      populateSelect(document.getElementById('destination'), cities);
+      populateSelect(document.getElementById('cargo-type'), cargoTypes);
+
+      await loadCargoRequests();
+      wireForm();
     }
 
-    [originSelect, destinationSelect, weightInput, typeSelect, dateInput].forEach((el) => {
-      el.addEventListener('input', () => {
-        validateCities();
-        updatePreview();
-      });
-      el.addEventListener('change', () => {
-        validateCities();
-        updatePreview();
-      });
-    });
+    function wireForm() {
+      const originSelect = document.getElementById('origin');
+      const destinationSelect = document.getElementById('destination');
+      const originField = document.getElementById('origin-field');
+      const originError = document.getElementById('origin-error');
+      const weightInput = document.getElementById('weight');
+      const typeSelect = document.getElementById('cargo-type');
+      const dateInput = document.getElementById('required-date');
 
-    document.getElementById('cargo-form').addEventListener('submit', (event) => {
-      event.preventDefault();
-      if (!validateCities()) return;
-      // no backend yet — this is where POST /api/cargo will go
-      console.log('Post cargo request (mock):', {
-        originCityId: originSelect.value,
-        destinationCityId: destinationSelect.value,
-        weightKg: weightInput.value,
-        cargoType: typeSelect.value,
-        requiredDate: dateInput.value,
-        priceEtb: document.getElementById('price').value || null,
-        notes: document.getElementById('notes').value,
-      });
-      alert('Cargo request posted (mock) — wire this up to the API once the backend is ready.');
-    });
+      const previewOrigin = document.getElementById('preview-origin');
+      const previewDestination = document.getElementById('preview-destination');
+      const previewWeight = document.getElementById('preview-weight');
+      const previewType = document.getElementById('preview-type');
+      const previewDate = document.getElementById('preview-date');
 
-    document.getElementById('logout-link').addEventListener('click', (event) => {
-      event.preventDefault();
-      localStorage.removeItem('lemenbado_session');
-      window.location.href = '../index.html';
-    });
+      function updatePreview() {
+        previewOrigin.textContent = originSelect.selectedOptions[0]?.text || 'Origin';
+        previewDestination.textContent = destinationSelect.selectedOptions[0]?.text || 'Destination';
+        previewWeight.textContent = weightInput.value ? `${Number(weightInput.value).toLocaleString()} kg` : '— kg';
+        previewType.textContent = typeSelect.selectedOptions[0]?.text || 'Cargo type not set';
+        const date = fmtDate(dateInput.value);
+        previewDate.textContent = date ? `Needed by ${date}` : 'Required date not set';
+      }
+
+      function validateCities() {
+        const sameCity = originSelect.value && originSelect.value === destinationSelect.value;
+        originField.classList.toggle('field--invalid', Boolean(sameCity));
+        originError.style.display = sameCity ? 'block' : 'none';
+        return !sameCity;
+      }
+
+      [originSelect, destinationSelect, weightInput, typeSelect, dateInput].forEach((el) => {
+        el.addEventListener('input', () => { validateCities(); updatePreview(); });
+        el.addEventListener('change', () => { validateCities(); updatePreview(); });
+      });
+
+      const form = document.getElementById('cargo-form');
+      const submitBtn = document.getElementById('submit-btn');
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!validateCities()) return;
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Posting…';
+
+        try {
+          await apiFetch('/cargo', {
+            method: 'POST',
+            body: JSON.stringify({
+              originCityId: Number(originSelect.value),
+              destinationCityId: Number(destinationSelect.value),
+              weightKg: Number(weightInput.value),
+              cargoTypeId: typeSelect.value,
+              requiredDate: dateToIso(dateInput.value),
+              desiredPriceEtb: document.getElementById('price').value ? Number(document.getElementById('price').value) : undefined,
+            }),
+          });
+
+          form.reset();
+          updatePreview();
+          await loadCargoRequests();
+        } catch (err) {
+          showFormError(form, err.message || 'Could not post cargo request.');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Post cargo request';
+        }
+      });
+    }
+
+    async function loadCargoRequests() {
+      const list = await apiFetch('/cargo');
+      const container = document.getElementById('active-list');
+
+      container.innerHTML = list.map((c) => `
+        <div class="card avail-card">
+          <div class="avail-card__top">
+            <span class="avail-card__route">
+              ${c.origin_city ? c.origin_city.name : '—'} <span class="avail-card__route-arrow">→</span> ${c.dest_city ? c.dest_city.name : '—'}
+            </span>
+            <span class="badge ${STATUS_BADGE[c.status] || 'badge--wait'}">${STATUS_LABEL[c.status] || c.status}</span>
+          </div>
+          <div class="avail-card__meta">
+            <span class="data">${Number(c.weight_kg).toLocaleString()} kg${c.cargo_type ? ' · ' + c.cargo_type.name : ''}</span>
+            <span class="data">Needed by ${fmtDate(c.required_date)}</span>
+            <span>${c.desired_price_etb ? Number(c.desired_price_etb).toLocaleString() + ' ETB' : 'Price not specified'}</span>
+          </div>
+          <div class="avail-card__actions">
+            ${c.status === 'OPEN' || c.status === 'MATCHED' ? `<button class="btn btn--ghost btn--sm" data-cancel="${c.id}" type="button">Cancel</button>` : ''}
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('active-empty').style.display = list.length === 0 ? 'block' : 'none';
+
+      container.querySelectorAll('[data-cancel]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          btn.disabled = true;
+          try {
+            await apiFetch(`/cargo/${btn.dataset.cancel}/cancel`, { method: 'PATCH' });
+            await loadCargoRequests();
+          } catch (err) {
+            alert(err.message || 'Could not cancel this cargo request.');
+            btn.disabled = false;
+          }
+        });
+      });
+    }
+
+    init();
   </script>
 </body>
 </html>
