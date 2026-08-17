@@ -272,6 +272,7 @@
           form.reset();
           updatePreview();
           await loadCargoRequests();
+          showFormSuccess(form, 'Cargo request posted! See it below in "Your active cargo requests."');
         } catch (err) {
           showFormError(form, err.message || 'Could not post cargo request.');
         } finally {

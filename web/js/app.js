@@ -115,5 +115,18 @@ function showFormError(form, message) {
   banner.textContent = message;
 }
 
+/** Shows a brief inline success message near a form. */
+function showFormSuccess(form, message) {
+  let banner = form.querySelector('.form-success-banner');
+  if (!banner) {
+    banner = document.createElement('p');
+    banner.className = 'form-success-banner';
+    banner.style.color = 'var(--color-signal)';
+    banner.style.fontSize = 'var(--text-sm)';
+    form.prepend(banner);
+  }
+  banner.textContent = message;
+  setTimeout(() => banner.remove(), 4000);
+}
 
 document.addEventListener('DOMContentLoaded', wireLogout);

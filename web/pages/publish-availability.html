@@ -369,6 +369,7 @@
           availForm.reset();
           updatePreview();
           await loadAvailabilities();
+          showFormSuccess(availForm, 'Availability published! See it below in "Your active availabilities."');
         } catch (err) {
           showFormError(availForm, err.message || 'Could not publish availability.');
         } finally {
