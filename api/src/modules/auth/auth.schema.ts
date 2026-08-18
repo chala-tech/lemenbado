@@ -11,3 +11,7 @@ export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
 });
+export const updateProfileSchema = z.object({
+  name: z.string().min(2).optional(),
+  phone: z.string().optional(),
+});
