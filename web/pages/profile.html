@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,7 +26,6 @@
 <body>
   <div class="app-shell">
 
-    <!-- nav -->
     <header class="nav">
       <div class="container nav__inner">
         <a href="../index.html" class="nav__logo">
@@ -42,7 +40,7 @@
 
         <nav class="nav__links" aria-label="Primary">
           <a class="nav__link" href="dashboard.html">Dashboard</a>
-          <a class="nav__link" href="publish-availability.html">Availability</a>
+          <a class="nav__link" id="nav-secondary" href="publish-availability.html">Availability</a>
           <a class="nav__link" href="matches.html">Matches</a>
           <a class="nav__link" href="bookings.html">Bookings</a>
         </nav>
@@ -62,44 +60,46 @@
         <p class="page-header__subtitle" id="profile-role">—</p>
       </div>
 
-      <!-- personal info -->
       <form class="form card" id="profile-form" style="margin-bottom: var(--space-5);" novalidate>
         <div class="field">
           <label class="field__label" for="name">Full name</label>
           <input class="input" type="text" id="name" name="name" required />
         </div>
         <div class="field">
-          <label class="field__label" for="phone">Phone number</label>
-          <input class="input" type="tel" id="phone" name="phone" required />
+          <label class="field__label" for="email">Email</label>
+          <input class="input" type="email" id="email" name="email" disabled />
+          <p class="field__hint">Email can't be changed here yet.</p>
+        </div>
+        <div class="field">
+          <label class="field__label" for="phone">Phone number <span class="field__hint">(optional)</span></label>
+          <input class="input" type="tel" id="phone" name="phone" placeholder="e.g. 09xx xxx xxx" />
         </div>
         <div class="form__actions">
-          <button class="btn btn--primary btn--sm" type="submit">Save changes</button>
+          <button class="btn btn--primary btn--sm" type="submit" id="save-btn">Save changes</button>
         </div>
       </form>
 
-      <!-- verification -->
       <div class="card" style="margin-bottom: var(--space-5);">
         <div class="avail-card__top" style="margin-bottom: var(--space-3);">
           <p class="field__label" style="margin-bottom:0;">Verification</p>
-          <span class="badge badge--wait">Pending verification</span>
+          <span class="badge badge--wait">Not available yet</span>
         </div>
         <p class="field__hint" style="margin-bottom: var(--space-4);">
-          Upload a photo of your license or business registration — an admin will review it manually during the pilot.
+          Document upload isn't wired up in this build yet — Supabase Storage integration for license/registration
+          photos is still on the to-do list. This won't submit anything for now.
         </p>
         <div class="field">
           <label class="field__label" for="document">Document photo</label>
-          <input class="input" type="file" id="document" name="document" accept="image/*,.pdf" />
+          <input class="input" type="file" id="document" name="document" accept="image/*,.pdf" disabled />
         </div>
       </div>
 
-      <!-- role-specific -->
       <div class="card" id="role-section" style="margin-bottom: var(--space-5);"></div>
 
-      <!-- ratings -->
       <div class="card" style="margin-bottom: var(--space-5);">
         <p class="field__label" style="margin-bottom: var(--space-2);">Ratings</p>
-        <p style="color: var(--color-route); font-family: var(--font-display); font-size: var(--text-lg); font-weight: var(--weight-bold);">
-          4.8 <span style="color: var(--color-ink-faint); font-size: var(--text-sm); font-family: var(--font-body); font-weight: var(--weight-regular);">(12 completed deliveries)</span>
+        <p id="ratings-display" style="color: var(--color-route); font-family: var(--font-display); font-size: var(--text-lg); font-weight: var(--weight-bold);">
+          — <span style="color: var(--color-ink-faint); font-size: var(--text-sm); font-family: var(--font-body); font-weight: var(--weight-regular);">Loading…</span>
         </p>
       </div>
 
@@ -116,21 +116,19 @@
 
   </div>
 
+  <script src="../js/app.js"></script>
   <script>
-    // reads the mock session from localStorage — same guard pattern
-    // as dashboard.html, repeated per page until js/app.js exists
+    async function init() {
+      const user = requireSession();
+      if (!user) return;
 
-    const session = JSON.parse(localStorage.getItem('lemenbado_session') || 'null');
-    const user = session ? session.user : null;
-
-    if (!user) {
-      window.location.href = 'login.html';
-    } else {
       document.getElementById('profile-name').textContent = user.name || 'Your profile';
-      document.getElementById('profile-role').textContent =
-        user.role === 'CARGO_OWNER' ? 'Cargo owner' : 'Truck owner';
+      document.getElementById('profile-role').textContent = user.role === 'CARGO_OWNER' ? 'Cargo owner' : 'Truck owner';
+      document.getElementById('nav-secondary').textContent = user.role === 'TRUCK_OWNER' ? 'Availability' : 'Post cargo';
+      document.getElementById('nav-secondary').href = user.role === 'TRUCK_OWNER' ? 'publish-availability.html' : 'post-cargo.html';
+
       document.getElementById('name').value = user.name || '';
-      document.getElementById('phone').value = user.phone || '';
+      document.getElementById('email').value = user.email || '';
 
       const initials = (user.name || 'U').split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase();
       document.getElementById('nav-avatar').textContent = initials;
@@ -139,42 +137,97 @@
       if (user.role === 'CARGO_OWNER') {
         roleSection.innerHTML = `
           <p class="field__label" style="margin-bottom: var(--space-3);">Your business</p>
-          <div class="avail-card__meta">
-            <span>Bekele Trading PLC</span>
-            <span>Business account</span>
-          </div>
+          <p class="field__hint">
+            A business profile is created automatically the first time you post a cargo request — there's no
+            separate business page yet, so nothing to show here until then.
+          </p>
         `;
       } else {
         roleSection.innerHTML = `
           <div class="avail-card__top" style="margin-bottom: var(--space-3);">
             <p class="field__label" style="margin-bottom:0;">Your trucks</p>
-            <a class="field__link" href="publish-availability.html#trucks">+ Add a truck</a>
+            <a class="field__link" href="publish-availability.html">+ Add a truck</a>
           </div>
-          <div class="avail-card__meta" style="margin-bottom: var(--space-2);">
-            <span>Isuzu FRR · AA-12345</span><span>Max 8,000 kg</span>
-          </div>
-          <div class="avail-card__meta">
-            <span>Sino Howo · OR-98765</span><span>Max 15,000 kg</span>
-          </div>
+          <div id="trucks-list"></div>
         `;
+        loadTrucks();
       }
 
-      function logout() {
-        localStorage.removeItem('lemenbado_session');
-        window.location.href = '../index.html';
-      }
-      document.getElementById('logout-link').addEventListener('click', (e) => { e.preventDefault(); logout(); });
-      document.getElementById('logout-btn').addEventListener('click', logout);
+      loadRatings(user.id);
+      wireForm();
+    }
 
-      document.getElementById('profile-form').addEventListener('submit', (event) => {
+    async function loadTrucks() {
+      try {
+        const trucks = await apiFetch('/trucks');
+        const container = document.getElementById('trucks-list');
+        if (trucks.length === 0) {
+          container.innerHTML = `<p class="field__hint">No trucks added yet.</p>`;
+          return;
+        }
+        container.innerHTML = trucks.map((t) => `
+          <div class="avail-card__meta" style="margin-bottom: var(--space-2);">
+            <span>${t.truck_type ? t.truck_type.name : 'Truck'} · ${t.plate_number}</span>
+            <span>Max ${Number(t.max_capacity_kg).toLocaleString()} kg</span>
+          </div>
+        `).join('');
+      } catch (err) {
+        document.getElementById('trucks-list').innerHTML = `<p class="field__hint" style="color: var(--color-alert);">Could not load trucks.</p>`;
+      }
+    }
+
+    async function loadRatings(userId) {
+      try {
+        const summary = await apiFetch(`/reviews/users/${userId}/summary`);
+        const el = document.getElementById('ratings-display');
+        if (summary.count === 0) {
+          el.innerHTML = `<span style="color: var(--color-ink-faint); font-size: var(--text-sm); font-family: var(--font-body); font-weight: var(--weight-regular);">No reviews yet.</span>`;
+        } else {
+          el.innerHTML = `${summary.average} <span style="color: var(--color-ink-faint); font-size: var(--text-sm); font-family: var(--font-body); font-weight: var(--weight-regular);">(${summary.count} completed ${summary.count === 1 ? 'delivery' : 'deliveries'})</span>`;
+        }
+      } catch (err) {
+        document.getElementById('ratings-display').textContent = '—';
+      }
+    }
+
+    function wireForm() {
+      const form = document.getElementById('profile-form');
+      const saveBtn = document.getElementById('save-btn');
+
+      form.addEventListener('submit', async (event) => {
         event.preventDefault();
-        // no backend yet — this is where PATCH /api/users/me will go
-        user.name = document.getElementById('name').value;
-        user.phone = document.getElementById('phone').value;
-        localStorage.setItem('lemenbado_session', JSON.stringify(session));
-        alert('Profile updated (mock) — wire this up to the API once the backend is ready.');
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Saving…';
+
+        try {
+          const result = await apiFetch('/auth/me', {
+            method: 'PATCH',
+            body: JSON.stringify({
+              name: document.getElementById('name').value,
+              phone: document.getElementById('phone').value || undefined,
+            }),
+          });
+
+          const session = Session.get();
+          session.user = result.user;
+          Session.set(session);
+
+          document.getElementById('profile-name').textContent = result.user.name;
+          showFormSuccess(form, 'Profile updated.');
+        } catch (err) {
+          showFormError(form, err.message || 'Could not update profile.');
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save changes';
+        }
+      });
+
+      document.getElementById('logout-btn').addEventListener('click', () => {
+        document.getElementById('logout-link').click();
       });
     }
+
+    init();
   </script>
 </body>
 </html>
