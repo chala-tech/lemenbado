@@ -26,7 +26,6 @@
 <body>
   <div class="app-shell">
 
-    <!-- nav -->
     <header class="nav">
       <div class="container nav__inner">
         <a href="../index.html" class="nav__logo">
@@ -41,14 +40,14 @@
 
         <nav class="nav__links" aria-label="Primary">
           <a class="nav__link" href="dashboard.html">Dashboard</a>
-          <a class="nav__link" href="publish-availability.html">Availability</a>
+          <a class="nav__link" id="nav-secondary" href="publish-availability.html">Availability</a>
           <a class="nav__link" href="matches.html">Matches</a>
           <a class="nav__link nav__link--active" href="bookings.html" aria-current="page">Bookings</a>
         </nav>
 
         <div class="nav__actions">
           <a class="btn btn--ghost btn--sm" href="#" id="logout-link">Log out</a>
-          <a class="nav__avatar" href="profile.html" aria-label="Your profile">TO</a>
+          <a class="nav__avatar" href="profile.html" id="nav-avatar" aria-label="Your profile">--</a>
         </div>
       </div>
     </header>
@@ -70,50 +69,8 @@
 
   </div>
 
+  <script src="../js/app.js"></script>
   <script>
-    // mock data — same shape/duplication note as bookings.html;
-    // transitions below are in-memory only, no persistence, purely to
-    // show the state machine from Part 9 of the blueprint
-
-    const BOOKINGS = {
-      bk_1: {
-        origin: 'Addis Ababa', destination: 'Adama', status: 'IN_TRANSIT',
-        weightKg: 2000, cargoType: 'General goods',
-        counterpart: 'Nib Import Export', phone: '+251 91 234 5678',
-        truck: 'Sino Howo · Plate OR-98765',
-        payment: 'Cash on delivery',
-      },
-      bk_2: {
-        origin: 'Hawassa', destination: 'Addis Ababa', status: 'COMPLETED',
-        weightKg: 4500, cargoType: 'Perishable',
-        counterpart: 'Bekele Trading PLC', phone: '+251 92 345 6789',
-        truck: 'Isuzu FRR · Plate AA-12345',
-        payment: 'Bank transfer',
-      },
-      bk_3: {
-        origin: 'Addis Ababa', destination: 'Hawassa', status: 'REQUESTED',
-        weightKg: 3000, cargoType: 'General goods',
-        counterpart: 'Bekele Trading PLC', phone: '+251 92 345 6789',
-        truck: 'Isuzu FRR · Plate AA-12345',
-        payment: 'Unspecified',
-      },
-      bk_4: {
-        origin: 'Addis Ababa', destination: 'Bahir Dar', status: 'ACCEPTED',
-        weightKg: 1800, cargoType: 'Construction material',
-        counterpart: 'Selam Hardware', phone: '+251 93 456 7890',
-        truck: 'Sino Howo · Plate OR-98765',
-        payment: 'Cash on delivery',
-      },
-      bk_5: {
-        origin: 'Addis Ababa', destination: 'Mekelle', status: 'CANCELLED',
-        weightKg: 6000, cargoType: 'General goods',
-        counterpart: 'Merkato Grains Co.', phone: '+251 94 567 8901',
-        truck: 'Isuzu FRR · Plate AA-12345',
-        payment: 'Unspecified',
-        cancelReason: 'Cargo owner found an alternate truck before pickup.',
-      },
-    };
-
     const STEPS = ['REQUESTED', 'ACCEPTED', 'IN_TRANSIT', 'DELIVERED', 'COMPLETED'];
     const STEP_LABELS = {
       REQUESTED: 'Requested', ACCEPTED: 'Accepted', IN_TRANSIT: 'In transit',
@@ -121,14 +78,50 @@
     };
     const STATUS_BADGE = {
       REQUESTED: 'badge--wait', ACCEPTED: 'badge--wait', IN_TRANSIT: 'badge--wait',
-      DELIVERED: 'badge--wait', COMPLETED: 'badge--signal', CANCELLED: 'badge--alert',
-      REJECTED: 'badge--alert',
+      DELIVERED: 'badge--wait', COMPLETED: 'badge--signal', CANCELLED: 'badge--alert', REJECTED: 'badge--alert',
     };
 
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get('id');
+    // must match ALLOWED_TRANSITIONS in api/src/modules/bookings/bookings.service.ts
+    const ALLOWED_TRANSITIONS = {
+      REQUESTED: ['ACCEPTED', 'REJECTED', 'CANCELLED'],
+      ACCEPTED: ['IN_TRANSIT', 'CANCELLED'],
+      IN_TRANSIT: ['DELIVERED', 'CANCELLED'],
+      DELIVERED: ['COMPLETED'],
+      COMPLETED: [],
+      REJECTED: [],
+      CANCELLED: [],
+    };
+
+    let user;
+    let booking;
     const root = document.getElementById('detail-root');
-    let booking = id ? BOOKINGS[id] : null;
+
+    function fmtDate(value) {
+      if (!value) return '—';
+      return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+
+    async function init() {
+      user = requireSession();
+      if (!user) return;
+
+      document.getElementById('nav-avatar').textContent = (user.name || 'U').split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+      document.getElementById('nav-secondary').textContent = user.role === 'TRUCK_OWNER' ? 'Availability' : 'Post cargo';
+      document.getElementById('nav-secondary').href = user.role === 'TRUCK_OWNER' ? 'publish-availability.html' : 'post-cargo.html';
+
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+
+      try {
+        const all = await apiFetch('/bookings');
+        booking = all.find((b) => b.id === id) || null;
+      } catch (err) {
+        root.innerHTML = `<div class="card" style="color: var(--color-alert);">${err.message}</div>`;
+        return;
+      }
+
+      render();
+    }
 
     function stepperHtml(status) {
       if (status === 'CANCELLED' || status === 'REJECTED') {
@@ -136,7 +129,6 @@
           <p style="color: var(--color-alert); font-weight: var(--weight-semibold); margin-bottom: var(--space-2);">
             This booking was ${status === 'REJECTED' ? 'rejected' : 'cancelled'}.
           </p>
-          <p style="font-size: var(--text-sm); color: var(--color-ink-soft);">${booking.cancelReason || 'No reason given.'}</p>
         </div>`;
       }
       const current = STEPS.indexOf(status);
@@ -149,40 +141,35 @@
       `).join('')}</div>`;
     }
 
-    function actionsHtml(status) {
-      const cancelBtn = `<button class="btn btn--ghost btn--sm" data-action="CANCELLED">Cancel booking</button>`;
-      switch (status) {
-        case 'REQUESTED':
-          return `
-            <button class="btn btn--primary" data-action="ACCEPTED">Accept</button>
-            <button class="btn btn--ghost" data-action="REJECTED">Reject</button>`;
-        case 'ACCEPTED':
-          return `
-            <button class="btn btn--primary" data-action="IN_TRANSIT">Mark picked up</button>
-            ${cancelBtn}`;
-        case 'IN_TRANSIT':
-          return `
-            <button class="btn btn--primary" data-action="DELIVERED">Mark delivered</button>
-            ${cancelBtn}`;
-        case 'DELIVERED':
-          return `<button class="btn btn--primary" data-action="COMPLETED">Confirm completed</button>`;
-        case 'COMPLETED':
-          return `<button class="btn btn--ghost" id="review-btn" type="button">Leave a review</button>`;
-        default:
-          return '';
-      }
-    }
+    function actionsHtml() {
+      const status = booking.status;
+      const allowed = ALLOWED_TRANSITIONS[status] || [];
+      const isRequester = booking.requested_by_user_id === user.id;
 
-    function contactHtml(status) {
-      const revealed = status !== 'REQUESTED';
-      return `
-        <div class="card">
-          <p class="field__label" style="margin-bottom: var(--space-3);">Counterpart</p>
-          <p style="color: var(--color-ink); font-weight: var(--weight-medium);">${booking.counterpart}</p>
-          <p class="data" style="color: var(--color-ink-soft); margin-top: var(--space-2);">
-            ${revealed ? booking.phone : 'Phone number is revealed once the booking is accepted.'}
-          </p>
-        </div>`;
+      if (allowed.length === 0) {
+        if (status === 'COMPLETED') {
+          return `<button class="btn btn--ghost" id="review-btn" type="button">Leave a review</button>`;
+        }
+        return '';
+      }
+
+      if (status === 'REQUESTED' && isRequester) {
+        return `
+          <p class="field__hint" style="margin-bottom: var(--space-3);">Waiting for a response from the other party.</p>
+          <button class="btn btn--ghost btn--sm" data-action="CANCELLED" type="button">Cancel request</button>`;
+      }
+
+      const buttons = allowed.map((next) => {
+        if (status === 'REQUESTED' && next === 'ACCEPTED') return `<button class="btn btn--primary" data-action="ACCEPTED" type="button">Accept</button>`;
+        if (status === 'REQUESTED' && next === 'REJECTED') return `<button class="btn btn--ghost" data-action="REJECTED" type="button">Reject</button>`;
+        if (next === 'IN_TRANSIT') return `<button class="btn btn--primary" data-action="IN_TRANSIT" type="button">Mark picked up</button>`;
+        if (next === 'DELIVERED') return `<button class="btn btn--primary" data-action="DELIVERED" type="button">Mark delivered</button>`;
+        if (next === 'COMPLETED') return `<button class="btn btn--primary" data-action="COMPLETED" type="button">Confirm completed</button>`;
+        if (next === 'CANCELLED') return `<button class="btn btn--ghost btn--sm" data-action="CANCELLED" type="button">Cancel</button>`;
+        return '';
+      });
+
+      return buttons.join('');
     }
 
     function render() {
@@ -190,17 +177,23 @@
         root.innerHTML = `
           <div class="card" style="text-align:center;">
             <h2>Booking not found</h2>
-            <p class="page-header__subtitle" style="margin-inline:auto;">This booking doesn't exist or the link is missing an id.</p>
+            <p class="page-header__subtitle" style="margin-inline:auto;">This booking doesn't exist, or you're not a participant in it.</p>
             <a class="btn btn--primary" href="bookings.html" style="margin-top: var(--space-4);">Back to bookings</a>
           </div>`;
         return;
       }
 
+      const origin = booking.truck_availability?.origin_city?.name || '—';
+      const dest = booking.truck_availability?.dest_city?.name || '—';
+      const weight = booking.cargo_request ? Number(booking.cargo_request.weight_kg).toLocaleString() + ' kg' : '—';
+      const cargoType = booking.cargo_request?.cargo_type?.name || '';
+      const plate = booking.truck_availability?.truck?.plate_number || '';
+
       root.innerHTML = `
         <div class="page-header">
           <span class="hero__eyebrow">Booking</span>
-          <h1>${booking.origin} → ${booking.destination}</h1>
-          <span class="badge ${STATUS_BADGE[booking.status]}">${STEP_LABELS[booking.status] || booking.status}</span>
+          <h1>${origin} → ${dest}</h1>
+          <span class="badge ${STATUS_BADGE[booking.status] || 'badge--wait'}">${STEP_LABELS[booking.status] || booking.status}</span>
         </div>
 
         ${stepperHtml(booking.status)}
@@ -209,41 +202,72 @@
           <div class="card">
             <p class="field__label" style="margin-bottom: var(--space-3);">Shipment</p>
             <div class="avail-card__meta" style="margin-bottom: var(--space-2);">
-              <span class="data">${booking.weightKg.toLocaleString()} kg</span>
-              <span>${booking.cargoType}</span>
-              <span>${booking.truck}</span>
+              <span class="data">${weight}</span>
+              <span>${cargoType}</span>
+              <span>${plate}</span>
             </div>
-            <p class="field__hint">Payment: ${booking.payment}</p>
+            <p class="field__hint">Required by: ${fmtDate(booking.cargo_request?.required_date)}</p>
 
-            <div class="form__actions" style="margin-top: var(--space-5);">
-              ${actionsHtml(booking.status)}
+            <div class="form__actions" style="margin-top: var(--space-5); flex-direction: column; align-items: flex-start;">
+              ${actionsHtml()}
             </div>
           </div>
 
-          ${contactHtml(booking.status)}
+          <div class="card">
+            <p class="field__label" style="margin-bottom: var(--space-3);">Contact</p>
+            <p class="field__hint">
+              Direct contact details aren't wired up yet on this build — for now, coordinate through the counterpart's
+              listed business/plate info above until in-app contact info sharing is added.
+            </p>
+          </div>
         </div>
       `;
 
       root.querySelectorAll('[data-action]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          booking.status = btn.dataset.action;
-          render();
+        btn.addEventListener('click', async () => {
+          btn.disabled = true;
+          try {
+            await apiFetch(`/bookings/${booking.id}`, {
+              method: 'PATCH',
+              body: JSON.stringify({ status: btn.dataset.action }),
+            });
+            const all = await apiFetch('/bookings');
+            booking = all.find((b) => b.id === booking.id);
+            render();
+          } catch (err) {
+            alert(err.message || 'Could not update this booking.');
+            btn.disabled = false;
+          }
         });
       });
 
       const reviewBtn = document.getElementById('review-btn');
       if (reviewBtn) {
-        reviewBtn.addEventListener('click', () => alert('Reviews are coming in a later phase — see Part 3, SHOULD HAVE.'));
+        reviewBtn.addEventListener('click', async () => {
+          const rating = prompt('Rate this delivery from 1 to 5:');
+          const ratingNum = Number(rating);
+          if (!rating || ratingNum < 1 || ratingNum > 5 || !Number.isInteger(ratingNum)) {
+            alert('Please enter a whole number from 1 to 5.');
+            return;
+          }
+          const comment = prompt('Optional comment:') || undefined;
+
+          try {
+            await apiFetch('/reviews', {
+              method: 'POST',
+              body: JSON.stringify({ bookingId: booking.id, rating: ratingNum, comment }),
+            });
+            alert('Review submitted — thank you!');
+            reviewBtn.disabled = true;
+            reviewBtn.textContent = 'Review submitted';
+          } catch (err) {
+            alert(err.message || 'Could not submit review.');
+          }
+        });
       }
     }
 
-    render();
-
-    document.getElementById('logout-link').addEventListener('click', (event) => {
-      event.preventDefault();
-      localStorage.removeItem('lemenbado_session');
-      window.location.href = '../index.html';
-    });
+    init();
   </script>
 </body>
 </html>

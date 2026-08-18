@@ -26,7 +26,6 @@
 <body>
   <div class="app-shell">
 
-    <!-- nav -->
     <header class="nav">
       <div class="container nav__inner">
         <a href="../index.html" class="nav__logo">
@@ -41,14 +40,14 @@
 
         <nav class="nav__links" aria-label="Primary">
           <a class="nav__link" href="dashboard.html">Dashboard</a>
-          <a class="nav__link" href="publish-availability.html">Availability</a>
+          <a class="nav__link" id="nav-secondary" href="publish-availability.html">Availability</a>
           <a class="nav__link" href="matches.html">Matches</a>
           <a class="nav__link nav__link--active" href="bookings.html" aria-current="page">Bookings</a>
         </nav>
 
         <div class="nav__actions">
           <a class="btn btn--ghost btn--sm" href="#" id="logout-link">Log out</a>
-          <a class="nav__avatar" href="profile.html" aria-label="Your profile">TO</a>
+          <a class="nav__avatar" href="profile.html" id="nav-avatar" aria-label="Your profile">--</a>
         </div>
       </div>
     </header>
@@ -87,110 +86,77 @@
 
   </div>
 
+  <script src="../js/app.js"></script>
   <script>
-    // mock data — stands in for GET /api/bookings until the Express
-    // API exists; same shape duplicated in booking-detail.html for now
-
-    const BOOKINGS = [
-      {
-        id: 'bk_1',
-        origin: 'Addis Ababa',
-        destination: 'Adama',
-        status: 'IN_TRANSIT',
-        weightKg: 2000,
-        counterpart: 'Nib Import Export',
-        dateLabel: 'Picked up Aug 5, 14:20',
-      },
-      {
-        id: 'bk_2',
-        origin: 'Hawassa',
-        destination: 'Addis Ababa',
-        status: 'COMPLETED',
-        weightKg: 4500,
-        counterpart: 'Bekele Trading PLC',
-        dateLabel: 'Delivered Jul 30',
-      },
-      {
-        id: 'bk_3',
-        origin: 'Addis Ababa',
-        destination: 'Hawassa',
-        status: 'REQUESTED',
-        weightKg: 3000,
-        counterpart: 'Bekele Trading PLC',
-        dateLabel: 'Needed by Aug 6',
-      },
-      {
-        id: 'bk_4',
-        origin: 'Addis Ababa',
-        destination: 'Bahir Dar',
-        status: 'ACCEPTED',
-        weightKg: 1800,
-        counterpart: 'Selam Hardware',
-        dateLabel: 'Departs Aug 11, 06:00',
-      },
-      {
-        id: 'bk_5',
-        origin: 'Addis Ababa',
-        destination: 'Mekelle',
-        status: 'CANCELLED',
-        weightKg: 6000,
-        counterpart: 'Merkato Grains Co.',
-        dateLabel: 'Cancelled Aug 2',
-      },
-    ];
-
     const STATUS_BADGE = {
-      REQUESTED: 'badge--wait',
-      ACCEPTED: 'badge--wait',
-      IN_TRANSIT: 'badge--wait',
-      COMPLETED: 'badge--signal',
-      CANCELLED: 'badge--alert',
+      REQUESTED: 'badge--wait', ACCEPTED: 'badge--wait', IN_TRANSIT: 'badge--wait', DELIVERED: 'badge--wait',
+      COMPLETED: 'badge--signal', CANCELLED: 'badge--alert', REJECTED: 'badge--alert',
     };
-
     const STATUS_LABEL = {
-      REQUESTED: 'Requested',
-      ACCEPTED: 'Accepted',
-      IN_TRANSIT: 'In transit',
-      COMPLETED: 'Completed',
-      CANCELLED: 'Cancelled',
+      REQUESTED: 'Requested', ACCEPTED: 'Accepted', IN_TRANSIT: 'In transit', DELIVERED: 'Delivered',
+      COMPLETED: 'Completed', CANCELLED: 'Cancelled', REJECTED: 'Rejected',
     };
 
-    const list = document.getElementById('booking-list');
-    const emptyState = document.getElementById('empty-state');
+    function fmtDate(value) {
+      if (!value) return '—';
+      return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+
+    let allBookings = [];
+
+    async function init() {
+      const user = requireSession();
+      if (!user) return;
+
+      document.getElementById('nav-avatar').textContent = (user.name || 'U').split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+      document.getElementById('nav-secondary').textContent = user.role === 'TRUCK_OWNER' ? 'Availability' : 'Post cargo';
+      document.getElementById('nav-secondary').href = user.role === 'TRUCK_OWNER' ? 'publish-availability.html' : 'post-cargo.html';
+
+      try {
+        allBookings = await apiFetch('/bookings');
+      } catch (err) {
+        document.getElementById('booking-list').innerHTML = `<div class="card" style="color: var(--color-alert);">${err.message}</div>`;
+        return;
+      }
+
+      renderBookings('ALL');
+
+      document.getElementById('tabs').addEventListener('click', (event) => {
+        const tab = event.target.closest('.tab');
+        if (!tab) return;
+        document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', 'false'));
+        tab.setAttribute('aria-selected', 'true');
+        renderBookings(tab.dataset.status);
+      });
+    }
 
     function renderBookings(filter) {
-      const items = filter === 'ALL' ? BOOKINGS : BOOKINGS.filter((b) => b.status === filter);
-      list.innerHTML = items.map((b) => `
-        <a class="card avail-card" href="booking-detail.html?id=${b.id}" style="display:flex;">
-          <div class="avail-card__top">
-            <span class="avail-card__route">${b.origin} <span class="avail-card__route-arrow">→</span> ${b.destination}</span>
-            <span class="badge ${STATUS_BADGE[b.status]}">${STATUS_LABEL[b.status]}</span>
-          </div>
-          <div class="avail-card__meta">
-            <span class="data">${b.weightKg.toLocaleString()} kg</span>
-            <span class="data">${b.dateLabel}</span>
-            <span>${b.counterpart}</span>
-          </div>
-        </a>
-      `).join('');
+      const items = filter === 'ALL' ? allBookings : allBookings.filter((b) => b.status === filter);
+      const list = document.getElementById('booking-list');
+      const emptyState = document.getElementById('empty-state');
+
+      list.innerHTML = items.map((b) => {
+        const origin = b.truck_availability?.origin_city?.name || '—';
+        const dest = b.truck_availability?.dest_city?.name || '—';
+        const weight = b.cargo_request ? Number(b.cargo_request.weight_kg).toLocaleString() + ' kg' : '';
+        return `
+          <a class="card avail-card" href="booking-detail.html?id=${b.id}" style="display:flex;">
+            <div class="avail-card__top">
+              <span class="avail-card__route">${origin} <span class="avail-card__route-arrow">→</span> ${dest}</span>
+              <span class="badge ${STATUS_BADGE[b.status] || 'badge--wait'}">${STATUS_LABEL[b.status] || b.status}</span>
+            </div>
+            <div class="avail-card__meta">
+              <span class="data">${weight}</span>
+              <span class="data">${fmtDate(b.created_at)}</span>
+            </div>
+          </a>
+        `;
+      }).join('');
+
       emptyState.style.display = items.length === 0 ? 'block' : 'none';
     }
 
-    document.getElementById('tabs').addEventListener('click', (event) => {
-      const tab = event.target.closest('.tab');
-      if (!tab) return;
-      document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', 'false'));
-      tab.setAttribute('aria-selected', 'true');
-      renderBookings(tab.dataset.status);
-    });
-
-    renderBookings('ALL');
-
-    document.getElementById('logout-link').addEventListener('click', (event) => {
-      event.preventDefault();
-      localStorage.removeItem('lemenbado_session');
-      window.location.href = '../index.html';
-    });
+    init();
   </script>
 </body>
 </html>

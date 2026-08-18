@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#E5972F" />
-  <meta name="description" content="Cargo matches for your published truck routes — Lemenbado." />
+  <meta name="description" content="Matches for your published routes or cargo requests — Lemenbado." />
 
   <link rel="manifest" href="../manifest.webmanifest" />
   <link rel="apple-touch-icon" href="../assets/icons/icon-192.png" />
@@ -26,7 +26,6 @@
 <body>
   <div class="app-shell">
 
-    <!-- nav -->
     <header class="nav">
       <div class="container nav__inner">
         <a href="../index.html" class="nav__logo">
@@ -41,14 +40,14 @@
 
         <nav class="nav__links" aria-label="Primary">
           <a class="nav__link" href="dashboard.html">Dashboard</a>
-          <a class="nav__link" href="publish-availability.html">Availability</a>
+          <a class="nav__link" id="nav-secondary" href="publish-availability.html">Availability</a>
           <a class="nav__link nav__link--active" href="matches.html" aria-current="page">Matches</a>
           <a class="nav__link" href="bookings.html">Bookings</a>
         </nav>
 
         <div class="nav__actions">
           <a class="btn btn--ghost btn--sm" href="#" id="logout-link">Log out</a>
-          <a class="nav__avatar" href="profile.html" aria-label="Your profile">TO</a>
+          <a class="nav__avatar" href="profile.html" id="nav-avatar" aria-label="Your profile">--</a>
         </div>
       </div>
     </header>
@@ -58,22 +57,26 @@
       <div class="page-header">
         <span class="hero__eyebrow">Matches</span>
         <h1>Find your best match</h1>
-        <p class="page-header__subtitle">
-          Cargo requests that fit a route you've already published — exact matches first, nearby-city matches after.
+        <p class="page-header__subtitle" id="page-subtitle">
+          Cargo requests that fit a route you've already published — exact matches only, for now.
         </p>
       </div>
 
-      <div class="field" style="max-width: 28rem; margin-bottom: var(--space-6);">
-        <label class="field__label" for="availability-select">Show matches for</label>
+      <div class="field" style="max-width: 28rem; margin-bottom: var(--space-6);" id="picker-field">
+        <label class="field__label" id="picker-label" for="picker-select">Show matches for</label>
         <div class="select-wrap">
-          <select class="select" id="availability-select"></select>
+          <select class="select" id="picker-select"></select>
         </div>
       </div>
 
       <div id="match-list" style="display: flex; flex-direction: column; gap: var(--space-4);"></div>
 
       <div class="card" id="empty-state" style="display: none; text-align: center; color: var(--color-ink-faint);">
-        No cargo requests match this route yet — check back once more cargo owners post on this corridor.
+        No matches yet on this route.
+      </div>
+
+      <div class="card" id="no-listings-state" style="display: none; text-align: center; color: var(--color-ink-faint);">
+        You don't have any active listings yet.
       </div>
 
     </main>
@@ -87,92 +90,146 @@
 
   </div>
 
+  <script src="../js/app.js"></script>
   <script>
-    // mock data — stands in for GET /api/trucks (own availabilities)
-    // and GET /api/matches?truckAvailabilityId=... until the Express
-    // API + Stage 1/2 matching engine (Part 7) exist
+    let user;
+    let myListings = [];
 
-    const AVAILABILITIES = [
-      { id: 'av_1', origin: 'Addis Ababa', destination: 'Hawassa', capacityKg: 5200, truck: 'Isuzu FRR · AA-12345' },
-      { id: 'av_2', origin: 'Addis Ababa', destination: 'Bahir Dar', capacityKg: 8000, truck: 'Isuzu FRR · AA-12345' },
-      { id: 'av_3', origin: 'Addis Ababa', destination: 'Adama', capacityKg: 3000, truck: 'Sino Howo · OR-98765' },
-    ];
+    function fmtDate(value) {
+      if (!value) return '—';
+      return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
 
-    const MATCHES = {
-      av_1: [
-        {
-          matchType: 'EXACT', origin: 'Addis Ababa', destination: 'Hawassa',
-          weightKg: 3000, cargoType: 'General goods', requiredDate: 'Aug 6',
-          priceEtb: 4500, cargoOwner: 'Bekele Trading PLC',
-        },
-        {
-          matchType: 'NEARBY', origin: 'Addis Ababa', destination: 'Shashemene',
-          weightKg: 1500, cargoType: 'Perishable', requiredDate: 'Aug 6',
-          priceEtb: null, cargoOwner: 'Ropack Foods',
-        },
-      ],
-      av_2: [
-        {
-          matchType: 'EXACT', origin: 'Addis Ababa', destination: 'Bahir Dar',
-          weightKg: 6000, cargoType: 'Construction material', requiredDate: 'Aug 10',
-          priceEtb: 9000, cargoOwner: 'Selam Hardware',
-        },
-      ],
-      av_3: [],
-    };
+    async function init() {
+      user = requireSession();
+      if (!user) return;
 
-    const MATCH_BADGE = { EXACT: 'badge--signal', NEARBY: 'badge--wait' };
-    const MATCH_LABEL = { EXACT: 'Exact match', NEARBY: 'Nearby match' };
+      document.getElementById('nav-avatar').textContent = (user.name || 'U').split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
 
-    const select = document.getElementById('availability-select');
-    const list = document.getElementById('match-list');
-    const emptyState = document.getElementById('empty-state');
+      if (user.role === 'TRUCK_OWNER') {
+        document.getElementById('nav-secondary').textContent = 'Availability';
+        document.getElementById('nav-secondary').href = 'publish-availability.html';
+        document.getElementById('page-subtitle').textContent =
+          'Cargo requests that fit a route you\'ve already published — exact matches only, for now.';
+        document.getElementById('picker-label').textContent = 'Show matches for this availability';
+        myListings = await apiFetch('/truck-availability');
+      } else {
+        document.getElementById('nav-secondary').textContent = 'Post cargo';
+        document.getElementById('nav-secondary').href = 'post-cargo.html';
+        document.getElementById('page-subtitle').textContent =
+          'Trucks already headed your route that fit your cargo — exact matches only, for now.';
+        document.getElementById('picker-label').textContent = 'Show matches for this cargo request';
+        myListings = await apiFetch('/cargo');
+      }
 
-    select.innerHTML = AVAILABILITIES.map((a) => `
-      <option value="${a.id}">${a.origin} → ${a.destination} · ${a.capacityKg.toLocaleString()} kg · ${a.truck}</option>
-    `).join('');
+      const active = myListings.filter((l) => l.status === 'OPEN');
+      const select = document.getElementById('picker-select');
 
-    function renderMatches(availabilityId) {
-      const matches = MATCHES[availabilityId] || [];
-      list.innerHTML = matches.map((m) => `
-        <div class="card avail-card">
-          <div class="avail-card__top">
-            <span class="avail-card__route">${m.origin} <span class="avail-card__route-arrow">→</span> ${m.destination}</span>
-            <span class="badge ${MATCH_BADGE[m.matchType]}">${MATCH_LABEL[m.matchType]}</span>
+      if (active.length === 0) {
+        document.getElementById('picker-field').style.display = 'none';
+        document.getElementById('no-listings-state').style.display = 'block';
+        return;
+      }
+
+      select.innerHTML = active.map((l) => {
+        if (user.role === 'TRUCK_OWNER') {
+          return `<option value="${l.id}">${l.origin_city?.name} → ${l.dest_city?.name} · ${Number(l.available_capacity_kg).toLocaleString()} kg · ${l.truck?.plate_number || ''}</option>`;
+        }
+        return `<option value="${l.id}">${l.origin_city?.name} → ${l.dest_city?.name} · ${Number(l.weight_kg).toLocaleString()} kg · needed by ${fmtDate(l.required_date)}</option>`;
+      }).join('');
+
+      select.addEventListener('change', () => renderMatches(select.value));
+      renderMatches(select.value);
+    }
+
+    async function renderMatches(listingId) {
+      const list = document.getElementById('match-list');
+      const emptyState = document.getElementById('empty-state');
+      list.innerHTML = '';
+      emptyState.style.display = 'none';
+
+      let matches = [];
+      try {
+        if (user.role === 'TRUCK_OWNER') {
+          matches = await apiFetch(`/matches?truckAvailabilityId=${listingId}`);
+        } else {
+          matches = await apiFetch(`/matches?cargoRequestId=${listingId}`);
+        }
+      } catch (err) {
+        list.innerHTML = `<div class="card" style="color: var(--color-alert);">${err.message || 'Could not load matches.'}</div>`;
+        return;
+      }
+
+      if (matches.length === 0) {
+        emptyState.style.display = 'block';
+        return;
+      }
+
+      list.innerHTML = matches.map((m) => {
+        if (user.role === 'TRUCK_OWNER') {
+          return `
+            <div class="card avail-card">
+              <div class="avail-card__top">
+                <span class="avail-card__route">${m.origin_city?.name} <span class="avail-card__route-arrow">→</span> ${m.dest_city?.name}</span>
+                <span class="badge badge--signal">Exact match</span>
+              </div>
+              <div class="avail-card__meta">
+                <span class="data">${Number(m.weight_kg).toLocaleString()} kg</span>
+                <span>${m.cargo_type ? m.cargo_type.name : ''}</span>
+                <span class="data">Needed by ${fmtDate(m.required_date)}</span>
+                ${m.desired_price_etb ? `<span class="data">${Number(m.desired_price_etb).toLocaleString()} ETB</span>` : '<span>Price not specified</span>'}
+              </div>
+              <div class="avail-card__actions">
+                <button class="btn btn--primary btn--sm" data-book data-cargo="${m.id}" data-truck="${listingId}">Request booking</button>
+              </div>
+            </div>
+          `;
+        }
+        return `
+          <div class="card avail-card">
+            <div class="avail-card__top">
+              <span class="avail-card__route">${m.origin_city?.name} <span class="avail-card__route-arrow">→</span> ${m.dest_city?.name}</span>
+              <span class="badge badge--signal">Exact match</span>
+            </div>
+            <div class="avail-card__meta">
+              <span class="data">${Number(m.available_capacity_kg).toLocaleString()} kg free</span>
+              <span>${m.truck ? m.truck.plate_number : ''}</span>
+              <span class="data">${fmtDate(m.departure_window_start)} – ${fmtDate(m.departure_window_end)}</span>
+            </div>
+            <div class="avail-card__actions">
+              <button class="btn btn--primary btn--sm" data-book data-cargo="${listingId}" data-truck="${m.id}">Request booking</button>
+            </div>
           </div>
-          <div class="avail-card__meta">
-            <span class="data">${m.weightKg.toLocaleString()} kg</span>
-            <span>${m.cargoType}</span>
-            <span class="data">Needed by ${m.requiredDate}</span>
-            ${m.priceEtb ? `<span class="data">${m.priceEtb.toLocaleString()} ETB</span>` : '<span>Price not specified</span>'}
-            <span>Cargo: ${m.cargoOwner}</span>
-          </div>
-          <div class="avail-card__actions">
-            <button class="btn btn--primary btn--sm" data-request>Request booking</button>
-            <a class="btn btn--ghost btn--sm" href="post-cargo.html">View cargo owner</a>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
 
-      emptyState.style.display = matches.length === 0 ? 'block' : 'none';
+      wireBookingButtons();
+    }
 
-      list.querySelectorAll('[data-request]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          // no backend yet — this is where POST /api/bookings goes
-          alert('Booking requested (mock) — you\'ll be able to track it on the Bookings page once the API exists.');
-          window.location.href = 'bookings.html';
+    function wireBookingButtons() {
+      document.querySelectorAll('[data-book]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          btn.disabled = true;
+          btn.textContent = 'Requesting…';
+          try {
+            await apiFetch('/bookings', {
+              method: 'POST',
+              body: JSON.stringify({
+                truckAvailabilityId: btn.dataset.truck,
+                cargoRequestId: btn.dataset.cargo,
+              }),
+            });
+            window.location.href = 'bookings.html';
+          } catch (err) {
+            alert(err.message || 'Could not request this booking.');
+            btn.disabled = false;
+            btn.textContent = 'Request booking';
+          }
         });
       });
     }
 
-    select.addEventListener('change', () => renderMatches(select.value));
-    renderMatches(select.value);
-
-    document.getElementById('logout-link').addEventListener('click', (event) => {
-      event.preventDefault();
-      localStorage.removeItem('lemenbado_session');
-      window.location.href = '../index.html';
-    });
+    init();
   </script>
 </body>
 </html>
