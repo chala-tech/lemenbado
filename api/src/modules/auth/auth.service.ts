@@ -51,3 +51,15 @@ export async function getUserById(id: string) {
   if (error || !data) throw new HttpError(404, 'User not found');
   return toPublicUser(data);
 }
+
+export async function updateProfile(userId: string, input: { name?: string; phone?: string }) {
+  const { data, error } = await supabase
+    .from('users')
+    .update(input)
+    .eq('id', userId)
+    .select()
+    .single();
+
+  if (error || !data) throw new HttpError(500, 'Failed to update profile');
+  return toPublicUser(data);
+}
