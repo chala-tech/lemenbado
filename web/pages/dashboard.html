@@ -137,8 +137,14 @@
     }
 
     async function init() {
-      const user = requireSession();
+            const user = requireSession();
       if (!user) return;
+
+      
+      if (user.role === 'ADMIN') {
+        window.location.href = 'admin.html';
+        return;
+      }
 
       document.getElementById('role-label').textContent = user.role === 'CARGO_OWNER' ? 'Cargo owner' : 'Truck owner';
       document.getElementById('welcome-heading').textContent = `Welcome back, ${(user.name || 'there').split(' ')[0]}`;

@@ -31,20 +31,31 @@ export async function register(input: RegisterInput) {
   };
 }
 
+
 export async function login(email: string, password: string) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error || !data.user) throw new HttpError(401, 'Invalid email or password');
+
+  
+  const { data: profile, error: profileError } = await supabase
+    .from('users')
+    .select('name, role')
+    .eq('id', data.user.id)
+    .single();
+
+  if (profileError || !profile) throw new HttpError(500, 'User profile not found');
 
   return {
     token: data.session?.access_token ?? null,
     user: toPublicUser({
       id: data.user.id,
       email: data.user.email ?? email,
-      name: data.user.user_metadata?.name ?? '',
-      role: data.user.user_metadata?.role ?? 'USER',
+      name: profile.name,
+      role: profile.role,
     }),
   };
 }
+
 
 export async function getUserById(id: string) {
   const { data, error } = await supabase.from('users').select('*').eq('id', id).single();

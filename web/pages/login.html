@@ -103,7 +103,7 @@
         });
 
         Session.set({ token: result.token, user: result.user });
-        window.location.href = 'dashboard.html';
+        window.location.href = result.user.role === 'ADMIN' ? 'admin.html' : 'dashboard.html';
       } catch (err) {
         showFormError(form, err.message || 'Login failed. Check your email and password.');
         submitBtn.disabled = false;

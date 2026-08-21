@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#E5972F" />
-  <meta name="description" content="Lemenbado admin — verify users, moderate listings, resolve disputes." />
+  <meta name="description" content="Lemenbado admin — verify documents, moderate listings." />
 
   <link rel="manifest" href="../manifest.webmanifest" />
   <link rel="apple-touch-icon" href="../assets/icons/icon-192.png" />
@@ -26,7 +26,6 @@
 <body>
   <div class="app-shell">
 
-    <!-- nav (admin — deliberately not the marketplace nav) -->
     <header class="nav">
       <div class="container nav__inner">
         <a href="../index.html" class="nav__logo">
@@ -45,35 +44,34 @@
       </div>
     </header>
 
-    <!-- guard message (shown if not an admin) -->
     <main class="container container--narrow page" id="guard-view" style="display: none;">
       <div class="card" style="text-align: center;">
         <h2>Admin access only</h2>
         <p class="page-header__subtitle" style="margin-inline: auto;">
-          This area is restricted to admin accounts. This page checks the role stored client-side, which is fine for
-          this demo — the real check has to happen on the server, per Part 11 of the blueprint, since anyone can edit
-          localStorage in dev tools.
+          This area is restricted to admin accounts. The server also enforces this independently on every
+          request (Part 11) — this client-side check just avoids showing you a broken page.
         </p>
         <a class="btn btn--primary" href="dashboard.html" style="margin-top: var(--space-4);">Back to dashboard</a>
       </div>
     </main>
 
-    <!-- admin content -->
     <main class="container page" id="admin-view" style="display: none;">
 
       <div class="page-header">
         <span class="hero__eyebrow">Admin</span>
-        <h1>Verification, listings & disputes</h1>
+        <h1>Users, documents & listings</h1>
         <p class="page-header__subtitle">Manual review for the pilot cohort — automate once this becomes the bottleneck (Part 10).</p>
       </div>
 
       <div class="tabs" role="tablist" aria-label="Admin sections" id="tabs">
         <button class="tab" role="tab" aria-selected="true" data-panel="users">Users</button>
+        <button class="tab" role="tab" aria-selected="false" data-panel="documents">Documents</button>
         <button class="tab" role="tab" aria-selected="false" data-panel="listings">Listings</button>
         <button class="tab" role="tab" aria-selected="false" data-panel="disputes">Disputes</button>
       </div>
 
       <section id="panel-users" style="display: flex; flex-direction: column; gap: var(--space-4);"></section>
+      <section id="panel-documents" style="display: none; flex-direction: column; gap: var(--space-4);"></section>
       <section id="panel-listings" style="display: none; flex-direction: column; gap: var(--space-4);"></section>
       <section id="panel-disputes" style="display: none; flex-direction: column; gap: var(--space-4);"></section>
 
@@ -88,139 +86,176 @@
 
   </div>
 
+  <script src="../js/app.js"></script>
   <script>
-  
-
-    const session = JSON.parse(localStorage.getItem('lemenbado_session') || 'null');
-    const user = session ? session.user : null;
-
-    if (!user || user.role !== 'ADMIN') {
-      document.getElementById('guard-view').style.display = 'block';
-    } else {
-      document.getElementById('admin-view').style.display = 'block';
-      initAdmin();
+    function fmtDate(value) {
+      if (!value) return '—';
+      return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
     }
 
-    function initAdmin() {
-      // mock data — stands in for GET /api/admin/*
-      const USERS = [
-        { id: 'u_1', name: 'Tesfaye Alemu', role: 'Truck owner', phone: '+251 91 111 2222', status: 'PENDING' },
-        { id: 'u_2', name: 'Bekele Trading PLC', role: 'Cargo owner', phone: '+251 92 222 3333', status: 'PENDING' },
-        { id: 'u_3', name: 'Selam Hardware', role: 'Cargo owner', phone: '+251 93 333 4444', status: 'VERIFIED' },
-      ];
+    async function init() {
+      const user = requireSession();
+      if (!user) return;
 
-      const LISTINGS = [
-        { id: 'l_1', type: 'Truck availability', route: 'Addis Ababa → Hawassa', owner: 'Tesfaye Alemu', status: 'ACTIVE' },
-        { id: 'l_2', type: 'Cargo request', route: 'Addis Ababa → Bahir Dar', owner: 'Selam Hardware', status: 'ACTIVE' },
-        { id: 'l_3', type: 'Truck availability', route: 'Addis Ababa → Adama', owner: 'Tesfaye Alemu', status: 'SUSPENDED' },
-      ];
+      if (user.role !== 'ADMIN') {
+        document.getElementById('guard-view').style.display = 'block';
+        return;
+      }
 
-      const DISPUTES = [
-        { id: 'd_1', route: 'Addis Ababa → Hawassa', parties: 'Tesfaye Alemu ↔ Bekele Trading PLC', summary: 'Cargo weight didn\'t match what was posted.', status: 'OPEN' },
-      ];
+      document.getElementById('admin-view').style.display = 'block';
 
-      const USER_BADGE = { PENDING: 'badge--wait', VERIFIED: 'badge--signal', REJECTED: 'badge--alert' };
-      const LISTING_BADGE = { ACTIVE: 'badge--signal', SUSPENDED: 'badge--alert' };
-      const DISPUTE_BADGE = { OPEN: 'badge--wait', RESOLVED: 'badge--signal' };
+      await Promise.all([loadUsers(), loadDocuments(), loadListings()]);
+      renderDisputes();
+      wireTabs();
+    }
 
-      function renderUsers() {
-        document.getElementById('panel-users').innerHTML = USERS.map((u) => `
+    async function loadUsers() {
+      const panel = document.getElementById('panel-users');
+      try {
+        const users = await apiFetch('/admin/users');
+        if (users.length === 0) {
+          panel.innerHTML = `<div class="card" style="text-align:center; color: var(--color-ink-faint);">No users yet.</div>`;
+          return;
+        }
+        panel.innerHTML = users.map((u) => `
           <div class="card avail-card">
             <div class="avail-card__top">
               <span class="avail-card__route">${u.name}</span>
-              <span class="badge ${USER_BADGE[u.status]}" id="user-badge-${u.id}">${u.status}</span>
+              <span class="badge badge--wait">${u.role}</span>
             </div>
             <div class="avail-card__meta">
-              <span>${u.role}</span>
-              <span class="data">${u.phone}</span>
+              <span class="data">${u.email}</span>
+              <span>Joined ${fmtDate(u.created_at)}</span>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        panel.innerHTML = `<div class="card" style="color: var(--color-alert);">${err.message}</div>`;
+      }
+    }
+
+    async function loadDocuments() {
+      const panel = document.getElementById('panel-documents');
+      try {
+        const docs = await apiFetch('/admin/documents');
+        if (docs.length === 0) {
+          panel.innerHTML = `<div class="card" style="text-align:center; color: var(--color-ink-faint);">No documents pending review.</div>`;
+          return;
+        }
+        panel.innerHTML = docs.map((d) => `
+          <div class="card avail-card">
+            <div class="avail-card__top">
+              <span class="avail-card__route">${d.user ? d.user.name : 'Unknown user'}</span>
+              <span class="badge badge--wait">${d.status}</span>
+            </div>
+            <div class="avail-card__meta">
+              <span>${d.type}</span>
+              <span>${d.user ? d.user.role : ''}</span>
+              <span class="data">Submitted ${fmtDate(d.created_at)}</span>
             </div>
             <div class="avail-card__actions">
-              <button class="btn btn--ghost btn--sm" data-verify="${u.id}" ${u.status === 'VERIFIED' ? 'disabled' : ''}>Verify</button>
-              <button class="btn btn--ghost btn--sm" data-reject="${u.id}" ${u.status === 'REJECTED' ? 'disabled' : ''}>Reject</button>
+              <button class="btn btn--ghost btn--sm" data-doc-verify="${d.id}">Verify</button>
+              <button class="btn btn--ghost btn--sm" data-doc-reject="${d.id}">Reject</button>
             </div>
           </div>
         `).join('');
 
-        document.querySelectorAll('[data-verify]').forEach((btn) => btn.addEventListener('click', () => {
-          const u = USERS.find((x) => x.id === btn.dataset.verify);
-          u.status = 'VERIFIED';
-          renderUsers();
-        }));
-        document.querySelectorAll('[data-reject]').forEach((btn) => btn.addEventListener('click', () => {
-          const u = USERS.find((x) => x.id === btn.dataset.reject);
-          u.status = 'REJECTED';
-          renderUsers();
-        }));
+        panel.querySelectorAll('[data-doc-verify]').forEach((btn) => btn.addEventListener('click', () => decideDocument(btn.dataset.docVerify, 'VERIFIED')));
+        panel.querySelectorAll('[data-doc-reject]').forEach((btn) => btn.addEventListener('click', () => decideDocument(btn.dataset.docReject, 'REJECTED')));
+      } catch (err) {
+        panel.innerHTML = `<div class="card" style="color: var(--color-alert);">${err.message}</div>`;
       }
+    }
 
-      function renderListings() {
-        document.getElementById('panel-listings').innerHTML = LISTINGS.map((l) => `
+    async function decideDocument(id, outcome) {
+      try {
+        await apiFetch(`/admin/documents/${id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ outcome }),
+        });
+        await loadDocuments();
+      } catch (err) {
+        alert(err.message || 'Could not update this document.');
+      }
+    }
+
+    async function loadListings() {
+      const panel = document.getElementById('panel-listings');
+      try {
+        const { availabilities, cargoRequests } = await apiFetch('/admin/listings');
+        const items = [
+          ...availabilities.map((a) => ({
+            id: a.id, kind: 'truck-availability', label: 'Truck availability',
+            route: `${a.origin_city?.name || '—'} → ${a.dest_city?.name || '—'}`,
+            owner: a.truck?.owner?.name || '—', status: a.status,
+          })),
+          ...cargoRequests.map((c) => ({
+            id: c.id, kind: 'cargo-request', label: 'Cargo request',
+            route: `${c.origin_city?.name || '—'} → ${c.dest_city?.name || '—'}`,
+            owner: c.business?.name || '—', status: c.status,
+          })),
+        ];
+
+        if (items.length === 0) {
+          panel.innerHTML = `<div class="card" style="text-align:center; color: var(--color-ink-faint);">No listings yet.</div>`;
+          return;
+        }
+
+        panel.innerHTML = items.map((item) => `
           <div class="card avail-card">
             <div class="avail-card__top">
-              <span class="avail-card__route">${l.route}</span>
-              <span class="badge ${LISTING_BADGE[l.status]}">${l.status === 'ACTIVE' ? 'Active' : 'Suspended'}</span>
+              <span class="avail-card__route">${item.route}</span>
+              <span class="badge ${item.status === 'CANCELLED' ? 'badge--alert' : 'badge--signal'}">${item.status}</span>
             </div>
             <div class="avail-card__meta">
-              <span>${l.type}</span>
-              <span>${l.owner}</span>
+              <span>${item.label}</span>
+              <span>${item.owner}</span>
             </div>
             <div class="avail-card__actions">
-              <button class="btn btn--ghost btn--sm" data-toggle="${l.id}">
-                ${l.status === 'ACTIVE' ? 'Suspend' : 'Reinstate'}
-              </button>
+              ${item.status !== 'CANCELLED' ? `<button class="btn btn--ghost btn--sm" data-suspend="${item.kind}:${item.id}">Suspend</button>` : ''}
             </div>
           </div>
         `).join('');
 
-        document.querySelectorAll('[data-toggle]').forEach((btn) => btn.addEventListener('click', () => {
-          const l = LISTINGS.find((x) => x.id === btn.dataset.toggle);
-          l.status = l.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
-          renderListings();
-        }));
+        panel.querySelectorAll('[data-suspend]').forEach((btn) => {
+          btn.addEventListener('click', async () => {
+            const [kind, id] = btn.dataset.suspend.split(':');
+            btn.disabled = true;
+            try {
+              await apiFetch(`/admin/listings/${kind}/${id}/suspend`, { method: 'PATCH' });
+              await loadListings();
+            } catch (err) {
+              alert(err.message || 'Could not suspend this listing.');
+              btn.disabled = false;
+            }
+          });
+        });
+      } catch (err) {
+        panel.innerHTML = `<div class="card" style="color: var(--color-alert);">${err.message}</div>`;
       }
+    }
 
-      function renderDisputes() {
-        document.getElementById('panel-disputes').innerHTML = DISPUTES.map((d) => `
-          <div class="card avail-card">
-            <div class="avail-card__top">
-              <span class="avail-card__route">${d.route}</span>
-              <span class="badge ${DISPUTE_BADGE[d.status]}">${d.status === 'OPEN' ? 'Open' : 'Resolved'}</span>
-            </div>
-            <div class="avail-card__meta"><span>${d.parties}</span></div>
-            <p class="field__hint" style="margin-top: var(--space-2);">${d.summary}</p>
-            <div class="avail-card__actions">
-              <button class="btn btn--ghost btn--sm" data-resolve="${d.id}" ${d.status === 'RESOLVED' ? 'disabled' : ''}>Mark resolved</button>
-            </div>
-          </div>
-        `).join('') || '<p class="field__hint">No disputes on file.</p>';
+    function renderDisputes() {
+      document.getElementById('panel-disputes').innerHTML = `
+        <div class="card" style="text-align:center; color: var(--color-ink-faint);">
+          Dispute handling isn't built yet — the blueprint's Dispute table exists in the schema, but no API
+          endpoints or admin actions have been wired up for it in this build.
+        </div>`;
+    }
 
-        document.querySelectorAll('[data-resolve]').forEach((btn) => btn.addEventListener('click', () => {
-          const d = DISPUTES.find((x) => x.id === btn.dataset.resolve);
-          d.status = 'RESOLVED';
-          renderDisputes();
-        }));
-      }
-
-      renderUsers();
-      renderListings();
-      renderDisputes();
-
+    function wireTabs() {
       document.getElementById('tabs').addEventListener('click', (event) => {
         const tab = event.target.closest('.tab');
         if (!tab) return;
         document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', 'false'));
         tab.setAttribute('aria-selected', 'true');
-        ['users', 'listings', 'disputes'].forEach((name) => {
+        ['users', 'documents', 'listings', 'disputes'].forEach((name) => {
           document.getElementById(`panel-${name}`).style.display = name === tab.dataset.panel ? 'flex' : 'none';
         });
       });
     }
 
-    document.getElementById('logout-link').addEventListener('click', (event) => {
-      event.preventDefault();
-      localStorage.removeItem('lemenbado_session');
-      window.location.href = '../index.html';
-    });
+    init();
   </script>
 </body>
 </html>
