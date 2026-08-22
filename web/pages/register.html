@@ -143,6 +143,7 @@
         }
 
         Session.set({ token: result.token, user: result.user });
+        sessionStorage.setItem('lemenbado_just_registered', '1');
         window.location.href = 'dashboard.html';
       } catch (err) {
         showFormError(form, err.message || 'Registration failed. Please try again.');

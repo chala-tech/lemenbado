@@ -147,7 +147,16 @@
       }
 
       document.getElementById('role-label').textContent = user.role === 'CARGO_OWNER' ? 'Cargo owner' : 'Truck owner';
-      document.getElementById('welcome-heading').textContent = `Welcome back, ${(user.name || 'there').split(' ')[0]}`;
+            const firstName = (user.name || 'there').split(' ')[0];
+      const justRegistered = sessionStorage.getItem('lemenbado_just_registered');
+
+      if (justRegistered) {
+        sessionStorage.removeItem('lemenbado_just_registered'); // one-time only
+        document.getElementById('welcome-heading').textContent = `Welcome to Lemenbado, ${firstName}!`;
+      } else {
+        document.getElementById('welcome-heading').textContent = `Welcome back, ${firstName}`;
+      }
+
       document.getElementById('nav-avatar').textContent = (user.name || 'U').split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
 
       const actions = document.getElementById('quick-actions');
