@@ -289,10 +289,13 @@
               maxCapacityKg: Number(document.getElementById('max-capacity').value),
             }),
           });
+
           truckForm.reset();
           truckForm.style.display = 'none';
           await loadTrucks();
+          showToast('Truck added successfully.');
         } catch (err) {
+
           showFormError(truckForm, err.message || 'Could not add truck.');
         } finally {
           submitBtn.disabled = false;
@@ -410,6 +413,7 @@
           try {
             await apiFetch(`/truck-availability/${btn.dataset.cancel}/cancel`, { method: 'PATCH' });
             await loadAvailabilities();
+            showToast('Availability cancelled.');
           } catch (err) {
             alert(err.message || 'Could not cancel this availability.');
             btn.disabled = false;

@@ -167,13 +167,14 @@
       }
     }
 
-    async function decideDocument(id, outcome) {
+        async function decideDocument(id, outcome) {
       try {
         await apiFetch(`/admin/documents/${id}`, {
           method: 'PATCH',
           body: JSON.stringify({ outcome }),
         });
         await loadDocuments();
+        showToast(outcome === 'VERIFIED' ? 'Document verified.' : 'Document rejected.');
       } catch (err) {
         alert(err.message || 'Could not update this document.');
       }
@@ -222,8 +223,12 @@
             const [kind, id] = btn.dataset.suspend.split(':');
             btn.disabled = true;
             try {
+              
+                        
               await apiFetch(`/admin/listings/${kind}/${id}/suspend`, { method: 'PATCH' });
               await loadListings();
+              showToast('Listing suspended.');
+
             } catch (err) {
               alert(err.message || 'Could not suspend this listing.');
               btn.disabled = false;

@@ -313,6 +313,7 @@
           try {
             await apiFetch(`/cargo/${btn.dataset.cancel}/cancel`, { method: 'PATCH' });
             await loadCargoRequests();
+            showToast('Cargo request cancelled.');
           } catch (err) {
             alert(err.message || 'Could not cancel this cargo request.');
             btn.disabled = false;

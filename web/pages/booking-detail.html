@@ -227,6 +227,12 @@
         btn.addEventListener('click', async () => {
           btn.disabled = true;
           try {
+           
+                        const ACTION_LABEL = {
+              ACCEPTED: 'Booking accepted.', REJECTED: 'Booking rejected.',
+              IN_TRANSIT: 'Marked as picked up.', DELIVERED: 'Marked as delivered.',
+              COMPLETED: 'Booking completed.', CANCELLED: 'Booking cancelled.',
+            };
             await apiFetch(`/bookings/${booking.id}`, {
               method: 'PATCH',
               body: JSON.stringify({ status: btn.dataset.action }),
@@ -234,6 +240,8 @@
             const all = await apiFetch('/bookings');
             booking = all.find((b) => b.id === booking.id);
             render();
+            showToast(ACTION_LABEL[btn.dataset.action] || 'Booking updated.');
+
           } catch (err) {
             alert(err.message || 'Could not update this booking.');
             btn.disabled = false;
