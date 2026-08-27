@@ -129,4 +129,20 @@ function showFormSuccess(form, message) {
   setTimeout(() => banner.remove(), 4000);
 }
 
+/** Shows a temporary confirmation banner, for actions not tied to a form. */
+function showToast(message, type = 'success') {
+  let toast = document.getElementById('app-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'app-toast';
+    document.body.appendChild(toast);
+  }
+  toast.className = `toast toast--${type}`;
+  toast.innerHTML = `<span class="toast__dot"></span><span>${message}</span>`;
+
+  requestAnimationFrame(() => toast.classList.add('toast--visible'));
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(() => toast.classList.remove('toast--visible'), 3000);
+}
+
 document.addEventListener('DOMContentLoaded', wireLogout);
