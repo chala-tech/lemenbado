@@ -72,10 +72,10 @@
   <script src="../js/app.js"></script>
   <script>
     const STEPS = ['REQUESTED', 'ACCEPTED', 'IN_TRANSIT', 'DELIVERED', 'COMPLETED'];
-    const STEP_LABELS = {
-      REQUESTED: 'Requested', ACCEPTED: 'Accepted', IN_TRANSIT: 'In transit',
-      DELIVERED: 'Delivered', COMPLETED: 'Completed',
-    };
+  const STEP_LABELS = {
+  REQUESTED: 'Waiting', ACCEPTED: 'Ready to pick up', IN_TRANSIT: 'On the way',
+  DELIVERED: 'Arrived', COMPLETED: 'Done',
+};
     const STATUS_BADGE = {
       REQUESTED: 'badge--wait', ACCEPTED: 'badge--wait', IN_TRANSIT: 'badge--wait',
       DELIVERED: 'badge--wait', COMPLETED: 'badge--signal', CANCELLED: 'badge--alert', REJECTED: 'badge--alert',
@@ -163,12 +163,12 @@
           <button class="btn btn--ghost btn--sm" data-action="CANCELLED" type="button">Cancel request</button>`;
       }
 
-      const buttons = allowed.map((next) => {
-        if (status === 'REQUESTED' && next === 'ACCEPTED') return `<button class="btn btn--primary" data-action="ACCEPTED" type="button">Accept</button>`;
-        if (status === 'REQUESTED' && next === 'REJECTED') return `<button class="btn btn--ghost" data-action="REJECTED" type="button">Reject</button>`;
-        if (next === 'IN_TRANSIT') return `<button class="btn btn--primary" data-action="IN_TRANSIT" type="button">Mark picked up</button>`;
-        if (next === 'DELIVERED') return `<button class="btn btn--primary" data-action="DELIVERED" type="button">Mark delivered</button>`;
-        if (next === 'COMPLETED') return `<button class="btn btn--primary" data-action="COMPLETED" type="button">Confirm completed</button>`;
+        const buttons = allowed.map((next) => {
+        if (status === 'REQUESTED' && next === 'ACCEPTED') return `<button class="btn btn--primary" data-action="ACCEPTED" type="button">Accept this booking</button>`;
+        if (status === 'REQUESTED' && next === 'REJECTED') return `<button class="btn btn--ghost" data-action="REJECTED" type="button">Decline</button>`;
+        if (next === 'IN_TRANSIT') return `<button class="btn btn--primary" data-action="IN_TRANSIT" type="button">I've picked up the cargo</button>`;
+        if (next === 'DELIVERED') return `<button class="btn btn--primary" data-action="DELIVERED" type="button">I've delivered it</button>`;
+        if (next === 'COMPLETED') return `<button class="btn btn--primary" data-action="COMPLETED" type="button">Confirm everything went well</button>`;
         if (next === 'CANCELLED') return `<button class="btn btn--ghost btn--sm" data-action="CANCELLED" type="button">Cancel</button>`;
         return '';
       });
@@ -245,10 +245,10 @@
         btn.addEventListener('click', async () => {
           btn.disabled = true;
           try {
-            const ACTION_LABEL = {
-              ACCEPTED: 'Booking accepted.', REJECTED: 'Booking rejected.',
-              IN_TRANSIT: 'Marked as picked up.', DELIVERED: 'Marked as delivered.',
-              COMPLETED: 'Booking completed.', CANCELLED: 'Booking cancelled.',
+              const ACTION_LABEL = {
+              ACCEPTED: 'Booking confirmed.', REJECTED: 'Booking declined.',
+              IN_TRANSIT: 'Marked as picked up — on the way now.', DELIVERED: 'Marked as delivered.',
+              COMPLETED: "Done — thanks for confirming!", CANCELLED: 'Booking cancelled.',
             };
             await apiFetch(`/bookings/${booking.id}`, {
               method: 'PATCH',

@@ -173,7 +173,7 @@
   <script src="../js/app.js"></script>
   <script>
     const STATUS_BADGE = { OPEN: 'badge--signal', MATCHED: 'badge--wait', BOOKED: 'badge--wait', CANCELLED: 'badge--alert', EXPIRED: 'badge--alert' };
-    const STATUS_LABEL = { OPEN: 'Open', MATCHED: 'Matched', BOOKED: 'Booked', CANCELLED: 'Cancelled', EXPIRED: 'Expired' };
+    const STATUS_LABEL = { OPEN: 'Open for matches', MATCHED: 'Matched — awaiting booking', BOOKED: 'Booked — job in progress', CANCELLED: 'Cancelled', EXPIRED: 'Expired' };
 
     function fmtDate(value) {
       if (!value) return null;
