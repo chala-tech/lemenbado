@@ -60,12 +60,12 @@
         <p class="page-header__subtitle">Every request you've sent or received, in one place — tap a booking for the full timeline.</p>
       </div>
 
-      <div class="tabs" role="tablist" aria-label="Filter by status" id="tabs">
+           <div class="tabs" role="tablist" aria-label="Filter by status" id="tabs">
         <button class="tab" role="tab" aria-selected="true" data-status="ALL">All</button>
-        <button class="tab" role="tab" aria-selected="false" data-status="REQUESTED">Requested</button>
-        <button class="tab" role="tab" aria-selected="false" data-status="ACCEPTED">Accepted</button>
-        <button class="tab" role="tab" aria-selected="false" data-status="IN_TRANSIT">In transit</button>
-        <button class="tab" role="tab" aria-selected="false" data-status="COMPLETED">Completed</button>
+        <button class="tab" role="tab" aria-selected="false" data-status="REQUESTED">Awaiting reply</button>
+        <button class="tab" role="tab" aria-selected="false" data-status="ACCEPTED">Confirmed</button>
+        <button class="tab" role="tab" aria-selected="false" data-status="IN_TRANSIT">On the way</button>
+        <button class="tab" role="tab" aria-selected="false" data-status="COMPLETED">Done</button>
         <button class="tab" role="tab" aria-selected="false" data-status="CANCELLED">Cancelled</button>
       </div>
 
@@ -92,11 +92,10 @@
       REQUESTED: 'badge--wait', ACCEPTED: 'badge--wait', IN_TRANSIT: 'badge--wait', DELIVERED: 'badge--wait',
       COMPLETED: 'badge--signal', CANCELLED: 'badge--alert', REJECTED: 'badge--alert',
     };
-    const STATUS_LABEL = {
-      REQUESTED: 'Requested', ACCEPTED: 'Accepted', IN_TRANSIT: 'In transit', DELIVERED: 'Delivered',
-      COMPLETED: 'Completed', CANCELLED: 'Cancelled', REJECTED: 'Rejected',
-    };
-
+const STATUS_LABEL = {
+  REQUESTED: 'Awaiting reply', ACCEPTED: 'Confirmed', IN_TRANSIT: 'On the way', DELIVERED: 'Arrived',
+  COMPLETED: 'Done', CANCELLED: 'Cancelled', REJECTED: 'Declined',
+};
     function fmtDate(value) {
       if (!value) return '—';
       return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
