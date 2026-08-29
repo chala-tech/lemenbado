@@ -16,6 +16,21 @@ declare global {
   }
 }
 
+// short-lived cache so a burst of near-simultaneous requests from one
+// page load (dashboard fires several calls at once) doesn't each pay
+// a separate round-trip to fetch the same user's role/name
+interface CachedProfile {
+  role: string;
+  name: string;
+  expiresAt: number;
+}
+const profileCache = new Map<string, CachedProfile>();
+const CACHE_TTL_MS = 15_000;
+
+export function invalidateProfileCache(userId: string) {
+  profileCache.delete(userId);
+}
+
 export async function requireAuth(req: Request, _res: Response, next: NextFunction) {
   const header = req.headers.authorization;
   const token = header?.startsWith('Bearer ') ? header.slice(7) : null;
@@ -28,21 +43,33 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
       return next(new HttpError(401, 'Invalid or expired token'));
     }
 
+    const cached = profileCache.get(data.user.id);
+    let role: string;
+    let name: string;
 
-    const { data: profile, error: profileError } = await supabase
-      .from('users')
-      .select('role, name')
-      .eq('id', data.user.id)
-      .single();
+    if (cached && cached.expiresAt > Date.now()) {
+      role = cached.role;
+      name = cached.name;
+    } else {
+      const { data: profile, error: profileError } = await supabase
+        .from('users')
+        .select('role, name')
+        .eq('id', data.user.id)
+        .single();
 
-    if (profileError || !profile) {
-      return next(new HttpError(401, 'User profile not found'));
+      if (profileError || !profile) {
+        return next(new HttpError(401, 'User profile not found'));
+      }
+
+      role = profile.role;
+      name = profile.name;
+      profileCache.set(data.user.id, { role, name, expiresAt: Date.now() + CACHE_TTL_MS });
     }
 
     req.auth = {
       userId: data.user.id,
-      role: profile.role,
-      name: profile.name || data.user.email?.split('@')[0] || 'User',
+      role,
+      name: name || data.user.email?.split('@')[0] || 'User',
     };
 
     return next();

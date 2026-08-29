@@ -3,6 +3,7 @@ import { registerSchema, loginSchema, updateProfileSchema } from './auth.schema.
 import * as authService from './auth.service.js';
 import { requireAuth } from '../../middleware/auth.js';
 import { HttpError } from '../../middleware/errorHandler.js';
+import { invalidateProfileCache } from '../../middleware/auth.js';
 
 export const authRouter = Router();
 
@@ -45,6 +46,7 @@ authRouter.patch('/me', requireAuth, async (req, res, next) => {
     if (!parsed.success) throw new HttpError(400, parsed.error.issues[0].message);
 
     const user = await authService.updateProfile(req.auth!.userId, parsed.data);
+    invalidateProfileCache(req.auth!.userId);
     res.json({ user });
   } catch (err) {
     next(err);
