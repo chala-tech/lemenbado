@@ -166,13 +166,9 @@
         actions.innerHTML = `<a class="btn btn--primary" href="post-cargo.html">Post a cargo request</a>`;
       }
 
-      try {
-        if (user.role === 'TRUCK_OWNER') {
-          await loadTruckOwnerData();
-        } else {
-          await loadCargoOwnerData();
-        }
-        await loadBookings();
+        try {
+        const roleDataPromise = user.role === 'TRUCK_OWNER' ? loadTruckOwnerData() : loadCargoOwnerData();
+        await Promise.all([roleDataPromise, loadBookings()]);
       } catch (err) {
         console.error(err);
       }
