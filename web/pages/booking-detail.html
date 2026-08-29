@@ -202,6 +202,12 @@ const STEP_LABELS = {
       const truckTypeName = booking.truck_availability?.truck?.truck_type?.name?.toLowerCase() || 'truck';
       const capacity = booking.truck_availability ? Number(booking.truck_availability.available_capacity_kg).toLocaleString() : '—';
 
+      const isRequester = booking.requested_by_user_id === user.id;
+      const badgeLabel = booking.status === 'REQUESTED'
+        ? (isRequester ? 'Waiting for their reply' : 'Needs your reply')
+        : (STEP_LABELS[booking.status] || booking.status);
+
+      
       const counterpartHtml = isTruckSide
         ? `<p class="field__label" style="margin-bottom: var(--space-3);">What you're carrying</p>
            <p style="color: var(--color-ink); margin-bottom: var(--space-2);">
@@ -217,7 +223,7 @@ const STEP_LABELS = {
         <div class="page-header">
           <span class="hero__eyebrow">Booking</span>
           <h1>${origin} → ${dest}</h1>
-          <span class="badge ${STATUS_BADGE[booking.status] || 'badge--wait'}">${STEP_LABELS[booking.status] || booking.status}</span>
+                <span class="badge ${STATUS_BADGE[booking.status] || 'badge--wait'}">${badgeLabel}</span>
         </div>
 
         ${stepperHtml(booking.status)}
