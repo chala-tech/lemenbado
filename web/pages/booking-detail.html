@@ -143,10 +143,11 @@ const STEP_LABELS = {
       `).join('')}</div>`;
     }
 
-    function actionsHtml() {
+        function actionsHtml() {
       const status = booking.status;
       const allowed = ALLOWED_TRANSITIONS[status] || [];
       const isRequester = booking.requested_by_user_id === user.id;
+      const isTruckSide = booking.truck_availability?.truck?.owner_id === user.id;
 
       if (allowed.length === 0) {
         if (status === 'COMPLETED') {
@@ -155,15 +156,24 @@ const STEP_LABELS = {
         return '';
       }
 
-      // the person who made the request shouldn't accept/reject their own
-      // request — only the counterpart can respond to a REQUESTED booking
+      
       if (status === 'REQUESTED' && isRequester) {
         return `
           <p class="field__hint" style="margin-bottom: var(--space-3);">Waiting for a response from the other party.</p>
           <button class="btn btn--ghost btn--sm" data-action="CANCELLED" type="button">Cancel request</button>`;
       }
 
-        const buttons = allowed.map((next) => {
+     
+      if ((status === 'ACCEPTED' || status === 'IN_TRANSIT') && !isTruckSide) {
+        const waitingMsg = status === 'ACCEPTED'
+          ? "Waiting for the truck to pick up your cargo."
+          : "Your cargo is on the way — waiting for the truck to mark it delivered.";
+        return `
+          <p class="field__hint" style="margin-bottom: var(--space-3);">${waitingMsg}</p>
+          <button class="btn btn--ghost btn--sm" data-action="CANCELLED" type="button">Cancel</button>`;
+      }
+
+      const buttons = allowed.map((next) => {
         if (status === 'REQUESTED' && next === 'ACCEPTED') return `<button class="btn btn--primary" data-action="ACCEPTED" type="button">Accept this booking</button>`;
         if (status === 'REQUESTED' && next === 'REJECTED') return `<button class="btn btn--ghost" data-action="REJECTED" type="button">Decline</button>`;
         if (next === 'IN_TRANSIT') return `<button class="btn btn--primary" data-action="IN_TRANSIT" type="button">I've picked up the cargo</button>`;
@@ -175,7 +185,6 @@ const STEP_LABELS = {
 
       return buttons.join('');
     }
-
     function render() {
       if (!booking) {
         root.innerHTML = `
@@ -190,9 +199,7 @@ const STEP_LABELS = {
       const origin = booking.truck_availability?.origin_city?.name || '—';
       const dest = booking.truck_availability?.dest_city?.name || '—';
 
-      // which side of this booking is the current viewer on? determines
-      // which half of the match is "theirs" (skip it, they already know
-      // it) vs "the other side" (show it — that's the useful part)
+      
       const isTruckSide = booking.truck_availability?.truck?.owner_id === user.id;
 
       const weight = booking.cargo_request ? Number(booking.cargo_request.weight_kg).toLocaleString() : '—';
