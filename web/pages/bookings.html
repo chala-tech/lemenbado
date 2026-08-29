@@ -129,12 +129,22 @@ const STATUS_LABEL = {
       });
     }
 
+        const PAGE_SIZE = 20;
+    let visibleCount = PAGE_SIZE;
+
     function renderBookings(filter) {
+      visibleCount = PAGE_SIZE; // reset when switching tabs
+      renderVisible(filter);
+    }
+
+    function renderVisible(filter) {
       const items = filter === 'ALL' ? allBookings : allBookings.filter((b) => b.status === filter);
+      const shown = items.slice(0, visibleCount);
       const list = document.getElementById('booking-list');
       const emptyState = document.getElementById('empty-state');
 
-      list.innerHTML = items.map((b) => {
+      list.innerHTML = shown.map((b) => {
+
         const origin = b.truck_availability?.origin_city?.name || '—';
         const dest = b.truck_availability?.dest_city?.name || '—';
         const weight = b.cargo_request ? Number(b.cargo_request.weight_kg).toLocaleString() + ' kg' : '';
@@ -150,9 +160,25 @@ const STATUS_LABEL = {
             </div>
           </a>
         `;
-      }).join('');
+          }).join('');
 
       emptyState.style.display = items.length === 0 ? 'block' : 'none';
+
+      const existingBtn = document.getElementById('load-more-btn');
+      if (existingBtn) existingBtn.remove();
+
+      if (items.length > visibleCount) {
+        const btn = document.createElement('button');
+        btn.id = 'load-more-btn';
+        btn.className = 'btn btn--ghost';
+        btn.style.marginTop = 'var(--space-4)';
+        btn.textContent = `Load more (${items.length - visibleCount} remaining)`;
+        btn.addEventListener('click', () => {
+          visibleCount += PAGE_SIZE;
+          renderVisible(document.querySelector('.tab[aria-selected="true"]').dataset.status);
+        });
+        list.after(btn);
+      }
     }
 
     init();
