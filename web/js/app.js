@@ -145,4 +145,36 @@ function showToast(message, type = 'success') {
   toast._hideTimer = setTimeout(() => toast.classList.remove('toast--visible'), 3000);
 }
 
+
+
+const BOOKING_STATUS_BADGE = {
+  REQUESTED: 'badge--wait', ACCEPTED: 'badge--wait', IN_TRANSIT: 'badge--wait',
+  DELIVERED: 'badge--wait', COMPLETED: 'badge--signal', CANCELLED: 'badge--alert', REJECTED: 'badge--alert',
+};
+
+const BOOKING_STATUS_LABEL = {
+  REQUESTED: 'Awaiting reply', ACCEPTED: 'Confirmed', IN_TRANSIT: 'On the way',
+  DELIVERED: 'Arrived', COMPLETED: 'Done', CANCELLED: 'Cancelled', REJECTED: 'Declined',
+};
+
+
+function bookingStatusLabel(booking, currentUserId) {
+  if (booking.status === 'REQUESTED') {
+    return booking.requested_by_user_id === currentUserId ? 'Waiting for their reply' : 'Needs your reply';
+  }
+  return BOOKING_STATUS_LABEL[booking.status] || booking.status;
+}
+
+
+
+const LISTING_STATUS_BADGE = {
+  OPEN: 'badge--signal', MATCHED: 'badge--wait', BOOKED: 'badge--wait',
+  CANCELLED: 'badge--alert', EXPIRED: 'badge--alert',
+};
+
+const LISTING_STATUS_LABEL = {
+  OPEN: 'Open for matches', MATCHED: 'Matched — awaiting booking', BOOKED: 'Booked — job in progress',
+  CANCELLED: 'Cancelled', EXPIRED: 'Expired',
+};
+
 document.addEventListener('DOMContentLoaded', wireLogout);

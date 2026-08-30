@@ -72,14 +72,6 @@
   <script src="../js/app.js"></script>
   <script>
     const STEPS = ['REQUESTED', 'ACCEPTED', 'IN_TRANSIT', 'DELIVERED', 'COMPLETED'];
-const STEP_LABELS = {
-  REQUESTED: 'Awaiting reply', ACCEPTED: 'Confirmed', IN_TRANSIT: 'On the way',
-  DELIVERED: 'Arrived', COMPLETED: 'Done',
-};
-    const STATUS_BADGE = {
-      REQUESTED: 'badge--wait', ACCEPTED: 'badge--wait', IN_TRANSIT: 'badge--wait',
-      DELIVERED: 'badge--wait', COMPLETED: 'badge--signal', CANCELLED: 'badge--alert', REJECTED: 'badge--alert',
-    };
 
     // must match ALLOWED_TRANSITIONS in api/src/modules/bookings/bookings.service.ts
     const ALLOWED_TRANSITIONS = {
@@ -138,7 +130,7 @@ const STEP_LABELS = {
         <div class="stepper__step ${i < current ? 'stepper__step--done' : ''} ${i === current ? 'stepper__step--current' : ''}">
           <span class="stepper__line"></span>
           <span class="stepper__dot"></span>
-          <span class="stepper__label">${STEP_LABELS[step]}</span>
+            <span class="stepper__label">${BOOKING_STATUS_LABEL[step]}</span>
         </div>
       `).join('')}</div>`;
     }
@@ -209,10 +201,9 @@ const STEP_LABELS = {
       const truckTypeName = booking.truck_availability?.truck?.truck_type?.name?.toLowerCase() || 'truck';
       const capacity = booking.truck_availability ? Number(booking.truck_availability.available_capacity_kg).toLocaleString() : '—';
 
-      const isRequester = booking.requested_by_user_id === user.id;
-      const badgeLabel = booking.status === 'REQUESTED'
-        ? (isRequester ? 'Waiting for their reply' : 'Needs your reply')
-        : (STEP_LABELS[booking.status] || booking.status);
+   
+
+      const badgeLabel = bookingStatusLabel(booking, user.id);
 
       
       const counterpartHtml = isTruckSide
@@ -230,7 +221,9 @@ const STEP_LABELS = {
         <div class="page-header">
           <span class="hero__eyebrow">Booking</span>
           <h1>${origin} → ${dest}</h1>
-                <span class="badge ${STATUS_BADGE[booking.status] || 'badge--wait'}">${badgeLabel}</span>
+
+          <span class="badge ${BOOKING_STATUS_BADGE[booking.status] || 'badge--wait'}">${badgeLabel}</span>
+          
         </div>
 
         ${stepperHtml(booking.status)}

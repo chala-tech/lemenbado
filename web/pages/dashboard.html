@@ -116,16 +116,15 @@
 
   <script src="../js/app.js"></script>
   <script>
-    const STATUS_BADGE = {
-      REQUESTED: 'badge--wait', ACCEPTED: 'badge--wait', IN_TRANSIT: 'badge--wait',
-      DELIVERED: 'badge--wait', COMPLETED: 'badge--signal', CANCELLED: 'badge--alert',
-      REJECTED: 'badge--alert', OPEN: 'badge--signal', BOOKED: 'badge--wait',
-      EXPIRED: 'badge--alert', MATCHED: 'badge--wait',
-    };
-    const STATUS_LABEL = {
-      REQUESTED: 'Requested', ACCEPTED: 'Accepted', IN_TRANSIT: 'In transit',
-      DELIVERED: 'Delivered', COMPLETED: 'Completed', CANCELLED: 'Cancelled', REJECTED: 'Rejected',
-    };
+       
+
+    
+    function bookingStatusLabel(b, currentUserId) {
+      if (b.status === 'REQUESTED') {
+        return b.requested_by_user_id === currentUserId ? 'Waiting for their reply' : 'Needs your reply';
+      }
+      return STATUS_LABEL[b.status] || b.status;
+    }
 
     function cityName(city) {
       return city ? city.name : '—';
@@ -136,10 +135,11 @@
       return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
     }
 
-    async function init() {
-            const user = requireSession();
-      if (!user) return;
+   let user;
 
+async function init() {
+  user = requireSession();
+  if (!user) return;
       
       if (user.role === 'ADMIN') {
         window.location.href = 'admin.html';
@@ -294,7 +294,7 @@
           <div class="card avail-card">
             <div class="avail-card__top">
               <span class="avail-card__route">${origin} <span class="avail-card__route-arrow">→</span> ${dest}</span>
-              <span class="badge ${STATUS_BADGE[b.status] || 'badge--wait'}">${STATUS_LABEL[b.status] || b.status}</span>
+              <span class="badge ${BOOKING_STATUS_BADGE[b.status] || 'badge--wait'}">${bookingStatusLabel(b, user.id)}</span>
             </div>
             <div class="avail-card__meta">
               <span class="data">${weight}</span>

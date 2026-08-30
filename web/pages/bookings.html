@@ -88,24 +88,18 @@
 
   <script src="../js/app.js"></script>
   <script>
-    const STATUS_BADGE = {
-      REQUESTED: 'badge--wait', ACCEPTED: 'badge--wait', IN_TRANSIT: 'badge--wait', DELIVERED: 'badge--wait',
-      COMPLETED: 'badge--signal', CANCELLED: 'badge--alert', REJECTED: 'badge--alert',
-    };
-const STATUS_LABEL = {
-  REQUESTED: 'Awaiting reply', ACCEPTED: 'Confirmed', IN_TRANSIT: 'On the way', DELIVERED: 'Arrived',
-  COMPLETED: 'Done', CANCELLED: 'Cancelled', REJECTED: 'Declined',
-};
+   
     function fmtDate(value) {
       if (!value) return '—';
       return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
     }
 
-    let allBookings = [];
+  let allBookings = [];
+let user;
 
-    async function init() {
-      const user = requireSession();
-      if (!user) return;
+async function init() {
+  user = requireSession();
+  if (!user) return;
 
       document.getElementById('nav-avatar').textContent = (user.name || 'U').split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
       document.getElementById('nav-secondary').textContent = user.role === 'TRUCK_OWNER' ? 'Availability' : 'Post cargo';
@@ -152,7 +146,7 @@ const STATUS_LABEL = {
           <a class="card avail-card" href="booking-detail.html?id=${b.id}" style="display:flex;">
             <div class="avail-card__top">
               <span class="avail-card__route">${origin} <span class="avail-card__route-arrow">→</span> ${dest}</span>
-              <span class="badge ${STATUS_BADGE[b.status] || 'badge--wait'}">${STATUS_LABEL[b.status] || b.status}</span>
+             <span class="badge ${BOOKING_STATUS_BADGE[b.status] || 'badge--wait'}">${bookingStatusLabel(b, user.id)}</span>
             </div>
             <div class="avail-card__meta">
               <span class="data">${weight}</span>
