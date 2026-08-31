@@ -1,6 +1,17 @@
 import { supabase } from '../../lib/supabase.js';
 import { HttpError } from '../../middleware/errorHandler.js';
 
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+
+function dayRangeAround(dateIso: string) {
+  const date = new Date(dateIso);
+  return {
+    minusOneDay: new Date(date.getTime() - ONE_DAY_MS).toISOString(),
+    plusOneDay: new Date(date.getTime() + ONE_DAY_MS).toISOString(),
+  };
+}
+
 export async function findMatchesForAvailability(truckAvailabilityId: string, ownerId: string) {
   const { data: availability, error } = await supabase
     .from('truck_availability')
@@ -10,6 +21,11 @@ export async function findMatchesForAvailability(truckAvailabilityId: string, ow
 
   if (error || !availability) throw new HttpError(404, 'Availability not found');
   if (availability.truck.owner_id !== ownerId) throw new HttpError(403, 'Not your availability');
+
+  // a cargo request is a candidate if its required_date falls within
+  // one day of either end of this truck's departure window
+  const windowStart = dayRangeAround(availability.departure_window_start).minusOneDay;
+  const windowEnd = dayRangeAround(availability.departure_window_end).plusOneDay;
 
   const { data, error: matchError } = await supabase
     .from('cargo_requests')
@@ -23,8 +39,8 @@ export async function findMatchesForAvailability(truckAvailabilityId: string, ow
     .eq('origin_city_id', availability.origin_city_id)
     .eq('destination_city_id', availability.destination_city_id)
     .lte('weight_kg', availability.available_capacity_kg)
-    .gte('required_date', availability.departure_window_start)
-    .lte('required_date', availability.departure_window_end);
+    .gte('required_date', windowStart)
+    .lte('required_date', windowEnd);
 
   if (matchError) throw new HttpError(500, matchError.message);
   return data;
@@ -48,6 +64,10 @@ export async function findMatchesForCargoRequest(cargoRequestId: string, userId:
 
   if (!membership) throw new HttpError(403, 'Not your cargo request');
 
+  // a truck availability is a candidate if its departure window
+  // reaches within one day of the cargo's required date, on either side
+  const { minusOneDay, plusOneDay } = dayRangeAround(cargoRequest.required_date);
+
   const { data, error: matchError } = await supabase
     .from('truck_availability')
     .select(`
@@ -60,8 +80,8 @@ export async function findMatchesForCargoRequest(cargoRequestId: string, userId:
     .eq('origin_city_id', cargoRequest.origin_city_id)
     .eq('destination_city_id', cargoRequest.destination_city_id)
     .gte('available_capacity_kg', cargoRequest.weight_kg)
-    .lte('departure_window_start', cargoRequest.required_date)
-    .gte('departure_window_end', cargoRequest.required_date);
+    .lte('departure_window_start', plusOneDay)
+    .gte('departure_window_end', minusOneDay);
 
   if (matchError) throw new HttpError(500, matchError.message);
   return data;
