@@ -174,11 +174,22 @@ async function init() {
       }
     }
 
-    async function loadTruckOwnerData() {
+        async function loadTruckOwnerData() {
       document.getElementById('stat-active-label').textContent = 'Active availabilities';
-      const availabilities = await apiFetch('/truck-availability');
+      const [availabilities, myBookings] = await Promise.all([
+        apiFetch('/truck-availability'),
+        apiFetch('/bookings'),
+      ]);
       const active = availabilities.filter(a => a.status === 'OPEN');
       document.getElementById('stat-active').textContent = active.length;
+
+      // pairs that already have a non-cancelled/rejected booking —
+      // don't offer "Request booking" again for these
+      const requestedPairs = new Set(
+        myBookings
+          .filter(b => !['CANCELLED', 'REJECTED'].includes(b.status))
+          .map(b => `${b.truck_availability_id}:${b.cargo_request_id}`)
+      );
 
       const sample = active.slice(0, 5);
       const matchGroups = await Promise.all(
@@ -200,8 +211,10 @@ async function init() {
                 <span class="data">${Number(cargo.weight_kg).toLocaleString()} kg${cargo.cargo_type ? ' · ' + cargo.cargo_type.name : ''}</span>
                 <span class="data">Needed by ${fmtDate(cargo.required_date)}</span>
               </div>
-              <div class="avail-card__actions">
-                <button class="btn btn--primary btn--sm" data-book data-truck="${availability.id}" data-cargo="${cargo.id}">Request booking</button>
+                 <div class="avail-card__actions">
+                ${requestedPairs.has(`${availability.id}:${cargo.id}`)
+                  ? `<span class="badge badge--wait">Already requested</span>`
+                  : `<button class="btn btn--primary btn--sm" data-book data-truck="${availability.id}" data-cargo="${cargo.id}">Request booking</button>`}
               </div>
             </div>
           `);
@@ -214,13 +227,23 @@ async function init() {
       wireBookingButtons();
     }
 
-    async function loadCargoOwnerData() {
+      async function loadCargoOwnerData() {
       document.getElementById('stat-active-label').textContent = 'Active cargo requests';
-      const requests = await apiFetch('/cargo');
+      const [requests, myBookings] = await Promise.all([
+        apiFetch('/cargo'),
+        apiFetch('/bookings'),
+      ]);
       const active = requests.filter(c => c.status === 'OPEN');
       document.getElementById('stat-active').textContent = active.length;
 
+      const requestedPairs = new Set(
+        myBookings
+          .filter(b => !['CANCELLED', 'REJECTED'].includes(b.status))
+          .map(b => `${b.truck_availability_id}:${b.cargo_request_id}`)
+      );
+
       const sample = active.slice(0, 5);
+
       const matchGroups = await Promise.all(
         sample.map(c => apiFetch(`/matches?cargoRequestId=${c.id}`).then(matches => ({ cargo: c, matches })).catch(() => ({ cargo: c, matches: [] })))
       );
@@ -240,8 +263,10 @@ async function init() {
                 <span class="data">${Number(availability.available_capacity_kg).toLocaleString()} kg free</span>
                 <span>${availability.truck ? availability.truck.plate_number : ''}</span>
               </div>
-              <div class="avail-card__actions">
-                <button class="btn btn--primary btn--sm" data-book data-truck="${availability.id}" data-cargo="${cargo.id}">Request booking</button>
+                 <div class="avail-card__actions">
+                ${requestedPairs.has(`${availability.id}:${cargo.id}`)
+                  ? `<span class="badge badge--wait">Already requested</span>`
+                  : `<button class="btn btn--primary btn--sm" data-book data-truck="${availability.id}" data-cargo="${cargo.id}">Request booking</button>`}
               </div>
             </div>
           `);

@@ -17,17 +17,27 @@ interface CreateBookingInput {
   requestedByUserId: string;
 }
 
+const ACTIVE_BOOKING_STATUSES = ['REQUESTED', 'ACCEPTED', 'IN_TRANSIT', 'DELIVERED', 'COMPLETED'];
+
 export async function createBooking(input: CreateBookingInput) {
-  const [{ data: availability }, { data: cargoRequest }] = await Promise.all([
+  const [{ data: availability }, { data: cargoRequest }, { data: existing }] = await Promise.all([
     supabase.from('truck_availability').select('*').eq('id', input.truckAvailabilityId).single(),
     supabase.from('cargo_requests').select('*').eq('id', input.cargoRequestId).single(),
+    supabase
+      .from('bookings')
+      .select('id')
+      .eq('truck_availability_id', input.truckAvailabilityId)
+      .eq('cargo_request_id', input.cargoRequestId)
+      .in('status', ACTIVE_BOOKING_STATUSES)
+      .maybeSingle(),
   ]);
 
   if (!availability) throw new HttpError(404, 'Truck availability not found');
   if (!cargoRequest) throw new HttpError(404, 'Cargo request not found');
+  if (existing) throw new HttpError(409, 'A booking already exists between this truck and this cargo request');
   if (availability.status !== 'OPEN') throw new HttpError(400, 'This truck availability is no longer open');
   if (cargoRequest.status !== 'OPEN') throw new HttpError(400, 'This cargo request is no longer open');
-
+  
   const { data, error } = await supabase
     .from('bookings')
     .insert({
