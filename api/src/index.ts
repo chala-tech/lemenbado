@@ -15,6 +15,7 @@ import { adminRouter } from './modules/admin/admin.routes.js';
 import { reviewsRouter } from './modules/reviews/reviews.routes.js';
 import { cargoTypesRouter } from './modules/cargo/cargo-types.routes.js';
 import { documentsRouter } from './modules/documents/documents.routes.js';
+import { sweepExpiredEntities } from './lib/expiry.js';
 
 const app = express();
 
@@ -39,4 +40,10 @@ app.use('/api/reviews', reviewsRouter);
 app.use(errorHandler);
 app.listen(env.port, () => {
   console.log(`Lemenbado API listening on http://localhost:${env.port}`);
+
+  // run once on startup, then every 5 minutes — genuine scheduled job,
+  // not a per-request check, so status is correct even for entities
+  // nobody has viewed recently
+  sweepExpiredEntities();
+  setInterval(sweepExpiredEntities, 5 * 60 * 1000);
 });
