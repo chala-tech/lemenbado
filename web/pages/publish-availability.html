@@ -56,10 +56,9 @@
 
       <div class="page-header">
         <span class="hero__eyebrow">Truck owner</span>
-        <h1>Publish available capacity</h1>
+                <h1>Share a route you're driving</h1>
         <p class="page-header__subtitle">
-          List a route you're already driving and the empty space you can offer.
-          Matching cargo requests on this corridor will show up automatically.
+          Tell us where you're headed and how much room you have. Matching cargo will show up here on its own.
         </p>
       </div>
 
@@ -70,7 +69,7 @@
       </div>
 
       <form class="form card" id="truck-form" style="display:none; margin-bottom: var(--space-6);" novalidate>
-        <p class="field__label" style="margin-bottom: 0;">Add a truck</p>
+               <p class="field__label" style="margin-bottom: 0;">Tell us about your truck</p>
 
         <div class="form__grid form__grid--2">
           <div class="field">
@@ -134,18 +133,18 @@
           </div>
 
           <div class="field">
-            <label class="field__label" for="capacity">Available capacity (kg)</label>
+            <label class="field__label" for="capacity">How much space do you have? (kg)</label>
             <input class="input" type="number" id="capacity" name="capacity" min="1" step="1" placeholder="e.g. 4500" required />
-            <p class="field__hint" id="capacity-hint">Select a truck to see its max capacity.</p>
+            <p class="field__hint" id="capacity-hint">Pick a truck above to see how much it can carry.</p>
           </div>
 
           <div class="form__grid form__grid--2">
-            <div class="field">
-              <label class="field__label" for="departure-start">Departure window — from</label>
+                      <div class="field">
+              <label class="field__label" for="departure-start">Earliest you can leave</label>
               <input class="input" type="datetime-local" id="departure-start" name="departure-start" required />
             </div>
             <div class="field">
-              <label class="field__label" for="departure-end">Departure window — to</label>
+              <label class="field__label" for="departure-end">Latest you can leave</label>
               <input class="input" type="datetime-local" id="departure-end" name="departure-end" required />
             </div>
           </div>
@@ -318,12 +317,12 @@
       const previewWindow = document.getElementById('preview-window');
 
       function updatePreview() {
-        previewOrigin.textContent = originSelect.selectedOptions[0]?.text || 'Origin';
-        previewDestination.textContent = destinationSelect.selectedOptions[0]?.text || 'Destination';
-        previewCapacity.textContent = capacityInput.value ? `${Number(capacityInput.value).toLocaleString()} kg` : '— kg';
-        const start = fmtDateTime(startInput.value);
-        const end = fmtDateTime(endInput.value);
-        previewWindow.textContent = start && end ? `${start} – ${end}` : 'Departure window not set';
+      previewOrigin.textContent = originSelect.selectedOptions[0]?.text || 'From';
+      previewDestination.textContent = destinationSelect.selectedOptions[0]?.text || 'To';
+      previewCapacity.textContent = capacityInput.value ? `${Number(capacityInput.value).toLocaleString()} kg` : '— kg';
+      const start = fmtDateTime(startInput.value);
+      const end = fmtDateTime(endInput.value);
+      previewWindow.textContent = start && end ? `Leaving between ${start} and ${end}` : 'No leaving time set yet';
       }
 
       truckSelect.addEventListener('change', () => {
