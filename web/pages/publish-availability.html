@@ -229,19 +229,26 @@
           </div>`;
         return;
       }
-
       document.getElementById('nav-avatar').textContent = (user.name || 'U').split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
 
-      const [cities, truckTypes] = await Promise.all([RefData.getCities(), RefData.getTruckTypes()]);
-      populateSelect(document.getElementById('origin'), cities);
-      populateSelect(document.getElementById('destination'), cities);
-      populateSelect(document.getElementById('truck-type'), truckTypes);
+      try {
+        const [cities, truckTypes] = await Promise.all([RefData.getCities(), RefData.getTruckTypes()]);
+        populateSelect(document.getElementById('origin'), cities);
+        populateSelect(document.getElementById('destination'), cities);
+        populateSelect(document.getElementById('truck-type'), truckTypes);
 
-      await loadTrucks();
-      await loadAvailabilities();
-      wireForms();
+        await loadTrucks();
+        await loadAvailabilities();
+        wireForms();
+      } catch (err) {
+        document.querySelector('main').insertAdjacentHTML('beforeend', `
+          <div class="card" style="text-align:center; border-color: var(--color-alert);">
+            <p style="color: var(--color-alert); font-weight: var(--weight-semibold); margin-bottom: var(--space-2);">Couldn't load this page.</p>
+            <p class="field__hint">${err.message || 'Something went wrong reaching the server.'}</p>
+            <button class="btn btn--primary btn--sm" onclick="location.reload()" style="margin-top: var(--space-4);">Try again</button>
+          </div>`);
+      }
     }
-
     async function loadTrucks() {
       myTrucks = await apiFetch('/trucks');
       const truckSelect = document.getElementById('truck');
