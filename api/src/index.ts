@@ -20,7 +20,8 @@ import { sweepExpiredEntities } from './lib/expiry.js';
 const app = express();
 
 // Part 11 — CORS locked to one known origin, not '*'
-app.use(cors({ origin: env.frontendOrigin }));
+const allowedOrigins = env.frontendOrigin.split(',').map((o) => o.trim());
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
