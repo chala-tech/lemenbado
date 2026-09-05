@@ -1,6 +1,9 @@
 
 
-const API_BASE_URL = 'http://127.0.0.1:4000/api';
+const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+const API_BASE_URL = isLocal
+  ? 'http://127.0.0.1:4000/api'
+  : 'https://RENDER-APP-NAME.onrender.com/api'; // ← this will be updated  after deploying the backend
 
 const SESSION_KEY = 'lemenbado_session';
 
