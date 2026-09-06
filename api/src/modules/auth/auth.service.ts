@@ -32,10 +32,21 @@ export async function register(input: RegisterInput) {
 }
 
 
-export async function login(email: string, password: string) {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error || !data.user) throw new HttpError(401, 'Invalid email or password');
+  export async function login(email: string, password: string) {
+  let data, error;
+  try {
+    ({ data, error } = await supabase.auth.signInWithPassword({ email, password }));
+  } catch (networkErr: any) {
+    
+    console.error('[auth] Supabase unreachable during login:', networkErr.message);
+    throw new HttpError(503, 'Could not reach the login service. Check your internet connection and try again.');
+  }
 
+  if (error) {
+    console.error('[auth] Supabase login error:', error.message);
+    throw new HttpError(401, 'Invalid email or password');
+  }
+  if (!data.user) throw new HttpError(401, 'Invalid email or password');
   
   const { data: profile, error: profileError } = await supabase
     .from('users')
