@@ -42,8 +42,13 @@ export async function register(input: RegisterInput) {
     throw new HttpError(503, 'Could not reach the login service. Check your internet connection and try again.');
   }
 
-  if (error) {
+
+    if (error) {
     console.error('[auth] Supabase login error:', error.message);
+   
+    if (error.message.toLowerCase().includes('fetch failed')) {
+      throw new HttpError(503, 'Could not reach the login service. Check your internet connection and try again.');
+    }
     throw new HttpError(401, 'Invalid email or password');
   }
   if (!data.user) throw new HttpError(401, 'Invalid email or password');
