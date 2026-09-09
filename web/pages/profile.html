@@ -132,6 +132,7 @@
 
       const initials = (user.name || 'U').split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase();
       document.getElementById('nav-avatar').textContent = initials;
+      renderBottomNav(user);
 
       const roleSection = document.getElementById('role-section');
       if (user.role === 'CARGO_OWNER') {

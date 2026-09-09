@@ -96,6 +96,16 @@ time,
   min-height: 100vh;
   background-color: var(--color-bg);
   position: relative;
+}.app-shell {
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  position: relative;
+}
+
+@media (max-width: 767px) {
+  .app-shell {
+    padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 .container {

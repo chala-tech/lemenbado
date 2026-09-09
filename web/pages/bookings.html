@@ -102,6 +102,7 @@ async function init() {
   if (!user) return;
 
       document.getElementById('nav-avatar').textContent = (user.name || 'U').split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+      renderBottomNav(user);
       document.getElementById('nav-secondary').textContent = user.role === 'TRUCK_OWNER' ? 'Availability' : 'Post cargo';
       document.getElementById('nav-secondary').href = user.role === 'TRUCK_OWNER' ? 'publish-availability.html' : 'post-cargo.html';
 

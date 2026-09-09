@@ -180,4 +180,39 @@ const LISTING_STATUS_LABEL = {
   CANCELLED: 'Cancelled', EXPIRED: 'Expired',
 };
 
+
+
+const BOTTOM_NAV_ICONS = {
+  dashboard: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>',
+  route: '<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.5"/><path d="M8 12 h4" stroke-dasharray="2 2"/><circle cx="16" cy="12" r="2.5" fill="none"/><path d="M18.5 12 h1.5"/></svg>',
+  matches: '<svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="4"/><circle cx="16" cy="16" r="4"/><path d="M11 11 l2 2"/></svg>',
+  bookings: '<svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8 h8 M8 12 h8 M8 16 h5"/></svg>',
+  cargo: '<svg viewBox="0 0 24 24"><path d="M3 8 l9-5 9 5-9 5-9-5z"/><path d="M3 8 v8 l9 5 9-5 V8"/><path d="M12 13 v8"/></svg>',
+};
+
+const BOTTOM_NAV_ITEMS = [
+  { label: 'Dashboard', href: 'dashboard.html', match: 'dashboard', icon: 'dashboard' },
+  { label: 'Availability', href: 'publish-availability.html', match: 'publish-availability', icon: 'route', roleOnly: 'TRUCK_OWNER' },
+  { label: 'Post cargo', href: 'post-cargo.html', match: 'post-cargo', icon: 'cargo', roleOnly: 'CARGO_OWNER' },
+  { label: 'Matches', href: 'matches.html', match: 'matches', icon: 'matches' },
+  { label: 'Bookings', href: 'bookings.html', match: 'bookings', icon: 'bookings' },
+];
+
+function renderBottomNav(user) {
+  const current = window.location.pathname.split('/').pop().replace('.html', '');
+  const items = BOTTOM_NAV_ITEMS.filter((i) => !i.roleOnly || i.roleOnly === user.role);
+
+  const nav = document.createElement('nav');
+  nav.className = 'bottom-nav';
+  nav.setAttribute('aria-label', 'Primary');
+  nav.innerHTML = items.map((item) => `
+    <a class="bottom-nav__item ${current === item.match ? 'bottom-nav__item--active' : ''}" href="${item.href}">
+      ${BOTTOM_NAV_ICONS[item.icon]}
+      <span class="bottom-nav__label">${item.label}</span>
+    </a>
+  `).join('');
+
+  document.body.appendChild(nav);
+}
+
 document.addEventListener('DOMContentLoaded', wireLogout);

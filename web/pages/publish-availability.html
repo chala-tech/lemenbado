@@ -231,6 +231,8 @@
       }
       document.getElementById('nav-avatar').textContent = (user.name || 'U').split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
 
+      renderBottomNav(user);
+
       try {
         const [cities, truckTypes] = await Promise.all([RefData.getCities(), RefData.getTruckTypes()]);
         populateSelect(document.getElementById('origin'), cities);

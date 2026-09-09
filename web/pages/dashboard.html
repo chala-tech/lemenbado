@@ -159,6 +159,8 @@ async function init() {
 
       document.getElementById('nav-avatar').textContent = (user.name || 'U').split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
 
+      renderBottomNav(user);
+
       const actions = document.getElementById('quick-actions');
       if (user.role === 'TRUCK_OWNER') {
         actions.innerHTML = `<a class="btn btn--primary" href="publish-availability.html">Publish availability</a>`;

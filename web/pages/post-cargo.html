@@ -199,6 +199,7 @@
       }
 
       document.getElementById('nav-avatar').textContent = (user.name || 'U').split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+      renderBottomNav(user);
 
       const [cities, cargoTypes] = await Promise.all([RefData.getCities(), RefData.getCargoTypes()]);
       populateSelect(document.getElementById('origin'), cities);

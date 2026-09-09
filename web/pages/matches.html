@@ -106,7 +106,7 @@ let myBookings = [];
       if (!user) return;
 
       document.getElementById('nav-avatar').textContent = (user.name || 'U').split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
-
+       renderBottomNav(user);
       if (user.role === 'TRUCK_OWNER') {
         document.getElementById('nav-secondary').textContent = 'Availability';
         document.getElementById('nav-secondary').href = 'publish-availability.html';

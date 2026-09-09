@@ -83,7 +83,88 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  flex-shrink: 0;
+  flex-shrink: 0;.nav__links {
+  display: none; /* replaced by bottom-nav on mobile — see below */
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.nav__link {
+  font-size: var(--text-sm);
+  color: var(--color-ink-soft);
+  transition: color var(--transition-fast);
+}
+
+.nav__link:hover {
+  color: var(--color-ink);
+}
+
+.nav__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+@media (min-width: 768px) {
+  .nav__links {
+    display: flex;
+  }
+}
+
+/* --------------------------------------------------------------------
+   BOTTOM NAV — mobile only. Standard mobile-app pattern: primary
+   sections as a fixed tab bar, thumb-reachable, no crowding the top
+   bar with logout/profile.
+   -------------------------------------------------------------------- */
+
+.bottom-nav {
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-nav);
+  background-color: rgb(15 22 38 / 92%);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--color-line-soft);
+  padding-bottom: env(safe-area-inset-bottom, 0px); /* iPhone home-bar clearance */
+}
+
+.bottom-nav__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding-block: var(--space-2);
+  min-height: var(--nav-height);
+  color: var(--color-ink-faint);
+  transition: color var(--transition-fast);
+}
+
+.bottom-nav__item svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.75;
+}
+
+.bottom-nav__label {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+}
+
+.bottom-nav__item--active {
+  color: var(--color-route);
+}
+
+@media (min-width: 768px) {
+  .bottom-nav {
+    display: none; /* desktop uses the top nav instead */
+  }
+}
 }
 
 @media (min-width: 768px) {
