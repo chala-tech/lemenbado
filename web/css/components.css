@@ -54,6 +54,42 @@
 
 .nav__link:hover {
   color: var(--color-ink);
+}.nav__links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.nav__links::-webkit-scrollbar {
+  display: none;
+}
+
+.nav__link {
+  font-size: var(--text-sm);
+  color: var(--color-ink-soft);
+  transition: color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.nav__link:hover {
+  color: var(--color-ink);
+}
+
+.nav__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .nav__links {
+    gap: var(--space-6);
+  }
 }
 
 .nav__actions {
