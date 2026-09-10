@@ -109,69 +109,104 @@
   .nav__links {
     display: flex;
   }
-}
+}}
+
+
+
 
 /* --------------------------------------------------------------------
-   BOTTOM NAV — mobile only. Standard mobile-app pattern: primary
-   sections as a fixed tab bar, thumb-reachable, no crowding the top
-   bar with logout/profile.
+   NAV — top bar (all screens) + bottom tab bar (mobile only)
    -------------------------------------------------------------------- */
 
-.bottom-nav {
-  display: flex;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: var(--z-nav);
-  background-color: rgb(15 22 38 / 92%);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid var(--color-line-soft);
-  padding-bottom: env(safe-area-inset-bottom, 0px); /* iPhone home-bar clearance */
+.nav__links {
+  display: none;
+  align-items: center;
+  gap: var(--space-6);
 }
 
-.bottom-nav__item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-1);
-  padding-block: var(--space-2);
-  min-height: var(--nav-height);
-  color: var(--color-ink-faint);
+.nav__link {
+  font-size: var(--text-sm);
+  color: var(--color-ink-soft);
   transition: color var(--transition-fast);
 }
 
-.bottom-nav__item svg {
-  width: 22px;
-  height: 22px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 1.75;
+.nav__link:hover {
+  color: var(--color-ink);
 }
 
-.bottom-nav__label {
-  font-size: var(--text-xs);
-  font-weight: var(--weight-medium);
-}
-
-.bottom-nav__item--active {
-  color: var(--color-route);
-}
-
-@media (min-width: 768px) {
-  .bottom-nav {
-    display: none; /* desktop uses the top nav instead */
-  }
-}
+.nav__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
 }
 
 @media (min-width: 768px) {
   .nav__links {
-    gap: var(--space-6);
+    display: flex;
   }
 }
+
+/* Bottom tab bar — floating pill, mobile only. Hard-hidden at 768px+
+   via display:none so it can never coexist with the top nav links. */
+
+.bottom-nav {
+  display: flex;
+  position: fixed;
+  left: var(--space-4);
+  right: var(--space-4);
+  bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+  z-index: var(--z-nav);
+  justify-content: space-around;
+  align-items: center;
+  padding: var(--space-2);
+  border-radius: var(--radius-lg);
+  background-color: rgb(20 28 48 / 88%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgb(255 255 255 / 8%);
+  box-shadow: var(--shadow-lg);
+}
+
+.bottom-nav__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  flex: 1;
+  padding: var(--space-2) var(--space-1);
+  border-radius: var(--radius-md);
+  color: var(--color-ink-faint);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.bottom-nav__item svg {
+  display: block;
+}
+
+.bottom-nav__label {
+  font-size: 10.5px;
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.01em;
+}
+
+.bottom-nav__item--active {
+  color: var(--color-route);
+  background-color: var(--color-route-tint);
+}
+
+@media (min-width: 768px) {
+  .bottom-nav {
+    display: none !important;
+  }
+}
+
+
+
+
+
+
+
 
 .nav__actions {
   display: flex;

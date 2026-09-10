@@ -148,3 +148,9 @@ time,
   background-color: var(--color-line);
   border-radius: var(--radius-full);
 }
+
+@media (max-width: 767px) {
+  .app-shell {
+    padding-bottom: calc(var(--nav-height) + var(--space-6) + env(safe-area-inset-bottom, 0px));
+  }
+}

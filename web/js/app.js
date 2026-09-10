@@ -182,12 +182,14 @@ const LISTING_STATUS_LABEL = {
 
 
 
+const ICON_ATTRS = 'width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"';
+
 const BOTTOM_NAV_ICONS = {
-  dashboard: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>',
-  route: '<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.5"/><path d="M8 12 h4" stroke-dasharray="2 2"/><circle cx="16" cy="12" r="2.5" fill="none"/><path d="M18.5 12 h1.5"/></svg>',
-  matches: '<svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="4"/><circle cx="16" cy="16" r="4"/><path d="M11 11 l2 2"/></svg>',
-  bookings: '<svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8 h8 M8 12 h8 M8 16 h5"/></svg>',
-  cargo: '<svg viewBox="0 0 24 24"><path d="M3 8 l9-5 9 5-9 5-9-5z"/><path d="M3 8 v8 l9 5 9-5 V8"/><path d="M12 13 v8"/></svg>',
+  dashboard: `<svg ${ICON_ATTRS}><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>`,
+  route: `<svg ${ICON_ATTRS}><circle cx="5" cy="12" r="2.5" fill="currentColor" stroke="none"/><path d="M8 12 h4" stroke-dasharray="2 2"/><circle cx="16" cy="12" r="2.5"/><path d="M18.5 12 h1.5"/></svg>`,
+  matches: `<svg ${ICON_ATTRS}><circle cx="8" cy="8" r="4"/><circle cx="16" cy="16" r="4"/><path d="M11 11 l2 2"/></svg>`,
+  bookings: `<svg ${ICON_ATTRS}><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8 h8 M8 12 h8 M8 16 h5"/></svg>`,
+  cargo: `<svg ${ICON_ATTRS}><path d="M3 8 l9-5 9 5-9 5-9-5z"/><path d="M3 8 v8 l9 5 9-5 V8"/><path d="M12 13 v8"/></svg>`,
 };
 
 const BOTTOM_NAV_ITEMS = [
@@ -214,5 +216,6 @@ function renderBottomNav(user) {
 
   document.body.appendChild(nav);
 }
+
 
 document.addEventListener('DOMContentLoaded', wireLogout);
