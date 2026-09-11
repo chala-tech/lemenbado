@@ -132,6 +132,28 @@ function showFormSuccess(form, message) {
   setTimeout(() => banner.remove(), 4000);
 }
 
+/** "Aug 29" — for required dates, listing dates, etc. Returns null if empty. */
+function formatDate(value) {
+  if (!value) return null;
+  return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+/** "Aug 29, 2:00 PM" — for departure windows, timestamps. Returns null if empty. */
+function formatDateTime(value) {
+  if (!value) return null;
+  return new Date(value).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+/** <input type="date"> value -> full ISO string the API expects. */
+function dateOnlyToIso(dateValue) {
+  return new Date(`${dateValue}T00:00:00`).toISOString();
+}
+
+/** <input type="datetime-local"> value -> full ISO string the API expects. */
+function localDateTimeToIso(localValue) {
+  return new Date(localValue).toISOString();
+}
+
 /** Shows a temporary confirmation banner, for actions not tied to a form. */
 function showToast(message, type = 'success') {
   let toast = document.getElementById('app-toast');
