@@ -185,8 +185,7 @@ async function init() {
       const active = availabilities.filter(a => a.status === 'OPEN');
       document.getElementById('stat-active').textContent = active.length;
 
-      // pairs that already have a non-cancelled/rejected booking —
-      // don't offer "Request booking" again for these
+     
       const requestedPairs = new Set(
         myBookings
           .filter(b => !['CANCELLED', 'REJECTED'].includes(b.status))
