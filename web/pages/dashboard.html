@@ -117,12 +117,6 @@
   <script src="../js/app.js"></script>
   <script>
 
-    function bookingStatusLabel(b, currentUserId) {
-      if (b.status === 'REQUESTED') {
-        return b.requested_by_user_id === currentUserId ? 'Waiting for their reply' : 'Needs your reply';
-      }
-      return STATUS_LABEL[b.status] || b.status;
-    }
 
     function cityName(city) {
       return city ? city.name : '—';
