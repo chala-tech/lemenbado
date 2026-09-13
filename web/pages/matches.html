@@ -177,16 +177,22 @@ let myBookings = [];
                 <span class="avail-card__route">${m.origin_city?.name} <span class="avail-card__route-arrow">→</span> ${m.dest_city?.name}</span>
                 <span class="badge badge--signal">Exact match</span>
               </div>
-              <div class="avail-card__meta">
+              
+                          <div class="avail-card__meta">
                 <span class="data">${Number(m.weight_kg).toLocaleString()} kg</span>
                 <span>${m.cargo_type ? m.cargo_type.name : ''}</span>
                 <span class="data">Needed by ${fmtDate(m.required_date)}</span>
                 ${m.desired_price_etb ? `<span class="data">${Number(m.desired_price_etb).toLocaleString()} ETB</span>` : '<span>Price not specified</span>'}
               </div>
-        
+              <div class="avail-card__actions">
+                ${myBookings.some(b => b.truck_availability_id === listingId && b.cargo_request_id === m.id && !['CANCELLED','REJECTED'].includes(b.status))
+                  ? `<span class="badge badge--wait">Already requested</span>`
+                  : `<button class="btn btn--primary btn--sm" data-book data-cargo="${m.id}" data-truck="${listingId}">Request booking</button>`}
+              </div>
             </div>
           `;
         }
+        
         return `
           <div class="card avail-card">
             <div class="avail-card__top">
