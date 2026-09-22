@@ -281,8 +281,15 @@
         truckForm.style.display = 'none';
       });
 
-      truckForm.addEventListener('submit', async (event) => {
+         truckForm.addEventListener('submit', async (event) => {
         event.preventDefault();
+
+        const truckTypeSelect = document.getElementById('truck-type');
+        if (!truckTypeSelect.value) {
+          showFormError(truckForm, 'Please select a truck type.');
+          return;
+        }
+
         const submitBtn = truckForm.querySelector('button[type=submit]');
         submitBtn.disabled = true;
         submitBtn.textContent = 'Adding…';
@@ -356,8 +363,13 @@
       const availForm = document.getElementById('availability-form');
       const submitBtn = document.getElementById('submit-btn');
 
-      availForm.addEventListener('submit', async (event) => {
+         availForm.addEventListener('submit', async (event) => {
         event.preventDefault();
+
+        if (!truckSelect.value) {
+          showFormError(availForm, 'Please select a truck before publishing.');
+          return;
+        }
         if (!validateCities()) return;
 
         submitBtn.disabled = true;
