@@ -246,11 +246,16 @@
         el.addEventListener('change', () => { validateCities(); updatePreview(); });
       });
 
-      const form = document.getElementById('cargo-form');
+        const form = document.getElementById('cargo-form');
       const submitBtn = document.getElementById('submit-btn');
 
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
+
+        if (!typeSelect.value) {
+          showFormError(form, 'Please select a cargo type before posting.');
+          return;
+        }
         if (!validateCities()) return;
 
         submitBtn.disabled = true;
