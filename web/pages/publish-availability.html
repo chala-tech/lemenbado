@@ -348,11 +348,12 @@
         capacityInput.max = max || '';
       });
 
-      function validateCities() {
-        const sameCity = originSelect.value && originSelect.value === destinationSelect.value;
+        function validateCities() {
+        const bothEmpty = !originSelect.value || !destinationSelect.value;
+        const sameCity = !bothEmpty && originSelect.value === destinationSelect.value;
         originField.classList.toggle('field--invalid', Boolean(sameCity));
         originError.style.display = sameCity ? 'block' : 'none';
-        return !sameCity;
+        return !sameCity; // emptiness is checked separately at submit time, below
       }
 
       [originSelect, destinationSelect, capacityInput, startInput, endInput].forEach((el) => {
@@ -363,11 +364,15 @@
       const availForm = document.getElementById('availability-form');
       const submitBtn = document.getElementById('submit-btn');
 
-         availForm.addEventListener('submit', async (event) => {
+           availForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         if (!truckSelect.value) {
           showFormError(availForm, 'Please select a truck before publishing.');
+          return;
+        }
+        if (!originSelect.value || !destinationSelect.value) {
+          showFormError(availForm, 'Please select both an origin and destination city.');
           return;
         }
         if (!validateCities()) return;
