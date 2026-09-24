@@ -281,12 +281,23 @@
         truckForm.style.display = 'none';
       });
 
-         truckForm.addEventListener('submit', async (event) => {
+      truckForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         const truckTypeSelect = document.getElementById('truck-type');
+        const plateInput = document.getElementById('plate-number');
+        const maxCapacityInput = document.getElementById('max-capacity');
+
         if (!truckTypeSelect.value) {
           showFormError(truckForm, 'Please select a truck type.');
+          return;
+        }
+        if (!plateInput.value.trim()) {
+          showFormError(truckForm, 'Please enter the plate number.');
+          return;
+        }
+        if (!maxCapacityInput.value || Number(maxCapacityInput.value) <= 0) {
+          showFormError(truckForm, 'Please enter a valid max capacity.');
           return;
         }
 
