@@ -257,8 +257,12 @@
           showFormError(form, 'Please select a cargo type before posting.');
           return;
         }
-        if (!originSelect.value || !destinationSelect.value) {
+              if (!originSelect.value || !destinationSelect.value) {
           showFormError(form, 'Please select both an origin and destination city.');
+          return;
+        }
+        if (!dateInput.value) {
+          showFormError(form, 'Please set a required-by date.');
           return;
         }
         if (!validateCities()) return;
