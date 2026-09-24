@@ -234,11 +234,12 @@
         previewDate.textContent = date ? `Needed by ${date}` : 'Required date not set';
       }
 
-      function validateCities() {
-        const sameCity = originSelect.value && originSelect.value === destinationSelect.value;
+        function validateCities() {
+        const bothEmpty = !originSelect.value || !destinationSelect.value;
+        const sameCity = !bothEmpty && originSelect.value === destinationSelect.value;
         originField.classList.toggle('field--invalid', Boolean(sameCity));
         originError.style.display = sameCity ? 'block' : 'none';
-        return !sameCity;
+        return !sameCity; // emptiness is checked separately at submit time, below
       }
 
       [originSelect, destinationSelect, weightInput, typeSelect, dateInput].forEach((el) => {
@@ -249,11 +250,15 @@
         const form = document.getElementById('cargo-form');
       const submitBtn = document.getElementById('submit-btn');
 
-      form.addEventListener('submit', async (event) => {
+          form.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         if (!typeSelect.value) {
           showFormError(form, 'Please select a cargo type before posting.');
+          return;
+        }
+        if (!originSelect.value || !destinationSelect.value) {
+          showFormError(form, 'Please select both an origin and destination city.');
           return;
         }
         if (!validateCities()) return;
