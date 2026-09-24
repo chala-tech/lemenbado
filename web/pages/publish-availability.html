@@ -371,8 +371,12 @@
           showFormError(availForm, 'Please select a truck before publishing.');
           return;
         }
-        if (!originSelect.value || !destinationSelect.value) {
+           if (!originSelect.value || !destinationSelect.value) {
           showFormError(availForm, 'Please select both an origin and destination city.');
+          return;
+        }
+        if (!startInput.value || !endInput.value) {
+          showFormError(availForm, 'Please set when you can earliest and latest leave.');
           return;
         }
         if (!validateCities()) return;
