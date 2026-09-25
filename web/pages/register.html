@@ -113,12 +113,31 @@
     const confirm = document.getElementById('confirm');
     const confirmField = document.getElementById('confirm-field');
 
-    form.addEventListener('submit', async (event) => {
+        form.addEventListener('submit', async (event) => {
       event.preventDefault();
+
+      const nameInput = document.getElementById('name');
+      const emailInput = document.getElementById('email');
+
+      if (!nameInput.value.trim()) {
+        showFormError(form, 'Please enter your full name.');
+        return;
+      }
+      if (!emailInput.value.trim()) {
+        showFormError(form, 'Please enter your email.');
+        return;
+      }
+      if (password.value.length < 8) {
+        showFormError(form, 'Password must be at least 8 characters.');
+        return;
+      }
 
       const passwordsMatch = password.value === confirm.value;
       confirmField.classList.toggle('field--invalid', !passwordsMatch);
-      if (!passwordsMatch) return;
+      if (!passwordsMatch) {
+        showFormError(form, "Passwords don't match.");
+        return;
+      }
 
       submitBtn.disabled = true;
       submitBtn.textContent = 'Creating account…';
