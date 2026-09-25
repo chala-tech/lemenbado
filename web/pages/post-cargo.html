@@ -261,8 +261,12 @@
           showFormError(form, 'Please select both an origin and destination city.');
           return;
         }
-        if (!dateInput.value) {
+              if (!dateInput.value) {
           showFormError(form, 'Please set a required-by date.');
+          return;
+        }
+        if (!weightInput.value || Number(weightInput.value) <= 0) {
+          showFormError(form, 'Please enter how much your cargo weighs.');
           return;
         }
         if (!validateCities()) return;
