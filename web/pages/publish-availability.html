@@ -386,8 +386,12 @@
           showFormError(availForm, 'Please select both an origin and destination city.');
           return;
         }
-        if (!startInput.value || !endInput.value) {
+               if (!startInput.value || !endInput.value) {
           showFormError(availForm, 'Please set when you can earliest and latest leave.');
+          return;
+        }
+        if (!capacityInput.value || Number(capacityInput.value) <= 0) {
+          showFormError(availForm, 'Please enter how much space you have.');
           return;
         }
         if (!validateCities()) return;
