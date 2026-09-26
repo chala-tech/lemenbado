@@ -88,6 +88,10 @@
     const form = document.getElementById('login-form');
     const submitBtn = document.getElementById('submit-btn');
 
+    if (new URLSearchParams(window.location.search).get('expired') === '1') {
+      showFormError(form, 'Your session expired — please log in again.');
+    }
+
        form.addEventListener('submit', async (event) => {
       event.preventDefault();
 

@@ -40,6 +40,15 @@ async function apiFetch(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
   const data = await response.json().catch(() => ({}));
 
+  if (response.status === 401 && token) {
+    
+    Session.clear();
+    const isInPages = window.location.pathname.includes('/pages/');
+    const loginPath = isInPages ? 'login.html' : 'pages/login.html';
+    window.location.href = `${loginPath}?expired=1`;
+    throw new Error('Session expired');
+  }
+
   if (!response.ok) {
     throw new Error(data.error || `Request failed (${response.status})`);
   }
