@@ -195,8 +195,15 @@
       const form = document.getElementById('profile-form');
       const saveBtn = document.getElementById('save-btn');
 
-      form.addEventListener('submit', async (event) => {
+            form.addEventListener('submit', async (event) => {
         event.preventDefault();
+
+        const nameInput = document.getElementById('name');
+        if (!nameInput.value.trim()) {
+          showFormError(form, 'Please enter your name.');
+          return;
+        }
+
         saveBtn.disabled = true;
         saveBtn.textContent = 'Saving…';
 
