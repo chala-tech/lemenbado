@@ -88,8 +88,21 @@
     const form = document.getElementById('login-form');
     const submitBtn = document.getElementById('submit-btn');
 
-    form.addEventListener('submit', async (event) => {
+       form.addEventListener('submit', async (event) => {
       event.preventDefault();
+
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+
+      if (!emailInput.value.trim()) {
+        showFormError(form, 'Please enter your email.');
+        return;
+      }
+      if (!passwordInput.value) {
+        showFormError(form, 'Please enter your password.');
+        return;
+      }
+
       submitBtn.disabled = true;
       submitBtn.textContent = 'Logging in…';
 
