@@ -40,7 +40,11 @@ async function apiFetch(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
   const data = await response.json().catch(() => ({}));
 
-  if (response.status === 401 && token) {
+  // login/register are never a "session expired" situation — a wrong
+  // password there is a normal, expected 401, not an expired token
+  const isAuthEndpoint = path.startsWith('/auth/login') || path.startsWith('/auth/register');
+
+  if (response.status === 401 && token && !isAuthEndpoint) {
     
     Session.clear();
     const isInPages = window.location.pathname.includes('/pages/');
@@ -54,8 +58,6 @@ async function apiFetch(path, options = {}) {
   }
 
   return data;
-}
-
 
 function requireSession() {
   const user = Session.user();
