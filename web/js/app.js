@@ -1,9 +1,7 @@
-
-
 const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 const API_BASE_URL = isLocal
   ? 'http://127.0.0.1:4000/api'
-  : 'https://lemenbado.onrender.com/api'; 
+  : 'https://lemenbado.onrender.com/api';
 
 const SESSION_KEY = 'lemenbado_session';
 
@@ -45,7 +43,7 @@ async function apiFetch(path, options = {}) {
   const isAuthEndpoint = path.startsWith('/auth/login') || path.startsWith('/auth/register');
 
   if (response.status === 401 && token && !isAuthEndpoint) {
-    
+
     Session.clear();
     const isInPages = window.location.pathname.includes('/pages/');
     const loginPath = isInPages ? 'login.html' : 'pages/login.html';
@@ -58,6 +56,7 @@ async function apiFetch(path, options = {}) {
   }
 
   return data;
+}
 
 function requireSession() {
   const user = Session.user();
