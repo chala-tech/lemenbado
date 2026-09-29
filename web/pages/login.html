@@ -88,6 +88,11 @@
 
   <script src="../js/app.js"></script>
   <script>
+  if (typeof apiFetch === 'undefined') {
+    document.body.innerHTML = '<div style="padding:2rem;color:#F26B5E;font-family:sans-serif;">Something went wrong loading this page. Please refresh, or contact support if this keeps happening.</div>';
+  }
+</script>
+  <script>
     const form = document.getElementById('login-form');
     const submitBtn = document.getElementById('submit-btn');
 
