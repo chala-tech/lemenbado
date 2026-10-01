@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import { registerSchema, loginSchema, updateProfileSchema } from './auth.schema.js';
 import * as authService from './auth.service.js';
-import { requireAuth } from '../../middleware/auth.js';
+import { requireAuth, invalidateProfileCache } from '../../middleware/auth.js';
 import { HttpError } from '../../middleware/errorHandler.js';
-import { invalidateProfileCache } from '../../middleware/auth.js';
+import { supabase } from '../../lib/supabase.js';
+import { env } from '../../lib/env.js';
 
 export const authRouter = Router();
 
@@ -48,6 +49,24 @@ authRouter.patch('/me', requireAuth, async (req, res, next) => {
     const user = await authService.updateProfile(req.auth!.userId, parsed.data);
     invalidateProfileCache(req.auth!.userId);
     res.json({ user });
+  } catch (err) {
+    next(err);
+  }
+});
+
+authRouter.post('/forgot-password', async (req, res, next) => {
+  try {
+    const email = req.body?.email;
+    if (!email || typeof email !== 'string') {
+      throw new HttpError(400, 'Email is required');
+    }
+
+    
+    await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${env.frontendOrigin.split(',')[0]}/pages/reset-password.html`,
+    });
+
+    res.json({ message: 'If an account exists for that email, a reset link has been sent.' });
   } catch (err) {
     next(err);
   }
