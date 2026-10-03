@@ -1,10 +1,21 @@
 import { supabase } from '../../lib/supabase.js';
+import { env } from '../../lib/env.js';
 import { HttpError } from '../../middleware/errorHandler.js';
 
 interface SubmitDocumentInput {
   userId: string;
   type: string;
-  fileUrl: string;
+  fileUrl: string; // storage path, not a public URL — bucket is private
+}
+
+const SIGNED_URL_TTL_SECONDS = 60 * 60; // 1 hour, enough for one review session
+
+async function withSignedUrl<T extends { file_url: string }>(doc: T) {
+  const { data } = await supabase.storage
+    .from(env.supabaseStorageBucket)
+    .createSignedUrl(doc.file_url, SIGNED_URL_TTL_SECONDS);
+
+  return { ...doc, signed_url: data?.signedUrl ?? null };
 }
 
 export async function submitDocument(input: SubmitDocumentInput) {
@@ -15,7 +26,18 @@ export async function submitDocument(input: SubmitDocumentInput) {
     .single();
 
   if (error) throw new HttpError(500, error.message);
-  return data;
+  return withSignedUrl(data);
+}
+
+export async function listMyDocuments(userId: string) {
+  const { data, error } = await supabase
+    .from('documents')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw new HttpError(500, error.message);
+  return Promise.all((data || []).map(withSignedUrl));
 }
 
 export async function listPendingDocuments() {
@@ -26,7 +48,7 @@ export async function listPendingDocuments() {
     .order('created_at', { ascending: true });
 
   if (error) throw new HttpError(500, error.message);
-  return data;
+  return Promise.all((data || []).map(withSignedUrl));
 }
 
 export async function decideDocument(documentId: string, adminId: string, outcome: 'VERIFIED' | 'REJECTED') {
