@@ -142,7 +142,7 @@
           panel.innerHTML = `<div class="card" style="text-align:center; color: var(--color-ink-faint);">No documents pending review.</div>`;
           return;
         }
-        panel.innerHTML = docs.map((d) => `
+               panel.innerHTML = docs.map((d) => `
           <div class="card avail-card">
             <div class="avail-card__top">
               <span class="avail-card__route">${d.user ? d.user.name : 'Unknown user'}</span>
@@ -152,6 +152,7 @@
               <span>${d.type}</span>
               <span>${d.user ? d.user.role : ''}</span>
               <span class="data">Submitted ${fmtDate(d.created_at)}</span>
+              ${d.signed_url ? `<a class="field__link" href="${d.signed_url}" target="_blank" rel="noopener">View document</a>` : ''}
             </div>
             <div class="avail-card__actions">
               <button class="btn btn--ghost btn--sm" data-doc-verify="${d.id}">Verify</button>
