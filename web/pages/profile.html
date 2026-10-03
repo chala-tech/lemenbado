@@ -79,19 +79,39 @@
         </div>
       </form>
 
-      <div class="card" style="margin-bottom: var(--space-5);">
+           <div class="card" style="margin-bottom: var(--space-5);">
         <div class="avail-card__top" style="margin-bottom: var(--space-3);">
           <p class="field__label" style="margin-bottom:0;">Verification</p>
-          <span class="badge badge--wait">Not available yet</span>
+          <span class="badge" id="verification-badge">—</span>
         </div>
         <p class="field__hint" style="margin-bottom: var(--space-4);">
-          Document upload isn't wired up in this build yet — Supabase Storage integration for license/registration
-          photos is still on the to-do list. This won't submit anything for now.
+          Upload a photo of your license or truck registration — an admin will review it manually during the pilot.
         </p>
-        <div class="field">
-          <label class="field__label" for="document">Document photo</label>
-          <input class="input" type="file" id="document" name="document" accept="image/*,.pdf" disabled />
-        </div>
+
+        <div id="documents-list" style="display: flex; flex-direction: column; gap: var(--space-3); margin-bottom: var(--space-4);"></div>
+
+        <form id="document-form" novalidate>
+          <div class="form__grid form__grid--2">
+            <div class="field">
+              <label class="field__label" for="document-type">Document type</label>
+              <div class="select-wrap">
+                <select class="select" id="document-type" required>
+                  <option value="" selected disabled>Select type</option>
+                  <option value="license">Driver's license</option>
+                  <option value="registration">Truck registration</option>
+                  <option value="business">Business registration</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field__label" for="document">Document photo</label>
+              <input class="input" type="file" id="document" name="document" accept="image/jpeg,image/png,image/webp,.pdf" />
+            </div>
+          </div>
+          <div class="form__actions" style="margin-top: var(--space-3);">
+            <button class="btn btn--primary btn--sm" type="submit" id="upload-btn">Upload document</button>
+          </div>
+        </form>
       </div>
 
       <div class="card" id="role-section" style="margin-bottom: var(--space-5);"></div>
@@ -154,8 +174,92 @@
         loadTrucks();
       }
 
-      loadRatings(user.id);
+          loadRatings(user.id);
+      loadDocuments();
       wireForm();
+      wireDocumentForm();
+    }
+
+    const DOC_STATUS_BADGE = { PENDING: 'badge--wait', VERIFIED: 'badge--signal', REJECTED: 'badge--alert' };
+    const DOC_TYPE_LABEL = { license: "Driver's license", registration: 'Truck registration', business: 'Business registration' };
+
+    async function loadDocuments() {
+      try {
+        const docs = await apiFetch('/documents/me');
+        const list = document.getElementById('documents-list');
+        const badge = document.getElementById('verification-badge');
+
+        if (docs.length === 0) {
+          list.innerHTML = '';
+          badge.className = 'badge badge--wait';
+          badge.textContent = 'No documents yet';
+          return;
+        }
+
+        const anyVerified = docs.some(d => d.status === 'VERIFIED');
+        const anyPending = docs.some(d => d.status === 'PENDING');
+        badge.className = `badge ${anyVerified ? 'badge--signal' : anyPending ? 'badge--wait' : 'badge--alert'}`;
+        badge.textContent = anyVerified ? 'Verified' : anyPending ? 'Pending review' : 'Rejected';
+
+        list.innerHTML = docs.map(d => `
+          <div class="avail-card__meta">
+            <span>${DOC_TYPE_LABEL[d.type] || d.type}</span>
+            <span class="badge ${DOC_STATUS_BADGE[d.status] || 'badge--wait'}">${d.status}</span>
+            ${d.signed_url ? `<a class="field__link" href="${d.signed_url}" target="_blank" rel="noopener">View</a>` : ''}
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function wireDocumentForm() {
+      const form = document.getElementById('document-form');
+      const uploadBtn = document.getElementById('upload-btn');
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const typeSelect = document.getElementById('document-type');
+        const fileInput = document.getElementById('document');
+
+        if (!typeSelect.value) {
+          showFormError(form, 'Please select a document type.');
+          return;
+        }
+        if (!fileInput.files[0]) {
+          showFormError(form, 'Please choose a file to upload.');
+          return;
+        }
+
+        uploadBtn.disabled = true;
+        uploadBtn.textContent = 'Uploading…';
+
+        try {
+          const formData = new FormData();
+          formData.append('type', typeSelect.value);
+          formData.append('document', fileInput.files[0]);
+
+         
+          const token = Session.token();
+          const response = await fetch(`${API_BASE_URL}/documents`, {
+            method: 'POST',
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+            body: formData,
+          });
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(data.error || 'Upload failed');
+
+          form.reset();
+          await loadDocuments();
+          showToast('Document uploaded — pending review.');
+        } catch (err) {
+          showFormError(form, err.message || 'Could not upload document.');
+        } finally {
+          uploadBtn.disabled = false;
+          uploadBtn.textContent = 'Upload document';
+        }
+      });
     }
 
     async function loadTrucks() {
