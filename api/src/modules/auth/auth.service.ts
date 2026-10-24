@@ -1,4 +1,4 @@
-import { supabase } from '../../lib/supabase.js';
+import { supabase, createAuthClient } from '../../lib/supabase.js';
 import { HttpError } from '../../middleware/errorHandler.js';
 
 export interface RegisterInput {
@@ -13,7 +13,9 @@ function toPublicUser(user: { id: string; email?: string | null; name?: string |
 }
 
 export async function register(input: RegisterInput) {
-  const { data, error } = await supabase.auth.signUp({
+  const authClient = createAuthClient();
+
+  const { data, error } = await authClient.auth.signUp({
     email: input.email,
     password: input.password,
     options: { data: { name: input.name, role: input.role, email: input.email } },
@@ -23,7 +25,6 @@ export async function register(input: RegisterInput) {
     throw new HttpError(400, error?.message || 'Registration failed');
   }
 
- 
 
   return {
     user: toPublicUser({ id: data.user.id, email: input.email, name: input.name, role: input.role }),
@@ -31,27 +32,28 @@ export async function register(input: RegisterInput) {
   };
 }
 
+export async function login(email: string, password: string) {
+  const authClient = createAuthClient();
 
-  export async function login(email: string, password: string) {
-  let data, error;
+  let data: Awaited<ReturnType<typeof authClient.auth.signInWithPassword>>['data'];
+  let error: Awaited<ReturnType<typeof authClient.auth.signInWithPassword>>['error'];
+
   try {
-    ({ data, error } = await supabase.auth.signInWithPassword({ email, password }));
+    ({ data, error } = await authClient.auth.signInWithPassword({ email, password }));
   } catch (networkErr: any) {
-    
     console.error('[auth] Supabase unreachable during login:', networkErr.message);
     throw new HttpError(503, 'Could not reach the login service. Check your internet connection and try again.');
   }
 
-
-    if (error) {
+  if (error) {
     console.error('[auth] Supabase login error:', error.message);
-   
     if (error.message.toLowerCase().includes('fetch failed')) {
       throw new HttpError(503, 'Could not reach the login service. Check your internet connection and try again.');
     }
     throw new HttpError(401, 'Invalid email or password');
   }
   if (!data.user) throw new HttpError(401, 'Invalid email or password');
+
   
   const { data: profile, error: profileError } = await supabase
     .from('users')
@@ -71,7 +73,6 @@ export async function register(input: RegisterInput) {
     }),
   };
 }
-
 
 export async function getUserById(id: string) {
   const { data, error } = await supabase.from('users').select('*').eq('id', id).single();

@@ -3,7 +3,7 @@ import { registerSchema, loginSchema, updateProfileSchema } from './auth.schema.
 import * as authService from './auth.service.js';
 import { requireAuth, invalidateProfileCache } from '../../middleware/auth.js';
 import { HttpError } from '../../middleware/errorHandler.js';
-import { supabase } from '../../lib/supabase.js';
+import { createAuthClient } from '../../lib/supabase.js';
 import { env } from '../../lib/env.js';
 
 export const authRouter = Router();
@@ -62,7 +62,7 @@ authRouter.post('/forgot-password', async (req, res, next) => {
     }
 
     
-    await supabase.auth.resetPasswordForEmail(email, {
+        await createAuthClient().auth.resetPasswordForEmail(email, {
       redirectTo: `${env.frontendOrigin.split(',')[0]}/pages/reset-password.html`,
     });
 
