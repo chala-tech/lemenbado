@@ -133,29 +133,33 @@
         panel.innerHTML = `<div class="card" style="color: var(--color-alert);">${err.message}</div>`;
       }
     }
-
     async function loadDocuments() {
       const panel = document.getElementById('panel-documents');
+      const TYPE_LABEL = { license: "Driver's license", registration: 'Truck registration', business: 'Business registration' };
+
       try {
         const docs = await apiFetch('/admin/documents');
         if (docs.length === 0) {
           panel.innerHTML = `<div class="card" style="text-align:center; color: var(--color-ink-faint);">No documents pending review.</div>`;
           return;
         }
-               panel.innerHTML = docs.map((d) => `
+
+        panel.innerHTML = docs.map((d) => `
           <div class="card avail-card">
             <div class="avail-card__top">
               <span class="avail-card__route">${d.user ? d.user.name : 'Unknown user'}</span>
               <span class="badge badge--wait">${d.status}</span>
             </div>
             <div class="avail-card__meta">
-              <span>${d.type}</span>
+              <span>${TYPE_LABEL[d.type] || d.type}</span>
               <span>${d.user ? d.user.role : ''}</span>
               <span class="data">Submitted ${fmtDate(d.created_at)}</span>
-              ${d.signed_url ? `<a class="field__link" href="${d.signed_url}" target="_blank" rel="noopener">View document</a>` : ''}
             </div>
+            ${d.signed_url
+              ? `<a class="btn btn--ghost btn--sm" href="${d.signed_url}" target="_blank" rel="noopener" style="align-self: flex-start;">View document</a>`
+              : `<p class="field__hint" style="color: var(--color-alert);">The file for this document is missing, so it can't be reviewed. Reject it and ask the user to upload it again.</p>`}
             <div class="avail-card__actions">
-              <button class="btn btn--ghost btn--sm" data-doc-verify="${d.id}">Verify</button>
+              <button class="btn btn--ghost btn--sm" data-doc-verify="${d.id}" ${d.signed_url ? '' : 'disabled title="Cannot verify a document that cannot be viewed"'}>Verify</button>
               <button class="btn btn--ghost btn--sm" data-doc-reject="${d.id}">Reject</button>
             </div>
           </div>

@@ -5,17 +5,22 @@ import { HttpError } from '../../middleware/errorHandler.js';
 interface SubmitDocumentInput {
   userId: string;
   type: string;
-  fileUrl: string; // storage path, not a public URL — bucket is private
+  fileUrl: string; 
 }
 
-const SIGNED_URL_TTL_SECONDS = 60 * 60; // 1 hour, enough for one review session
+const SIGNED_URL_TTL_SECONDS = 60 * 60; 
 
-async function withSignedUrl<T extends { file_url: string }>(doc: T) {
-  const { data } = await supabase.storage
+async function withSignedUrl<T extends { id: string; file_url: string }>(doc: T) {
+  const { data, error } = await supabase.storage
     .from(env.supabaseStorageBucket)
     .createSignedUrl(doc.file_url, SIGNED_URL_TTL_SECONDS);
 
-  return { ...doc, signed_url: data?.signedUrl ?? null };
+  if (error || !data?.signedUrl) {
+    console.error(`[documents] no viewable file for document ${doc.id} (path: "${doc.file_url}"):`, error?.message);
+    return { ...doc, signed_url: null, file_missing: true };
+  }
+
+  return { ...doc, signed_url: data.signedUrl, file_missing: false };
 }
 
 export async function submitDocument(input: SubmitDocumentInput) {
@@ -55,7 +60,19 @@ export async function decideDocument(documentId: string, adminId: string, outcom
   const { data: document, error } = await supabase.from('documents').select('*').eq('id', documentId).single();
   if (error || !document) throw new HttpError(404, 'Document not found');
 
-  await supabase.from('documents').update({ status: outcome }).eq('id', documentId);
+  // never verify something the admin could not have viewed
+  if (outcome === 'VERIFIED') {
+    const { data: signed, error: signError } = await supabase.storage
+      .from(env.supabaseStorageBucket)
+      .createSignedUrl(document.file_url, 60);
+
+    if (signError || !signed?.signedUrl) {
+      throw new HttpError(400, 'Cannot verify: the uploaded file is missing. Reject this document and ask the user to upload it again.');
+    }
+  }
+
+  const { error: updateError } = await supabase.from('documents').update({ status: outcome }).eq('id', documentId);
+  if (updateError) throw new HttpError(500, updateError.message);
 
   const { data, error: verifyError } = await supabase
     .from('verifications')
