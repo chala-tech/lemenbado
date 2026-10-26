@@ -145,20 +145,21 @@ let myBookings = [];
       select.addEventListener('change', () => renderMatches(select.value));
       renderMatches(select.value);
     }
-
     async function renderMatches(listingId) {
       const list = document.getElementById('match-list');
       const emptyState = document.getElementById('empty-state');
       list.innerHTML = '';
       emptyState.style.display = 'none';
 
+      const isTruckOwner = user.role === 'TRUCK_OWNER';
+
       let matches = [];
       try {
-        if (user.role === 'TRUCK_OWNER') {
-          matches = await apiFetch(`/matches?truckAvailabilityId=${listingId}`);
-        } else {
-          matches = await apiFetch(`/matches?cargoRequestId=${listingId}`);
-        }
+        matches = await apiFetch(
+          isTruckOwner
+            ? `/matches?truckAvailabilityId=${listingId}`
+            : `/matches?cargoRequestId=${listingId}`
+        );
       } catch (err) {
         list.innerHTML = `<div class="card" style="color: var(--color-alert);">${err.message || 'Could not load matches.'}</div>`;
         return;
@@ -170,45 +171,42 @@ let myBookings = [];
       }
 
       list.innerHTML = matches.map((m) => {
-        if (user.role === 'TRUCK_OWNER') {
-          return `
-            <div class="card avail-card">
-              <div class="avail-card__top">
-                <span class="avail-card__route">${m.origin_city?.name} <span class="avail-card__route-arrow">→</span> ${m.dest_city?.name}</span>
-                <span class="badge badge--signal">Exact match</span>
-              </div>
-              
-                          <div class="avail-card__meta">
-                <span class="data">${Number(m.weight_kg).toLocaleString()} kg</span>
-                <span>${m.cargo_type ? m.cargo_type.name : ''}</span>
-                <span class="data">Needed by ${fmtDate(m.required_date)}</span>
-                ${m.desired_price_etb ? `<span class="data">${Number(m.desired_price_etb).toLocaleString()} ETB</span>` : '<span>Price not specified</span>'}
-              </div>
-              <div class="avail-card__actions">
-                ${myBookings.some(b => b.truck_availability_id === listingId && b.cargo_request_id === m.id && !['CANCELLED','REJECTED'].includes(b.status))
-                  ? `<span class="badge badge--wait">Already requested</span>`
-                  : `<button class="btn btn--primary btn--sm" data-book data-cargo="${m.id}" data-truck="${listingId}">Request booking</button>`}
-              </div>
-            </div>
-          `;
-        }
         
+        const truckAvailabilityId = isTruckOwner ? listingId : m.id;
+        const cargoRequestId = isTruckOwner ? m.id : listingId;
+
+        const alreadyRequested = myBookings.some((b) =>
+          b.truck_availability_id === truckAvailabilityId &&
+          b.cargo_request_id === cargoRequestId &&
+          !['CANCELLED', 'REJECTED'].includes(b.status)
+        );
+
+        const action = alreadyRequested
+          ? `<span class="badge badge--wait">Already requested</span>`
+          : `<button class="btn btn--primary btn--sm" data-book data-truck="${truckAvailabilityId}" data-cargo="${cargoRequestId}">Request booking</button>`;
+
+        const details = isTruckOwner
+          ? `
+              <span class="data">${Number(m.weight_kg).toLocaleString()} kg</span>
+              <span>${m.cargo_type ? m.cargo_type.name : ''}</span>
+              <span class="data">Needed by ${fmtDate(m.required_date)}</span>
+              ${m.desired_price_etb ? `<span class="data">${Number(m.desired_price_etb).toLocaleString()} ETB</span>` : '<span>Price not specified</span>'}`
+          : `
+              <span class="data">${Number(m.available_capacity_kg).toLocaleString()} kg free</span>
+              <span>${m.truck ? m.truck.plate_number : ''}</span>
+              <span class="data">${fmtDate(m.departure_window_start)} – ${fmtDate(m.departure_window_end)}</span>`;
+
         return `
           <div class="card avail-card">
             <div class="avail-card__top">
               <span class="avail-card__route">${m.origin_city?.name} <span class="avail-card__route-arrow">→</span> ${m.dest_city?.name}</span>
               <span class="badge badge--signal">Exact match</span>
             </div>
-            <div class="avail-card__meta">
-              <span class="data">${Number(m.available_capacity_kg).toLocaleString()} kg free</span>
-              <span>${m.truck ? m.truck.plate_number : ''}</span>
-              <span class="data">${fmtDate(m.departure_window_start)} – ${fmtDate(m.departure_window_end)}</span>
+            <div class="avail-card__meta">${details}
             </div>
-                <div class="avail-card__actions">
-                ${myBookings.some(b => b.truck_availability_id === listingId && b.cargo_request_id === m.id && !['CANCELLED','REJECTED'].includes(b.status))
-                  ? `<span class="badge badge--wait">Already requested</span>`
-                  : `<button class="btn btn--primary btn--sm" data-book data-cargo="${m.id}" data-truck="${listingId}">Request booking</button>`}
-              </div>
+            <div class="avail-card__actions">
+              ${action}
+            </div>
           </div>
         `;
       }).join('');
